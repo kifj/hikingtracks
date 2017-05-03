@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="Description" content="X1 Hiking Tracks" />
+  <meta name="Keywords" content="hiking, tracks, gps, share, maps, route, bike, cycling" />
+  <meta charset="utf-8">
+  <meta name="Distribution" content="Global" />
+  <meta name="Author" content="Johannes Beck - mail@johannes-beck.name" />
+  <meta name="Robots" content="index,follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-core.css" media="all"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks.css" media="(min-width: 870px) and (max-width: 1240px)"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
+  <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
+  <script type="text/javascript" src="../js/jquery.mustache.js"></script>
+  <script type="text/javascript" src="../js/mustache.js"></script>
+  <script type="text/javascript" src="../js/common.js"></script>
+  <script type="text/javascript" src="../js/hikingtracks.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      client.initMessages('../bundle/');
+      client.initHeaderPhoto();
+      client.initAboutPage();
+    });
+  </script>
+  <title>HikingTracks</title>
+</head>
+
+<body id="body">
+<!-- wrap starts here -->
+<div id="wrap">
+
+  <header id="header"><div id="header-content">
+
+    <h1 id="logo"><a href="../pages/index.html" title="">{{{title_line}}}</a></h1>
+    <h2 id="slogan">{{txt_subtitle}}</h2>
+    <ul><li class="messageOff" id="message"></li><li><span id="indicator">&nbsp;</span></li></ul>
+
+    <!-- Menu Tabs -->
+    <nav><ul>
+      <li id="map"><a href="../pages/map.html">{{nav_map}}</a></li>
+      <li id="home"><a href="../pages/index.html">{{nav_home}}</a></li>
+      <li id="tracks"><a href="../secure/tracks.html">{{nav_mytracks}}</a></li>
+      <li id="login"><a href="../login.html">{{nav_login}}</a></li>
+      <li id="logout"><a href="../oauth?logout=true">{{nav_logout}}</a></li>
+      <li><a href="#" id="current">{{nav_about}}</a></li>
+      <li id="language"><a id="current-language" href="#"><img class="rss"/></a><ul id="languages"></ul></li>
+      <li><a href="../services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="../images/rss.png" /></a></li>
+    </ul></nav>
+
+  </div></header>
+
+  <div class="headerphoto"></div>
+
+  <!-- content-wrap starts here -->
+  <div id="content-wrap"><div id="content">
+
+    <aside id="sidebar" >
+
+      <div class="sidebox hide-small">
+        <h1>{{hdr_welcome}}</h1>
+        <p>{{txt_welcome1}}</p>
+        <p>{{txt_welcome2}}</p>
+      </div>
+
+      <div class="sidebox">
+        <h1 class="clear">{{mnu_sidebar}}</h1>
+        <ul class="sidemenu">
+          <li><a href="../pages/index.html" class="top">{{mnu_home}}</a></li>
+          <li><a href="../secure/profile.html">{{mnu_profile}}</a></li>
+          <li><a href="../secure/track.html">{{mnu_upload}}</a></li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <div id="main">
+
+      <div class="post">
+
+        <h1 id="Impressum">{{hdr_credits}}</h1>
+        <address><p>{{{txt_address}}}</p></address>
+      </div>
+
+      <br/>
+      <div class="post">
+      
+        <h1 id="SupportInfo">{{hdr_thanks}}</h1>
+        <p>{{{txt_about_1}}}</p>
+        <p>{{{txt_about_2}}}</p>
+        <p>{{{txt_about_3}}}</p>
+        <p>{{{txt_about_4}}}</p>
+        <p>{{{txt_about_5}}}</p>
+
+        <p class="post-footer align-right">
+          {{{txt_about_author}}}<span class="date">{{txt_about_date}}</span>
+        </p>
+
+      </div>
+    </div>
+
+  <!-- content-wrap ends here -->
+  </div></div>
+  
+  <!-- footer starts here -->
+  <footer id="footer">
+    <div id="footer-content">
+      <div class="col2 float-right">
+        <p>
+        <a href="../pages/about.html">{{{txt_footer}}}</a><br/>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <!-- footer ends here -->
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

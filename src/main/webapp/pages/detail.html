@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="Description" content="X1 Hiking Tracks" />
+  <meta name="Keywords" content="hiking, tracks, gps, share, maps, route, bike, cycling" />
+  <meta charset="utf-8">
+  <meta name="Distribution" content="Global" />
+  <meta name="Author" content="Johannes Beck - mail@johannes-beck.name" />
+  <meta name="Robots" content="index,follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-core.css" media="all"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks.css" media="(min-width: 870px) and (max-width: 1240px)"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
+  <link type="text/css" rel="stylesheet" href="../css/jquery-ui.min.css" media="all"/>
+  <link type="text/css" rel="stylesheet" href="../css/jquery.lightbox.css" />
+  <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.json-2.3.min.js"></script>
+  <script type="text/javascript" src="../js/jquery-ui.min.js" ></script>
+  <script type="text/javascript" src="../js/jquery-ui-i18n.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.dateFormat-1.0.js"></script>
+  <script type="text/javascript" src="../js/jquery.imagecarousel.js"></script>  
+  <script type="text/javascript" src="../js/jquery.lightbox-0.5.min.js"></script> 
+  <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
+  <script type="text/javascript" src="../js/jquery.mustache.js"></script>
+  <script type="text/javascript" src="../js/mustache.js"></script>
+  <script type="text/javascript" src="../js/common.js"></script>
+  <script type="text/javascript" src="../js/hikingtracks.js"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="https://maps-api-ssl.google.com/maps/api/js?key=AIzaSyDWeHGoMQhMLrjL2P57l54AKhC7w_GyyXQ"></script>
+  <script type="text/javascript">
+    google.load('visualization', '1.0', {'packages':['corechart', 'line']});
+  </script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      client.initMessages('../bundle/');
+      client.initHeaderPhoto();
+      client.initDetailPage();
+  });
+  </script>
+  <title>HikingTracks</title>
+</head>
+
+<body id="body">
+<!-- wrap starts here -->
+<div id="wrap">
+
+  <header id="header"><div id="header-content">
+    <h1 id="logo"><a href="../pages/index.html" title="">{{{title_line}}}</a></h1>
+    <h2 id="slogan">{{txt_subtitle}}</h2>
+    <ul><li class="messageOff" id="message"></li><li><span id="indicator">&nbsp;</span></li></ul>
+
+    <!-- Menu Tabs -->
+    <nav><ul>
+      <li id="map"><a href="../pages/map.html">{{nav_map}}</a></li>
+      <li id="home"><a href="../pages/index.html">{{nav_home}}</a></li>
+      <li id="tracks"><a href="../secure/tracks.html" id="current">{{nav_mytracks}}</a></li>
+      <li id="login"><a href="../login.html">{{nav_login}}</a></li>
+      <li id="logout"><a href="../oauth?logout=true">{{nav_logout}}</a></li>
+      <li><a href="../pages/about.html">{{nav_about}}</a></li>
+      <li id="language"><a id="current-language" href="#"><img class="rss"/></a><ul id="languages"></ul></li>
+      <li><a href="../services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="../images/rss.png" /></a></li>
+    </ul></nav>
+
+  </div></header>
+
+  <div class="headerphoto"></div>
+
+  <!-- content-wrap starts here -->
+  <div id="content-wrap"><div id="content">
+
+    <aside id="sidebar" >
+
+      <div class="sidebox hide-small">
+        <h1>{{hdr_welcome}}</h1>
+        <p>{{txt_welcome1}}</p>
+        <p>{{txt_welcome2}}</p>
+      </div>
+
+      <div class="sidebox">
+        <h1>{{hdr_search}}</h1>
+        <form action="javascript:client.searchAndShowTracks()" class="searchform">
+          <p>
+            <input id="search_query" name="search_query" class="textbox" type="text" />
+            <select id="search_activity" name="search_activity" class="icon">
+              <option></option>
+              <option value="BICYCLE">&#x21e0;</option>
+              <option value="HIKING">&#x219a;</option>
+              <option value="MOUNTAINEER">&#x21a2;</option>
+              <option value="ALPIN_SKI">&#x215e;</option>
+              <option value="SNOWBOARD">&#x2193;</option>
+              <option value="NORDIC_SKI">&#x2182;</option>
+              <option value="SWIMMING">&#x2183;</option>
+              <option value="CANOE">&#x2180;</option>
+              <option value="ROWING">&#x2209;</option>
+              <option value="BOAT">&#x219c;</option>
+              <option value="DIVER">&#x21d1;</option>
+              <option value="WINDSURFER">&#x21d9;</option>
+              <option value="HORSE">&#x21bf;</option>
+              <option value="SKATER">&#x21de;</option>
+              <option value="INLINE_SKATER">&#x21df;</option>
+              <option value="PARAGLIDER">&#x21d4;</option>
+            </select>            
+            <br/><br/>
+            <input name="search" class="button" value="{{btn_search}}" type="submit" />
+            <input name="clear" class="button" value="{{btn_clear}}" type="reset" />
+          </p>
+        </form>
+      </div>
+
+      <div class="sidebox">
+        <h1 class="clear">{{mnu_sidebar}}</h1>
+        <ul class="sidemenu">
+          <li><a href="../pages/index.html" class="top">{{mnu_home}}</a></li>
+          <li><a href="../secure/profile.html">{{mnu_profile}}</a></li>
+          <li><a href="../secure/track.html">{{mnu_upload}}</a></li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <div id="main">
+
+      <div class="post">
+        <div id="pager-feature">
+          <a id="prev_feature" class="btnPrev fg-button ui-state-default fg-button-icon-solo ui-corner-all">
+            <span class="ui-icon ui-icon-carat-1-w">{{btn_previous}}</span>
+          </a>
+          <a id="next_feature" class="btnNext fg-button ui-state-default fg-button-icon-solo ui-corner-all">
+            <span class="ui-icon ui-icon-carat-1-e">{{btn_next}}</span>
+          </a>
+          <h1 id="track_name"></h1>
+        </div>
+      
+        <p class="block">
+          <input id="track_id" name="t_id" type="hidden" />
+          <label>{{lbl_Location}}</label>
+          <span id="track_location"></span>
+          <label>{{lbl_Date}}</label>
+          <span class="date" id="track_date"></span>
+          <label>{{lbl_Author}}</label>
+          <span id="track_author"></span>
+          <label >{{lbl_Activity}}</label>
+          <span id="track_activity" class="icon"></span>
+          <label>{{lbl_Distance}}</label>
+          <span id="track_distance"></span>
+          <span id="_public">
+            <label >{{lbl_Public}}</label>
+            <input id="track_published" name="t_published" type="checkbox" disabled="disabled" value="true"/>
+          </span>
+          <br/>    
+          <br/>
+          <span id="track_description"></span>      
+        </p>
+        <div id="google-maps">{{msg_loading}}</div>
+        <div id="elevation-chart"></div>
+        <p class="block" id="elevation-legend">
+        	<span id="elevation-low">Low:</span>&nbsp;-&nbsp;<span id="elevation-high">High:</span>
+        </p>
+        <br/>
+        <div class="carousel">
+          <div class="carouselBody" id="image-parent">
+            <ul id="image-list" >
+            </ul>
+            <a href="#" class="btnNext">{{btn_next}}</a>
+            <a href="#" class="btnPrevious">{{btn_next}}</a>
+          </div>
+        </div>
+        <p>
+          <br class="clear"/>
+          
+          <span id="status"></span>
+          <br/>
+          <input class="button" id="button_edit" type="button" value="{{btn_edit}}" />
+          <input class="button" id="button_list" type="button" value="{{btn_back_to_overview}}" />
+        </p>
+        <br/>
+      </div>
+    </div>
+
+  <!-- content-wrap ends here -->
+  </div></div>
+
+  <!-- footer starts here -->
+  <footer id="footer">
+    <div id="footer-content">
+      <div class="col2 float-right">
+        <p>
+        <a href="../pages/about.html">{{{txt_footer}}}</a><br/>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <!-- footer ends here -->
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<html>
+<!-- Mustache templates -->
+<script type="text/html" id="track-list-post-more-tracks">
+  <div class="post" id="track-list-post"><h1>{{msg_more_tracks}}</h1></div>
+</script>
+<script type="text/html" id="track-list-post-no-tracks">
+	<div class="post"><h2 id="track_name">{{msg_no_tracks_found}}</h2></div>
+</script>
+<script type="text/html" id="author-from">
+	{{lbl_From}} <a href="mailto:{{email}}">{{name}}</a>
+</script>
+<script type="text/html" id="author-show">
+	<a href="mailto:{{email}}">{{name}}</a>
+</script>
+<script type="text/html" id="summary-info">
+	<h2><a href="../pages/detail.html#{{name}}" id="track_name_{{index}}"></a></h2>
+	<div class="post_image" id="track_image_{{index}}"/>
+	<p class="block post_text_content">
+		<input id="track_id_{{index}}" name="t_id_{{index}}" type="hidden"/>
+		<label class="inline">{{lbl_Location}}:</label>
+		<span id="track_location_{{index}}"></span> 
+		<label class="inline">{{lbl_Activity}}:</label>
+		<span id="track_activity_{{index}}" class="icon"></span>
+		<br/><br/>
+		<span id="track_description_{{index}}"></span>
+	</p>
+	<p class="post-footer align-right">
+    <span class="author-name" id="track_author_{{index}}"></span>
+		<img id="avatar_{{index}}" src="../images/empty.png" alt="Avatar" height="32" class="avatar-small">
+		<span class="date" id="track_date_{{index}}"></span>
+		<br clear="all"/>
+	</p>
+	<br/>
+</script>
+<script type="text/html" id="show-image">
+	<li class="gallery-icon" id="img_{{index}}">
+		<a id="image_name_{{index}}" href="{{hrefUrl}}" title="{{name}}">
+			<img src="{{url}}" class="attachment-thumbnail" title="{{name}}" alt="{{name}}"/>
+		</a>
+	</li>
+</script>
+<script type="text/html" id="track-info">
+<div class="post">
+  <h1 id="track_name_{{index}}"></h1>
+  <div class="post_image_inline" id="track_image_{{index}}"/>
+    <p class="block post_text_content">
+      <input id="track_id_{{index}}" name="t_id_{{index}}" type="hidden" />
+      <label>{{lbl_Location}}</label><span id="track_location_{{index}}"></span>
+      <label>{{lbl_Date}}</label><span class="date" id="track_date_{{index}}"></span>
+      <label>{{lbl_Activity}}</label><span class="icon" id="track_activity_{{index}}"></span>
+      <label>{{lbl_Author}}</label><span id="track_author_{{index}}"></span>
+	   {{#token}}
+      <label>{{lbl_Public}}</label>
+      <input id="track_published_{{index}}" name="t_published" type="checkbox" disabled="disabled" value="true"/>
+       {{/token}}
+      <br/><br/>
+      <span id="track_description_{{index}}"></span>
+    </p>
+    <p>
+      <input class="button" id="button_show_{{index}}" type="button" value="{{btn_show}}" />  
+      <input class="button" id="button_edit_{{index}}" type="button" value="{{btn_edit}}" />
+    </p>
+  </div>
+</script>
+<script type="text/html" id="gtrack-detail">
+	<div id="gtrack_detail" class="post"><h1 id="gtrack_name"></h1><p class="block">
+  <input id="gtrack_id" name="t_id" type="hidden" />
+     <label>{{lbl_Location}}</label>
+     <span id="gtrack_location"></span>
+     <label>{{lbl_Date}}</label>
+     <span class="date" id="gtrack_date"></span>
+     <label>{{lbl_Author}}</label>
+     <span id="gtrack_author"></span>
+     <label>{{lbl_Activity}}</label>
+     <span id="gtrack_activity" class="icon"></span>
+     <label>{{lbl_Distance}}</label>
+     <span id="track_distance"></span>
+     <span id="_public">
+       <label>{{lbl_Public}}</label>
+       <input id="gtrack_published" name="t_published" type="checkbox" disabled="disabled" value="true"/>
+     </span>
+   </p></div>
+</script>
+<script type="text/html" id="add-track-data-new">
+  <li id="td_{{index}}">
+		<input id="button_delete_track_data_{{index}}" class="button right" value="{{btn_minus}}" type="button" />
+		<input id="track_data_name_{{index}}" name="td_name" value="" type="hidden" />
+		<label>{{lbl_URL}}</label>
+		<input id="track_data_url_{{index}}" name="td_url" value="" type="url" size="65" maxlength="200" />
+  </li>
+</script>
+<script type="text/html" id="add-track-data">
+  <li id="td_{{index}}">
+		<input id="button_delete_track_data_{{index}}" class="button right" value="{{btn_minus}}" type="button" />
+		<label>{{lbl_Name}}</label>
+		<input id="track_data_name_{{index}}" name="td_name" value="" type="text" disabled="disabled" size="65" />
+		<input id="track_data_url_{{index}}" name="td_url" value="" type="hidden" size="65" maxlength="200" />
+  </li>
+</script>
+<script type="text/html" id="add-image-new">
+	<li id="img_{{index}}">
+		<input id="button_delete_image_{{index}}" class="button right" value="-" type="button"/>
+		{{#url}}
+		<img id="image_img_{{index}}" class="image_edit"/>
+		{{/url}}
+		<div class="updownbuttons"> 
+			<input id="button_up_image_{{index}}" class="button" value="&#x21e7;" type="button" /> 
+			<input id="button_down_image_{{index}}" class="button" value="&#x21e9;" type="button" /> 
+		</div>
+		<input id="image_name_{{index}}" name="img_name" value="" type="hidden" />
+		<label>{{lbl_URL}}</label>
+		<input id="image_url_{{index}}" name="img_url" value="" type="url" size="65" maxlength="200" />
+	</li>
+</script>
+<script type="text/html" id="add-image">
+	<li id="img_{{index}}">
+		<input id="button_delete_image_{{index}}" class="button right" value="-" type="button"/>
+		{{#url}}
+		<img id="image_img_{{index}}" class="image_edit"/>
+		{{/url}}
+		<div class="updownbuttons"> 
+			<input id="button_up_image_{{index}}" class="button" value="&#x21e7;" type="button" /> 
+			<input id="button_down_image_{{index}}" class="button" value="&#x21e9;" type="button" /> 
+		</div>
+		<input id="image_url_{{index}}" name="img_url" value="" type="hidden" />
+		<label>{{lbl_Name}}:</label>
+		<input id="image_name_{{index}}" name="img_name" value="" type="text" size="65" />
+	</li>
+</script>
+<script type="text/html" id="image">
+	<img alt="{{name}}" src="{{url}}" />
+</script>
+<script type="text/html" id="pager">
+  <li id="pager_{{count}}"><a{{#itemId}} id="current-page"{{/itemId}}>{{{pager}}}</a></li>
+</script>
+<script type="text/html" id="detail-link">
+	<a href="../pages/detail.html#{{link}}">{{name}}</a>
+</script>
+<script type="text/html" id="image-list">
+	<ul id="image-list"></ul> 
+	<a href="#" class="btnNext">{{next}}</a> 
+	<a href="#" class="btnPrevious">{{previous}}</a>
+</script>
+<script type="text/html" id="languages">
+	<li><a id="de"><img alt="Deutsch" src="{{prefix}}/de.png"/></a></li>
+	<li><a id="en"><img alt="English" src="{{prefix}}/en.png"/></a></li>
+</script>
+</html>

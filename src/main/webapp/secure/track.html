@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="Description" content="X1 Hiking Tracks" />
+  <meta name="Keywords" content="hiking, tracks, gps, share, maps, route, bike, cycling" />
+  <meta charset="utf-8">
+  <meta http-equiv="expires" content="0">
+  <meta name="Distribution" content="Global" />
+  <meta name="Author" content="Johannes Beck - mail@johannes-beck.name" />
+  <meta name="Robots" content="index,follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-core.css" media="all"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks.css" media="(min-width: 870px) and (max-width: 1240px)"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
+  <link type="text/css" rel="stylesheet" href="../css/jquery-ui.min.css" media="all"/>
+  <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="../js/jquery-ui.min.js" ></script>
+  <script type="text/javascript" src="../js/jquery-ui-i18n.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.json-2.3.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.fileupload.js"></script>
+  <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
+  <script type="text/javascript" src="../js/jquery.mustache.js"></script>
+  <script type="text/javascript" src="../js/mustache.js"></script>
+  <script type="text/javascript" src="../js/common.js"></script>
+  <script type="text/javascript" src="../js/hikingtracks.js"></script>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDWeHGoMQhMLrjL2P57l54AKhC7w_GyyXQ"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      client.initMessages('../bundle/');
+      client.initHeaderPhoto();
+      client.initTrackPage();
+  });
+  </script>
+  <title>HikingTracks</title>
+</head>
+
+<body id="body">
+<!-- wrap starts here -->
+<div id="wrap">
+
+  <header id="header"><div id="header-content">
+    <h1 id="logo"><a href="../pages/index.html" title="">{{{title_line}}}</a></h1>
+    <h2 id="slogan">{{txt_subtitle}}</h2>
+    <ul><li class="messageOff" id="message"></li><li><span id="indicator">&nbsp;</span></li></ul>
+
+    <!-- Menu Tabs -->
+    <nav><ul>
+      <li id="map"><a href="../pages/map.html">{{nav_map}}</a></li>
+      <li id="home"><a href="../pages/index.html">{{nav_home}}</a></li>
+      <li id="tracks"><a href="../secure/tracks.html" id="current">{{nav_mytracks}}</a></li>
+      <li id="login"><a href="../login.html">{{nav_login}}</a></li>
+      <li id="logout"><a href="../oauth?logout=true">{{nav_logout}}</a></li>
+      <li><a href="../pages/about.html">{{nav_about}}</a></li>
+      <li id="language"><a id="current-language" href="#"><img class="rss"/></a><ul id="languages"></ul></li>
+      <li><a href="../services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="../images/rss.png" /></a></li>
+    </ul></nav>
+
+  </div></header>
+
+  <div class="headerphoto"></div>
+
+  <!-- content-wrap starts here -->
+  <div id="content-wrap"><div id="content">
+
+    <aside id="sidebar" >
+
+      <div class="sidebox hide-small">
+        <h1>{{hdr_welcome}}</h1>
+        <p>{{txt_welcome1}}</p>
+        <p>{{txt_welcome2}}</p>
+      </div>
+
+      <div class="sidebox">
+        <h1 class="clear">{{mnu_sidebar}}</h1>
+        <ul class="sidemenu">
+          <li><a href="../pages/index.html" class="top">{{mnu_home}}</a></li>
+          <li><a href="../secure/profile.html">{{mnu_profile}}</a></li>
+          <li><a href="../secure/track.html">{{mnu_upload}}</a></li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <div id="main">
+
+      <div class="post">
+        <h1 id="TrackInfo">{{hdr_howto_edit_track}}</h1>
+        <p>{{{txt_edit_track}}}</p>
+      </div>
+
+      <h3>{{hdr_edit_track}}</h3>
+      <form action="javascript:client.makeTrackUpdate()" autocomplete="off">
+        <small class="right required">{{txt_required_input}}</small>
+        <p>
+          <input id="track_id" name="t_id" type="hidden" />
+          <label>{{lbl_Track}} <span class="required">*</span></label>
+          <input id="track_name" name="t_name" placeholder="{{lbl_placeholder_Track}}" type="text" size="80" maxlength="100" required="required"/>
+          <label>{{lbl_Location}}</label>
+          <input list="countries" id="track_location" placeholder="{{lbl_placeholder_Location}}" name="t_location" type="text" size="80" maxlength="100" autocomplete="on"/>
+          <datalist id="countries" class="hidden">
+            <option value="Afghanistan"/>
+            <option value="&Aring;land Islands"/>
+            <option value="Albania"/>
+            <option value="Algeria"/>
+            <option value="American Samoa"/>
+            <option value="Andorra"/>
+            <option value="Angola"/>
+            <option value="Anguilla"/>
+            <option value="Antarctica"/>
+            <option value="Antigua and Barbuda"/>
+            <option value="Argentina"/>
+            <option value="Armenia"/>
+            <option value="Aruba"/>
+            <option value="Australia"/>
+            <option value="Austria"/>
+            <option value="Azerbaijan"/>
+            <option value="Bahamas"/>
+            <option value="Bahrain"/>
+            <option value="Bangladesh"/>
+            <option value="Barbados"/>
+            <option value="Belarus"/>
+            <option value="Belgium"/>
+            <option value="Belize"/>
+            <option value="Benin"/>
+            <option value="Bermuda"/>
+            <option value="Bhutan"/>
+            <option value="Bolivia"/>
+            <option value="Bosnia and Herzegovina"/>
+            <option value="Botswana"/>
+            <option value="Bouvet Island"/>
+            <option value="Brazil"/>
+            <option value="British Indian Ocean territory"/>
+            <option value="Brunei Darussalam"/>
+            <option value="Bulgaria"/>
+            <option value="Burkina Faso"/>
+            <option value="Burundi"/>
+            <option value="Cambodia"/>
+            <option value="Cameroon"/>
+            <option value="Canada"/>
+            <option value="Cape Verde"/>
+            <option value="Cayman Islands"/>
+            <option value="Central African Republic"/>
+            <option value="Chad"/>
+            <option value="Chile"/>
+            <option value="China"/>
+            <option value="Christmas Island"/>
+            <option value="Cocos (Keeling) Islands"/>
+            <option value="Colombia"/>
+            <option value="Comoros"/>
+            <option value="Congo"/>
+            <option value="Congo, Democratic Republic"/>
+            <option value="Cook Islands"/>
+            <option value="Costa Rica"/>
+            <option value="C&ocirc;te d'Ivoire (Ivory Coast)"/>
+            <option value="Croatia (Hrvatska)"/>
+            <option value="Cuba"/>
+            <option value="Cyprus"/>
+            <option value="Czech Republic"/>
+            <option value="Denmark"/>
+            <option value="Djibouti"/>
+            <option value="Dominica"/>
+            <option value="Dominican Republic"/>
+            <option value="East Timor"/>
+            <option value="Ecuador"/>
+            <option value="Egypt"/>
+            <option value="El Salvador"/>
+            <option value="Equatorial Guinea"/>
+            <option value="Eritrea"/>
+            <option value="Estonia"/>
+            <option value="Ethiopia"/>
+            <option value="Falkland Islands"/>
+            <option value="Faroe Islands"/>
+            <option value="Fiji"/>
+            <option value="Finland"/>
+            <option value="France"/>
+            <option value="French Guiana"/>
+            <option value="French Polynesia"/>
+            <option value="French Southern Territories"/>
+            <option value="Gabon"/>
+            <option value="Gambia"/>
+            <option value="Georgia"/>
+            <option value="Germany"/>
+            <option value="Ghana"/>
+            <option value="Gibraltar"/>
+            <option value="Greece"/>
+            <option value="Greenland"/>
+            <option value="Grenada"/>
+            <option value="Guadeloupe"/>
+            <option value="Guam"/>
+            <option value="Guatemala"/>
+            <option value="Guinea"/>
+            <option value="Guinea-Bissau"/>
+            <option value="Guyana"/>
+            <option value="Haiti"/>
+            <option value="Heard and McDonald Islands"/>
+            <option value="Honduras"/>
+            <option value="Hong Kong"/>
+            <option value="Hungary"/>
+            <option value="Iceland"/>
+            <option value="India"/>
+            <option value="Indonesia"/>
+            <option value="Iran"/>
+            <option value="Iraq"/>
+            <option value="Ireland"/>
+            <option value="Israel"/>
+            <option value="Italy"/>
+            <option value="Jamaica"/>
+            <option value="Japan"/>
+            <option value="Jordan"/>
+            <option value="Kazakhstan"/>
+            <option value="Kenya"/>
+            <option value="Kiribati"/>
+            <option value="Korea (north)"/>
+            <option value="Korea (south)"/>
+            <option value="Kuwait"/>
+            <option value="Kyrgyzstan"/>
+            <option value="Lao People's Democratic Republic"/>
+            <option value="Latvia"/>
+            <option value="Lebanon"/>
+            <option value="Lesotho"/>
+            <option value="Liberia"/>
+            <option value="Libyan Arab Jamahiriya"/>
+            <option value="Liechtenstein"/>
+            <option value="Lithuania"/>
+            <option value="Luxembourg"/>
+            <option value="Macao"/>
+            <option value="Macedonia, Former Yugoslav Republic Of"/>
+            <option value="Madagascar"/>
+            <option value="Malawi"/>
+            <option value="Malaysia"/>
+            <option value="Maldives"/>
+            <option value="Mali"/>
+            <option value="Malta"/>
+            <option value="Marshall Islands"/>
+            <option value="Martinique"/>
+            <option value="Mauritania"/>
+            <option value="Mauritius"/>
+            <option value="Mayotte"/>
+            <option value="Mexico"/>
+            <option value="Micronesia"/>
+            <option value="Moldova"/>
+            <option value="Monaco"/>
+            <option value="Mongolia"/>
+            <option value="Montenegro"/>
+            <option value="Montserrat"/>
+            <option value="Morocco"/>
+            <option value="Mozambique"/>
+            <option value="Myanmar"/>
+            <option value="Namibia"/>
+            <option value="Nauru"/>
+            <option value="Nepal"/>
+            <option value="Netherlands"/>
+            <option value="Netherlands Antilles"/>
+            <option value="New Caledonia"/>
+            <option value="New Zealand"/>
+            <option value="Nicaragua"/>
+            <option value="Niger"/>
+            <option value="Nigeria"/>
+            <option value="Niue"/>
+            <option value="Norfolk Island"/>
+            <option value="Northern Mariana Islands"/>
+            <option value="Norway"/>
+            <option value="Oman"/>
+            <option value="Pakistan"/>
+            <option value="Palau"/>
+            <option value="Palestinian Territories"/>
+            <option value="Panama"/>
+            <option value="Papua New Guinea"/>
+            <option value="Paraguay"/>
+            <option value="Peru"/>
+            <option value="Philippines"/>
+            <option value="Pitcairn"/>
+            <option value="Poland"/>
+            <option value="Portugal"/>
+            <option value="Puerto Rico"/>
+            <option value="Qatar"/>
+            <option value="R&eacute;union"/>
+            <option value="Romania"/>
+            <option value="Russian Federation"/>
+            <option value="Rwanda"/>
+            <option value="Saint Helena"/>
+            <option value="Saint Kitts and Nevis"/>
+            <option value="Saint Lucia"/>
+            <option value="Saint Pierre and Miquelon"/>
+            <option value="Saint Vincent and the Grenadines"/>
+            <option value="Samoa"/>
+            <option value="San Marino"/>
+            <option value="Sao Tome and Principe"/>
+            <option value="Saudi Arabia"/>
+            <option value="Senegal"/>
+            <option value="Serbia"/>
+            <option value="Seychelles"/>
+            <option value="Sierra Leone"/>
+            <option value="Singapore"/>
+            <option value="Slovakia"/>
+            <option value="Slovenia"/>
+            <option value="Solomon Islands"/>
+            <option value="Somalia"/>
+            <option value="South Africa"/>
+            <option value="South Georgia and the South Sandwich Islands"/>
+            <option value="Spain"/>
+            <option value="Sri Lanka"/>
+            <option value="Sudan"/>
+            <option value="Suriname"/>
+            <option value="Svalbard and Jan Mayen Islands"/>
+            <option value="Swaziland"/>
+            <option value="Sweden"/>
+            <option value="Switzerland"/>
+            <option value="Syria"/>
+            <option value="Taiwan"/>
+            <option value="Tajikistan"/>
+            <option value="Tanzania"/>
+            <option value="Thailand"/>
+            <option value="Togo"/>
+            <option value="Tokelau"/>
+            <option value="Tonga"/>
+            <option value="Trinidad and Tobago"/>
+            <option value="Tunisia"/>
+            <option value="Turkey"/>
+            <option value="Turkmenistan"/>
+            <option value="Turks and Caicos Islands"/>
+            <option value="Tuvalu"/>
+            <option value="Uganda"/>
+            <option value="Ukraine"/>
+            <option value="United Arab Emirates"/>
+            <option value="United Kingdom"/>
+            <option value="United States of America"/>
+            <option value="Uruguay"/>
+            <option value="Uzbekistan"/>
+            <option value="Vanuatu"/>
+            <option value="Vatican City"/>
+            <option value="Venezuela"/>
+            <option value="Vietnam"/>
+            <option value="Virgin Islands (British)"/>
+            <option value="Virgin Islands (US)"/>
+            <option value="Wallis and Futuna Islands"/>
+            <option value="Western Sahara"/>
+            <option value="Yemen"/>
+            <option value="Zaire"/>
+            <option value="Zambia"/>
+            <option value="Zimbabwe"/>
+          </datalist>
+          <label>{{lbl_Coordinates}}</label>
+          <input id="track_longitude" name="t_lon" size="10" maxlength="10" type="number" min="-180" max="180" step="0.000001" style="text-align: right;"/> {{txt_east}} /
+          <input id="track_latitude" name="t_lat" size="10" maxlength="10" type="number" min="-90" max="90" step="0.000001"  style="text-align: right;"/> {{txt_north}} 
+
+          <input id="search_location" type="button" class="button" style="margin-left: 20px;" value="{{btn_lookup}}" 
+            onclick="javascript:client.lookupCoordinates()"/>
+          
+          <label>{{lbl_Date}}</label>
+          <input id="track_date" name="t_date" type="text" size="10" maxlength="10" pattern="{{date_pattern}}" />
+          <label>{{lbl_Activity}}</label>
+          <select id="track_activity" name="t_activity" class="icon" >
+            <option></option>
+            <option>&#x21e0;</option>
+            <option>&#x219a;</option>
+            <option>&#x21a2;</option>
+            <option>&#x215e;</option>
+            <option>&#x2193;</option>
+            <option>&#x2182;</option>
+            <option>&#x2183;</option>
+            <option>&#x2180;</option>
+            <option>&#x2209;</option>
+            <option>&#x219c;</option>
+            <option>&#x21d1;</option>
+            <option>&#x21d9;</option>
+            <option>&#x21bf;</option>
+            <option>&#x21de;</option>
+            <option>&#x21df;</option>
+            <option>&#x21d4;</option>            
+          </select>
+          <label>{{lbl_Description}}</label>
+          <textarea id="track_description" name="t_description" rows="8" cols="80"></textarea>          
+          <label>{{lbl_Public}}</label>
+          <input id="track_published" name="t_published" type="checkbox" value="true"/>
+        </p>
+        <fieldset>
+          <p>
+            <span class="hint right">{{{txt_upload_data_hint}}}</span>
+            <label>{{txt_kml_url}}</label>
+          </p>
+          <ul id="track-data-list">
+          </ul>
+          <p>
+            <span class="right">
+            {{txt_add_more_data}}
+            <input id="button_add_track_data" class="button" value="{{btn_plus}}" type="button" />
+            </span>
+          </p>
+        </fieldset>
+        <br/>
+        <fieldset>
+          <p>
+            <span class="hint right">{{{txt_upload_data_hint}}}</span>
+            <label>{{txt_image_url}}</label><br/>
+          </p>
+          <ul id="image-list" class="edit-image-list">
+          </ul>
+          <p>
+            <span class="right">
+            {{txt_add_more_images}}
+            <input id="button_add_image" class="button" value="{{btn_plus}}" type="button" />
+            </span>
+            <br/>
+          </p>
+        </fieldset>
+        <div id="confirmation-dialog" title="{{txt_confirmation}}">
+          <p id="confirmation-message">{{txt_confirm}}</p>
+        </div>
+        <div id="progressbar"></div>
+        <br/>
+        <p>
+          <span id="status"></span>
+          <br/>
+          <input class="button" id="button_save" value="{{btn_save}}" type="submit"/> 
+          <input class="button" id="button_show" type="button" value="{{btn_show}}" disabled="disabled" />
+          <input class="button" id="button_delete" type="button" value="{{btn_delete}}" disabled="disabled" />
+          <input class="button" id="button_refresh" type="button" value="{{btn_refresh}}" />
+          <input class="button" id="button_list" type="button" value="{{btn_back_to_overview}}" />
+        </p>
+      </form>
+      <div class="upload-form" id="upload">
+        <fieldset>
+          <h3>{{hdr_upload}}</h3>
+          <span id="upload_hint"></span>
+          <br/>        
+          <p>
+            <span class="left">
+              <label>{{txt_kml_chooser}}</label>
+              <input id="kmlupload" type="file" name="kmlfiles[]" multiple="multiple" size="50"/> 
+            </span>
+            <br clear="all"/>
+            <span class="left">
+              <label>{{txt_image_chooser}}</label>
+              <input id="imgupload" type="file" name="kmlfiles[]" multiple="multiple" size="50"/> 
+            </span>
+          </p>
+        </fieldset>
+      </div>
+    </div>
+
+  <!-- content-wrap ends here -->
+  </div></div>
+
+  <!-- footer starts here -->
+  <footer id="footer">
+    <div id="footer-content">
+      <div class="col2 float-right">
+        <p>
+        <a href="../pages/about.html">{{{txt_footer}}}</a><br/>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <!-- footer ends here -->
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

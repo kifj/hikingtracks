@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="Description" content="X1 Hiking Tracks" />
+<meta name="Keywords" content="hiking, tracks, gps, share, maps, route, bike, cycling" />
+<meta charset="utf-8">
+<meta name="Distribution" content="Global" />
+<meta name="Author" content="Johannes Beck - mail@johannes-beck.name" />
+<meta name="Robots" content="index,follow" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link type="text/css" rel="stylesheet" href="../css/hikingtracks-core.css" media="all" />
+<link type="text/css" rel="stylesheet" href="../css/hikingtracks.css" media="(min-width: 870px) and (max-width: 1240px)" />
+<link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
+<link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
+<script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
+<script type="text/javascript" src="../js/jquery.mustache.js"></script>
+<script type="text/javascript" src="../js/mustache.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript" src="../js/hikingtracks.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+      client.initMessages('../bundle/');
+      client.initHeaderPhoto();
+    	client.showLoginButtons();
+    });
+  </script>
+<title>HikingTracks</title>
+</head>
+
+<body id="body">
+  <!-- wrap starts here -->
+  <div id="wrap">
+
+    <header id="header">
+      <div id="header-content">
+        <h1 id="logo">
+          <a href="index.html" title="">{{{title_line}}}</a>
+        </h1>
+        <h2 id="slogan">{{txt_subtitle}}</h2>
+        <ul>
+          <li class="messageOff" id="message"></li>
+          <li><span id="indicator">&nbsp;</span></li>
+        </ul>
+        <!-- Menu Tabs -->
+        <nav>
+          <ul>
+            <li id="map"><a href="../pages/map.html">{{nav_map}}</a></li>
+            <li id="home"><a href="../pages/index.html" id="current">{{nav_home}}</a></li>
+            <li id="tracks"><a href="../secure/tracks.html">{{nav_mytracks}}</a></li>
+            <li id="login"><a href="../login.html">{{nav_login}}</a></li>
+            <li id="logout"><a href="../oauth?logout=true">{{nav_logout}}</a></li>
+            <li><a href="../pages/about.html">{{nav_about}}</a></li>
+            <li id="language"><a id="current-language" href="#"><img class="rss" /></a>
+            <ul id="languages"></ul></li>
+            <li><a href="../services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="../images/rss.png" /></a></li>
+          </ul>
+        </nav>
+
+      </div>
+    </header>
+
+    <div class="headerphoto"></div>
+
+    <!-- content-wrap starts here -->
+    <div id="content-wrap">
+      <div id="content">
+
+        <aside id="sidebar">
+          <div class="sidebox hide-small">
+            <h1>{{hdr_welcome}}</h1>
+            <p>{{txt_welcome1}}</p>
+            <p>{{txt_welcome2}}</p>
+          </div>
+          <div class="sidebox">
+            <h1 class="clear">{{mnu_sidebar}}</h1>
+            <ul class="sidemenu">
+              <li><a href="../pages/index.html" class="top">{{mnu_home}}</a></li>
+              <li><a href="../secure/profile.html">{{mnu_profile}}</a></li>
+              <li><a href="../secure/track.html">{{mnu_upload}}</a></li>
+            </ul>
+          </div>
+          <div class="sidebox">
+            <h1>Wise Words</h1>
+            <p>&quot;No man can live happily who regards himself alone; who turns everything to his own advantage.
+              You must live for others if you wish to live for yourself.&quot;</p>
+            <p class="align-right">- Seneca</p>
+          </div>
+          <div class="sidebox">
+            <h1>{{hdr_search}}</h1>
+            <form action="#" class="searchform">
+              <p>
+                <input id="search_query" name="search_query" class="textbox" type="text" /> <br />
+                <br /> <input name="search" class="button" value="{{btn_search}}" type="submit" /> <input name="clear"
+                  class="button" value="{{btn_clear}}" type="reset" />
+              </p>
+            </form>
+          </div>
+        </aside>
+
+        <div id="main">
+
+          <div class="post">
+
+            <h1 id="TemplateInfo">Template Info</h1>
+
+            <p>
+              Posted by <a href="index.html">ealigam</a>
+            </p>
+
+            <p>
+              <strong>PixelGreen</strong> is a free, W3C-compliant, CSS-based website template by <a
+                href="http://www.styleshout.com/">styleshout.com</a>. This work is distributed under the <a
+                rel="license" href="http://creativecommons.org/licenses/by/2.5/"> Creative Commons Attribution 2.5
+                License</a>, which means that you are free to use and modify it for any purpose. All I ask is that you give
+              me credit by including a <strong>link back</strong> to <a href="http://www.styleshout.com/">my website</a>.
+            </p>
+
+            <p>
+              You can find more of my free template designs at <a href="http://www.styleshout.com/">my website</a>. For
+              premium commercial designs, you can check out <a href="http://www.dreamtemplate.com"
+                title="Website Templates">DreamTemplate.com</a>.
+            </p>
+
+            <p class="post-footer align-right">
+              <a href="index.html" class="readmore">Read more</a> <a href="index.html" class="comments">Comments (7)</a>
+              <span class="date">Nov 11, 2006</span>
+            </p>
+
+          </div>
+
+          <h1 id="SampleTags">Sample Tags</h1>
+
+          <h3>Code</h3>
+          <p>
+            <code>
+              code-sample { <br /> font-weight: bold;<br /> font-style: italic;<br /> }
+            </code>
+          </p>
+
+          <h3>Example Lists</h3>
+
+          <ol>
+            <li>Here is an example</li>
+            <li>of an ordered list</li>
+          </ol>
+
+          <ul>
+            <li>Here is an example</li>
+            <li>of an unordered list</li>
+          </ul>
+
+          <h3>Blockquote</h3>
+          <blockquote>
+            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut
+              laoreet dolore magna aliquam erat....</p>
+          </blockquote>
+
+          <h3>Image and text</h3>
+          <p>
+            <a href="http://example.com/"><img src="../images/placeholder.jpg" width="100" height="121"
+              alt="placeholder" class="float-left" /></a> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec
+            libero. Suspendisse bibendum. Cras id urna. Morbi tincidunt, orci ac convallis aliquam, lectus turpis varius
+            lorem, eu posuere nunc justo tempus leo. Donec mattis, purus nec placerat bibendum, dui pede condimentum
+            odio, ac blandit ante orci ut diam. Cras fringilla magna. Phasellus suscipit, leo a pharetra condimentum,
+            lorem tellus eleifend magna, eget fringilla velit magna id neque. Curabitur vel urna. In tristique orci
+            porttitor ipsum. Aliquam ornare diam iaculis nibh.
+          </p>
+
+          <h3>Table Styling</h3>
+
+          <table>
+            <tr>
+              <th class="first"><strong>post</strong> date</th>
+              <th>title</th>
+              <th>description</th>
+            </tr>
+            <tr class="row-a">
+              <td class="first">05.31.2006</td>
+              <td><a href="index.html">Augue non nibh</a></td>
+              <td><a href="index.html">Lobortis commodo metus vestibulum</a></td>
+            </tr>
+            <tr class="row-b">
+              <td class="first">05.31.2006</td>
+              <td><a href="index.html">Fusce ut diam bibendum</a></td>
+              <td><a href="index.html">Purus in eget odio in sapien</a></td>
+            </tr>
+            <tr class="row-a">
+              <td class="first">05.31.2006</td>
+              <td><a href="index.html">Maecenas et ipsum</a></td>
+              <td><a href="index.html">Adipiscing blandit quisque eros</a></td>
+            </tr>
+            <tr class="row-b">
+              <td class="first">05.31.2006</td>
+              <td><a href="index.html">Sed vestibulum blandit</a></td>
+              <td><a href="index.html">Cras lobortis commodo metus lorem</a></td>
+            </tr>
+          </table>
+
+          <h3>Example Form</h3>
+          <form action="#">
+            <p>
+              <label>Name</label> <input name="dname" value="Your Name" type="text" size="30" /> <label>Email</label> <input
+                name="demail" value="Your Email" type="text" size="30" /> <label>Your Comments</label>
+              <textarea rows="5" cols="5"></textarea>
+              <br /> <input class="button" type="submit" />
+            </p>
+          </form>
+
+          <br />
+
+        </div>
+
+        <!-- content-wrap ends here -->
+      </div>
+    </div>
+
+    <!-- footer starts here -->
+    <footer id="footer">
+      <div id="footer-content">
+        <div class="col2 float-right">
+          <p>
+            <a href="../pages/about.html">{{{txt_footer}}}</a><br />
+          </p>
+        </div>
+      </div>
+    </footer>
+    <!-- footer ends here -->
+
+    <!-- wrap ends here -->
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="Description" content="X1 Hiking Tracks" />
+  <meta name="Keywords" content="hiking, tracks, gps, share, maps, route, bike, cycling" />
+  <meta charset="utf-8">
+  <meta http-equiv="expires" content="0">
+  <meta name="Distribution" content="Global" />
+  <meta name="Author" content="Johannes Beck - mail@johannes-beck.name" />
+  <meta name="Robots" content="index,follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-core.css" media="all"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks.css" media="(min-width: 870px) and (max-width: 1240px)"/>
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
+  <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
+  <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.json-2.3.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
+  <script type="text/javascript" src="../js/jquery.mustache.js"></script>
+  <script type="text/javascript" src="../js/mustache.js"></script>
+  <script type="text/javascript" src="../js/common.js"></script>
+  <script type="text/javascript" src="../js/hikingtracks.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      client.initMessages('../bundle/');
+      client.initHeaderPhoto();
+      client.initProfilePage();
+  });
+  </script>
+  <title>HikingTracks</title>
+</head>
+
+<body id="body">
+<!-- wrap starts here -->
+<div id="wrap">
+
+  <header id="header"><div id="header-content">
+    <h1 id="logo"><a href="../pages/index.html" title="">{{{title_line}}}</a></h1>
+    <h2 id="slogan">{{txt_subtitle}}</h2>
+    <ul><li class="messageOff" id="message"></li><li><span id="indicator">&nbsp;</span></li></ul>
+
+    <!-- Menu Tabs -->
+    <nav><ul>
+      <li id="map"><a href="../pages/map.html">{{nav_map}}</a></li>
+      <li id="home"><a href="../pages/index.html" id="current">{{nav_home}}</a></li>
+      <li id="tracks"><a href="../secure/tracks.html">{{nav_mytracks}}</a></li>
+      <li id="login"><a href="../login.html">{{nav_login}}</a></li>
+      <li id="logout"><a href="../oauth?logout=true">{{nav_logout}}</a></li>
+      <li><a href="../pages/about.html">{{nav_about}}</a></li>
+      <li id="language"><a id="current-language" href="#"><img class="rss"/></a><ul id="languages"></ul></li>
+      <li><a href="../services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="../images/rss.png" /></a></li>
+    </ul></nav>
+
+  </div></header>
+
+  <div class="headerphoto"></div>
+
+  <!-- content-wrap starts here -->
+  <div id="content-wrap"><div id="content">
+
+    <aside id="sidebar" >
+
+      <div class="sidebox hide-small">
+        <h1>{{hdr_welcome}}</h1>
+        <p>{{txt_welcome1}}</p>
+        <p>{{txt_welcome2}}</p>
+      </div>
+
+      <div class="sidebox">
+        <h1 class="clear">{{mnu_sidebar}}</h1>
+        <ul class="sidemenu">
+          <li><a href="../pages/index.html" class="top">{{mnu_home}}</a></li>
+          <li><a href="../secure/profile.html">{{mnu_profile}}</a></li>
+          <li><a href="../secure/track.html">{{mnu_upload}}</a></li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <div id="main">
+
+      <div class="post">
+        <h1 id="PolicyInfo">{{hdr_policy}}</h1>
+        <p>{{{txt_policy}}}</p>
+      </div>
+
+        <h3><img id="avatar" src="../images/appbar.user.png" alt="Avatar" height="40" class="right no-border">{{hdr_profile}}</h3>
+        <form action="javascript:client.makeProfileUpdate()" autocomplete="off">
+          <p>
+          <label for="profile_name">{{lbl_Profile}}</label>
+          <input id="profile_name" name="f_name" placeholder="{{lbl_placeholder_Profile}}" type="text" size="80" maxlength="100" />
+          <label for="profile_email">{{lbl_Email}}</label>
+          <input id="profile_email" name="f_email" placeholder="{{lbl_placeholder_Email}}" type="email" size="80" maxlength="100" disabled="disabled" />
+          <br/><br/>
+          <label for="profile_show_banner">
+            <input id="profile_show_banner" name="f_show_banner" type="checkbox" />
+            {{lbl_Show_Banner}}
+          </label>
+          <br/>
+          <label for="profile_published">
+            <input id="profile_published" name="f_published" type="checkbox" />
+            {{lbl_Public}}
+          </label>
+          <br/>
+          <span id="status"></span>
+          <br/>
+          <input class="button" value="{{btn_update}}" type="submit" />
+          <input class="button" id="button_delete" type="button" value="{{btn_profile_delete}}" />
+          </p>
+        </form>
+
+        <br />
+
+    </div>
+
+  <!-- content-wrap ends here -->
+  </div></div>
+
+  <!-- footer starts here -->
+  <footer id="footer">
+    <div id="footer-content">
+      <div class="col2 float-right">
+        <p>
+        <a href="../pages/about.html">{{{txt_footer}}}</a><br/>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <!-- footer ends here -->
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

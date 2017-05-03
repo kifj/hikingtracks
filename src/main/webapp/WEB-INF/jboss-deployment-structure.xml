@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<jboss-deployment-structure>
+  <deployment>
+    <dependencies>
+      <module name="org.jboss.as.jmx" />
+      <module name="org.infinispan" />
+      <module name="org.infinispan.commons" />
+      <module name="org.infinispan.client.hotrod" />
+      <module name="org.jgroups"/>
+      <module name="org.jboss.resteasy.resteasy-atom-provider" />
+      <module name="com.fasterxml.jackson.core.jackson-core" />
+      <module name="com.fasterxml.jackson.core.jackson-annotations" />
+      <module name="org.apache.commons.codec"/>
+      <module name="org.apache.httpcomponents" />
+    </dependencies>
+  </deployment>
+</jboss-deployment-structure>
