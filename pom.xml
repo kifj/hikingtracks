@@ -108,6 +108,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>1.7.7</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -176,16 +177,6 @@
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-atom-provider</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <artifactId>xercesImpl</artifactId>
-      <groupId>xerces</groupId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>
