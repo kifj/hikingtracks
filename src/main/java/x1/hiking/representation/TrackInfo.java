@@ -1,7 +1,6 @@
 package x1.hiking.representation;
 
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,9 +47,8 @@ public class TrackInfo implements Representation {
    * @param track the track
    * @param path the path
    * @param user the user
-   * @throws URISyntaxException
    */
-  public TrackInfo(Track track, String path, User user) throws URISyntaxException {
+  public TrackInfo(Track track, String path, User user) {
     this(track, true, true, path, user);
   }
 

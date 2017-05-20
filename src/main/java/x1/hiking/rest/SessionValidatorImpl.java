@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.service.HikingTracksService;
+import x1.hiking.utils.ServletHelper;
 import x1.oauth.AuthorizationConstants;
-import x1.oauth.ServletHelper;
 
 /**
  * Session Validator Implementation

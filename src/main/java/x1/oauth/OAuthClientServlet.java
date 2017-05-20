@@ -41,6 +41,7 @@ import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.service.HikingTracksService;
 import x1.hiking.utils.ConfigurationValue;
+import x1.hiking.utils.ServletHelper;
 
 /**
  * Authorization servlet
@@ -172,8 +173,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return null;
   }
 
-  private OAuthParams buildOAuthParams(OAuthProviderType oauthProvider, HttpServletRequest request)
-      throws MalformedURLException {
+  private OAuthParams buildOAuthParams(OAuthProviderType oauthProvider, HttpServletRequest request) {
     OAuthParams oauthParams = new OAuthParams();
     oauthParams.setApplication(oauthProvider.name());
     oauthParams.setAuthzEndpoint(oauthProvider.getAuthzEndpoint());
@@ -191,12 +191,11 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return oauthParams;
   }
 
-  /*
+  /**
    * configure the return_to URL where your application will receive the
    * authentication responses from the OAuth provider
    */
-  private String buildReturnToUrl(OAuthProviderType oauthProvider, HttpServletRequest request)
-      throws MalformedURLException {
+  private String buildReturnToUrl(OAuthProviderType oauthProvider, HttpServletRequest request) {
     UriBuilder b = ServletHelper.getRequestUrl(request);
     b.queryParam(PARAM_AUTHENTICATE, Boolean.TRUE);
     b.queryParam(PARAM_URL, oauthProvider.name());

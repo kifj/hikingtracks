@@ -1,6 +1,5 @@
 package x1.hiking.rest;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
@@ -45,6 +44,7 @@ import x1.hiking.representation.TrackInfoList;
 import x1.hiking.representation.UserInfo;
 import x1.hiking.service.HikingTracksService;
 import x1.hiking.utils.ConfigurationValue;
+import x1.hiking.utils.ServletHelper;
 
 /**
  * ATOM Feed service
@@ -93,13 +93,13 @@ public class FeedServiceImpl implements FeedService {
       }
       putToCache(cache, feed);
       return feed;
-    } catch (URISyntaxException | IOException | JAXBException e) {
+    } catch (URISyntaxException | JAXBException e) {
       log.warn(null, e);
       throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
-  private void putToCache(Cache<String, Object> cache, Feed feed) throws IOException, JAXBException {
+  private void putToCache(Cache<String, Object> cache, Feed feed) throws JAXBException {
     StringWriter out = new StringWriter();
     marshaller.marshal(feed, out);
     cache.put(SEP, out.toString());
@@ -147,7 +147,7 @@ public class FeedServiceImpl implements FeedService {
     }
   }
 
-  private TrackInfoList getTrackInfoList() throws URISyntaxException {
+  private TrackInfoList getTrackInfoList() {
     QueryOptions options = new QueryOptions(0, 5, null);
     List<Track> tracks = service.findTracks(null, options);
     List<TrackInfo> trackInfos = new ArrayList<>();
@@ -348,7 +348,7 @@ public class FeedServiceImpl implements FeedService {
   }
 
   private String getRequestURL() {
-    String url = httpServletRequest.getRequestURL().toString();
+    String url = ServletHelper.getRequestUrl(httpServletRequest).build().toString();
     if (url.endsWith(SEP)) {
       url = url.substring(0, url.length() - 1);
     }

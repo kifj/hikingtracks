@@ -2,7 +2,6 @@ package x1.hiking.rest;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -48,6 +47,7 @@ import x1.hiking.representation.*;
 import x1.hiking.service.HikingTracksService;
 import x1.hiking.thumbnails.ThumbnailService;
 import x1.hiking.utils.ConfigurationValue;
+import x1.hiking.utils.ServletHelper;
 import x1.oauth.AuthorizationConstants;
 
 /**
@@ -168,9 +168,6 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     } catch (NotFoundException e) {
       log.info(e.getMessage());
       throw e;
-    } catch (URISyntaxException | UnsupportedEncodingException e) {
-      log.warn(null, e);
-      throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -188,7 +185,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     return track;
   }
 
-  private List<Model> addLinks(Track track, TrackInfo trackInfo, User user) throws UnsupportedEncodingException {
+  private List<Model> addLinks(Track track, TrackInfo trackInfo, User user) {
     List<Model> result = new ArrayList<>();
     result.add(track);
     Track next = hikingTrackService.nextTrack(track, user);
@@ -290,9 +287,6 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     } catch (ConflictException e) {
       log.info(e.getMessage());
       throw e;
-    } catch (UnsupportedEncodingException | URISyntaxException e) {
-      log.warn(null, e);
-      throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -343,9 +337,6 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     } catch (NotFoundException e) {
       log.info(e.getMessage());
       throw e;
-    } catch (UnsupportedEncodingException | URISyntaxException e) {
-      log.warn(null, e);
-      throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -789,7 +780,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private String getRequestURL() {
-    String url = httpServletRequest.getRequestURL().toString();
+    String url = ServletHelper.getRequestUrl(httpServletRequest).build().toString();
     if (url.endsWith(SEP)) {
       url = url.substring(0, url.length() - 1);
     }

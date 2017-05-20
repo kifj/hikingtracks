@@ -16,7 +16,6 @@ package x1.oauth;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.jwt.JWT;
@@ -48,14 +47,10 @@ public class OpenIdConnectResponse extends OAuthJSONAccessTokenResponse {
    *
    * @param issuer
    * @param audience
-   * @return
    */
   public boolean checkId(String issuer, String audience) {
-    if (idToken.getClaimsSet().getIssuer().equals(issuer) && idToken.getClaimsSet().getAudience().equals(audience)
-        && idToken.getClaimsSet().getExpirationTime() < System.currentTimeMillis()) {
-      return true;
-    }
-    return false;
+    return idToken.getClaimsSet().getIssuer().equals(issuer) && idToken.getClaimsSet().getAudience().equals(audience)
+        && idToken.getClaimsSet().getExpirationTime() < System.currentTimeMillis();
   }
 
 }
