@@ -191,7 +191,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5</version>
+        <version>3.6.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -224,7 +224,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.12</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>parse-version</id>

@@ -1163,7 +1163,9 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
       var image = controlUI.firstChild;
       controlUI.oldParent.appendChild(image);
     }
-    this.map.controls[google.maps.ControlPosition.RIGHT_CENTER].pop();
+    if (trackData) {
+      this.map.controls[google.maps.ControlPosition.RIGHT_CENTER].pop();
+    }
     $('#google-maps').css('height', '450px');
     google.maps.event.trigger(this.map, 'resize');
   } else {
@@ -1442,7 +1444,8 @@ Client.prototype.showTrackInfo = function(trackData, index) {
   if (trackData.image && trackData.image.length > 0) {
     this.localize('#track_image_' + index, 'image', {
       name : trackData.image[0].name,
-      url : trackData.image[0].url
+      url : trackData.image[0].url,
+      track_name: encodeURIComponent(trackData.name)
     });
   }
   $("#button_show_" + index).click(function(e) {
@@ -1475,7 +1478,8 @@ Client.prototype.showTrackSummaryInfo = function(trackData, index) {
   if (trackData.image && trackData.image.length > 0) {
     this.localize('#track_image_' + index, 'image', {
       name : trackData.image[0].name,
-      url : trackData.image[0].url
+      url : trackData.image[0].url,
+      track_name: encodeURIComponent(trackData.name)
     });
   }
 }
@@ -1791,7 +1795,7 @@ Client.prototype.showElevationProfile = function(elem, trackData) {
   if (hasTrackData) {
     for (var i = 0; i < trackDataList.length; i++) {
       var td = trackDataList[i];
-      if (td != null && td.samples != null) {
+      if (td.samples != null) {
         for (var j = 0; j < td.samples.length; j++) {
           latlngs.push(td.samples[j]);
           if (lowestPoint == null || lowestPoint.elevation > td.samples[j].elevation) {
@@ -1801,14 +1805,14 @@ Client.prototype.showElevationProfile = function(elem, trackData) {
             highestPoint = td.samples[j];
           }
         }
+        if (!td.lowestPoint) {
+          td.lowestPoint = lowestPoint;
+        }
+        if (!td.highestPoint) {
+          td.highestPoint = highestPoint;
+        }
       }
     }
-  }
-  if (!td.lowestPoint) {
-    td.lowestPoint = lowestPoint;
-  }
-  if (!td.highestPoint) {
-    td.highestPoint = highestPoint;
   }
 
   if (latlngs.length == 0) {
@@ -1817,7 +1821,7 @@ Client.prototype.showElevationProfile = function(elem, trackData) {
     return;
   }
   $(elem).css("display", "block");
-  if (td.lowestPoint && td.highestPoint) {
+  if (td && td.lowestPoint && td.highestPoint) {
     $('#elevation-low').text(txt_elevation_low(td.lowestPoint.elevation));
     $('#elevation-high').text(txt_elevation_high(td.highestPoint.elevation));
     $('#elevation-legend').css('display', 'block');
