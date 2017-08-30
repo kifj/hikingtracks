@@ -13,12 +13,12 @@
   <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
   <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
   <link type="text/css" rel="stylesheet" href="../css/jquery-ui.min.css" media="all"/>
-  <link type="text/css" rel="stylesheet" href="../css/jquery.lightbox.css" />
+  <link type="text/css" rel="stylesheet" href="../css/chocolat.css" />
   <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
   <script type="text/javascript" src="../js/jquery-ui.min.js" ></script>
   <script type="text/javascript" src="../js/jquery-ui-i18n.min.js"></script>
-  <script type="text/javascript" src="../js/jquery.imagecarousel.js"></script> 
-  <script type="text/javascript" src="../js/jquery.lightbox-0.5.min.js"></script> 
+  <script type="text/javascript" src="../js/slick.min.js"></script> 
+  <script type="text/javascript" src="../js/jquery.chocolat.min.js"></script> 
   <script type="text/javascript" src="../js/jquery.dateFormat-1.0.js"></script>
   <script type="text/javascript" src="https://maps-api-ssl.google.com/maps/api/js?key=AIzaSyDWeHGoMQhMLrjL2P57l54AKhC7w_GyyXQ"></script>
   <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
@@ -148,12 +148,10 @@
       <div id="google-maps">{{msg_loading}}</div>
       <br/>
       <div class="carousel">
-        <div class="carouselBody" id="image-parent">
-          <ul id="image-list" >
-          </ul>
-          <a href="#" class="btnNext">{{btn_next}}</a>
-          <a href="#" class="btnPrevious">{{btn_previous}}</a>
-        </div>
+      	<div id ="image-parent">
+       	  <div id="image-list">
+       	  </div>
+       	</div>
       </div>
       <br/>
     </div>      

@@ -73,7 +73,8 @@ Client.prototype.initTrackPage = function() {
     dataType : 'json',
     url : baseurl + serviceTrackUrl,
     type : 'POST',
-    multipart : false
+    multipart : false,
+    sequentialUploads: true
   });
   $('#kmlupload').bind('fileuploadadd', function(e, data) {
     var trackData = caller.trackData;
@@ -100,7 +101,8 @@ Client.prototype.initTrackPage = function() {
     dataType : 'json',
     url : baseurl + serviceTrackUrl,
     type : 'POST',
-    multipart : false
+    multipart : false,
+    sequentialUploads: true
   });
   $('#imgupload').bind('fileuploadadd', function(e, data) {
     var trackData = caller.trackData;
@@ -777,10 +779,7 @@ Client.prototype.addCarousel = function(elem, trackData) {
   var hasImages = trackData['image'] && trackData['image'].length > 0;
   if (hasImages) {
     if (this.initCarousel) {
-      $(elem).empty().mustache('image-list', $.extend({
-        next : btn_next,
-        previous : btn_previous
-      }, $.i18n.map));
+      $(elem).empty().mustache('image-list', $.i18n.map);
     }
     $(elem).css('display', 'inherit');
     for (var i = 0; i < trackData['image'].length; i++) {
@@ -789,19 +788,23 @@ Client.prototype.addCarousel = function(elem, trackData) {
         this.showImage('#image-list', trackData.name, img, i, "SMALL");
       }
     }
-    $('#image-list a').lightBox();
-    $('.carousel').ImageCarousel({
-      allow_minimize : false,
-      display_header : false,
-      carousel_width : '96%'
+    $('#image-list').slick({
+      infinite: true,
+      slidesToShow: 1,
+      variableWidth: true,
+      swipeToSlide: true,
+      centerMode: true,
+      draggable: false,
+      dots: true
     });
+    $('#image-list').Chocolat({
+      loop: true,
+      imageSize: 'contain'
+    });    
     this.initCarousel = true;
   } else {
     this.initCarousel = false;
-    $(elem).css('display', 'none').empty().mustache('image-list', $.extend({
-      next : btn_next,
-      previous : btn_previous
-    }, $.i18n.map));
+    $(elem).css('display', 'none').empty().mustache('image-list', $.i18n.map);
   }
 }
 
@@ -1160,8 +1163,6 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
   if (!this.isFullScreen()) {
     if (hasImages) {
       var controlUI = this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].pop();
-      var image = controlUI.firstChild;
-      controlUI.oldParent.appendChild(image);
     }
     if (trackData) {
       this.map.controls[google.maps.ControlPosition.RIGHT_CENTER].pop();
@@ -1174,18 +1175,26 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
     if (hasImages) {
       var controlUI = document.createElement('div');
       controlUI.className = 'google-maps-fullscreen-carousel google-maps-control carousel';
-      var image = document.getElementById('image-parent');
-      controlUI.oldParent = image.parentNode;
-      controlUI.appendChild(image);
       this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlUI);
-      $('#image-list a').unbind("click");
-      $('#image-list a').bind("click", function(event) {
-        event.preventDefault();
-      });
-      $('.google-maps-fullscreen-carousel').ImageCarousel({
-        allow_minimize : false,
-        display_header : false,
-        carousel_width : '90%'
+      for (var i = 0; i < trackData['image'].length; i++) {
+        var img = trackData['image'][i];
+        if (img != null) {
+          var url = img.url + "?thumbnail=SMALL";
+          $('.google-maps-fullscreen-carousel').mustache('show-googlemaps-image', $.extend({
+            index : i,
+            name : img.name,
+            url : url
+          }, $.i18n.map));
+        }
+      }
+      $('.google-maps-fullscreen-carousel').slick({
+        infinite: true,
+        slidesToShow: 1,
+        centerMode: true,
+        variableWidth: true,
+        swipeToSlide: true,
+        draggable: false,
+        dots: true
       });
     }
     this.addGoogleMapsDetail(trackData);

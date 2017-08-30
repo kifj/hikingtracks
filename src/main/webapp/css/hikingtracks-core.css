@@ -260,10 +260,14 @@ input.button {
   overflow: hidden;
 }
 
+.gallery-icon {
+  margin: 0px 5px;
+  padding: 0px 0px;
+}
+
 .gallery-icon img {
-  margin: 0 !important;
-  padding: 0 !important;
   border: none !important;
+  padding: 0px;
 }
 
 .upload-form {
@@ -424,15 +428,13 @@ input.button {
   list-style-image: none !important;
 }
 
-#image-list {
-  margin: 0;
-}
-
-#image-list li {
-  list-style-type: none;
-  list-style-image: none !important;
-  padding-bottom: 2px;
-  min-height: 42px;
+#image-parent {
+  margin: 10px 10px;
+  border: 1px solid #EFEDED;
+  background-color: #FAFAFA;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
 
 #button_list {
@@ -459,115 +461,275 @@ input.button {
 ------------------------------- */
 .carousel {
   position: relative;
-  margin: 0px 10px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  background-color: #FAFAFA;
-  border: 1px solid #EFEDED;
+  padding: 0px 50px;
 }
 
-.carouselBody {
-  padding: 0;
-  margin-top: 0px;
-  display: block;
-  zoom: 1;
-  overflow: hidden;
-  width: 100%;
-  border: none !important;
+.slick-slider {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    -webkit-touch-callout: none;
+    -khtml-user-select: none;
+    -ms-touch-action: pan-y;
+        touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.carouselBody img {
-  max-height: 150px;
-  max-width: 150px;
+.slick-list {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
-.carousel ul {
-  list-style-type: none;
-  margin: 0 0 0 10px;
-  width: 50000px !important;
-  padding: 0;
+.slick-list:focus {
+    outline: none;
 }
 
-.carousel li {
-  display: inline;
-  float: left;
-  padding-right: 10px;
+.slick-list.dragging {
+    cursor: pointer;
+    cursor: hand;
 }
 
-.carousel .btnPrevious {
-  float: left;
+.slick-slider .slick-track, .slick-slider .slick-list {
+    -webkit-transform: translate3d(0, 0, 0);
+       -moz-transform: translate3d(0, 0, 0);
+        -ms-transform: translate3d(0, 0, 0);
+         -o-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
 }
 
-.carousel .btnNext {
-  float: right;
+.slick-track {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: block;
 }
 
-.carousel .fg-button {
-  outline: 0;
-  margin: 10px;
-  text-decoration: none !important;
-  cursor: pointer;
-  position: relative;
-  text-align: center;
-  zoom: 1;
+.slick-track:before, .slick-track:after {
+    display: table;
+    content: '';
 }
 
-.carouselBody .fg-button {
-  padding: 4px 10px;
+.slick-track:after {
+    clear: both;
 }
 
-.carousel .fg-button .ui-icon {
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 50%;
-  margin-left: -8px;
+.slick-loading .slick-track {
+    visibility: hidden;
 }
 
-.carousel button.fg-button {
-  width: auto;
-  overflow: visible;
-}
-/* removes extra button width in IE */
-.carousel .fg-button-icon-left {
-  padding-left: 2.1em;
-}
-.carousel .fg-button-icon-right {
-  padding-right: 2.1em;
+.slick-slide {
+    display: none;
+    float: left;
+    height: 100%;
+    min-height: 1px;
 }
 
-.carousel .fg-button-icon-left .ui-icon {
-  right: auto;
-  left: .2em;
-  margin-left: 0;
+[dir='rtl'] .slick-slide {
+    float: right;
 }
 
-.carousel .fg-button-icon-right .ui-icon {
-  left: auto;
-  right: .2em;
-  margin-left: 0;
+.slick-slide img {
+    display: block;
 }
-/* solo icon buttons must have block properties for the text-indent to work */
-.carousel .fg-button-icon-solo {
-  display: block;
-  width: 8px;
-  text-indent: -9999px;
+
+.slick-slide.slick-loading img {
+    display: none;
 }
-  
-.carousel .btnHide {
-  position: absolute;
-  height: 18px;
-  width: 19px;
-  margin: -11px 0 0;
-  padding: 1px;
-  top: 50%;
-  right: 5px;
+
+.slick-slide.dragging img {
+    pointer-events: none;
+}
+
+.slick-initialized .slick-slide {
+    display: block;
+}
+
+.slick-loading .slick-slide {
+    visibility: hidden;
+}
+
+.slick-vertical .slick-slide {
+    display: block;
+    height: auto;
+    border: 1px solid transparent;
+}
+
+.slick-arrow.slick-hidden {
+    display: none;
+}
+
+/* Theme */
+.slick-loading .slick-list {
+    background: #fff url(images/ajax-loader.gif) center center no-repeat;
+}
+
+/* Icons */
+@font-face {
+    font-family: 'slick';
+    font-weight: normal;
+    font-style: normal;
+    src: url(slick.eot);
+    src: url(slick.eot?#iefix) format('embedded-opentype'), url(slick.woff) format('woff'), url(slick.ttf) format('truetype'), url(slick.svg#slick) format('svg');
+}
+
+/* Arrows */
+.slick-prev, .slick-next {
+    font-size: 0;
+    line-height: 0;
+    position: absolute;
+    top: 50%;
+    display: block;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    -webkit-transform: translate(0, -50%);
+    -ms-transform: translate(0, -50%);
+    transform: translate(0, -50%);
+    cursor: pointer;
+    color: transparent;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.slick-prev:hover, .slick-prev:focus, .slick-next:hover, .slick-next:focus {
+    color: transparent;
+    outline: none;
+    background: transparent;
+}
+
+.slick-prev:hover:before, .slick-prev:focus:before, .slick-next:hover:before, .slick-next:focus:before {
+    opacity: 1;
+}
+
+.slick-prev.slick-disabled:before, .slick-next.slick-disabled:before {
+    opacity: .25;
+}
+
+.slick-prev:before, .slick-next:before {
+    font-family: 'slick';
+    font-size: 20px;
+    line-height: 1;
+    opacity: .75;
+    color: #72A545;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.slick-prev {
+    left: -25px;
+}
+
+[dir='rtl'] .slick-prev {
+    right: -25px;
+    left: auto;
+}
+
+.slick-prev:before {
+    content: '←';
+}
+
+[dir='rtl'] .slick-prev:before {
+    content: '→';
+}
+
+.slick-next {
+    right: -25px;
+}
+
+[dir='rtl'] .slick-next {
+    right: auto;
+    left: -25px;
+}
+
+.slick-next:before {
+    content: '→';
+}
+
+[dir='rtl'] .slick-next:before {
+    content: '←';
+}
+
+/* Dots */
+.slick-dotted.slick-slider {
+    margin-bottom: 30px;
+}
+
+.slick-dots {
+    position: absolute;
+    bottom: -25px;
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-align: center;
+}
+
+.slick-dots li {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.slick-dots li button {
+    font-size: 0;
+    line-height: 0;
+    display: block;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    cursor: pointer;
+    color: transparent;
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+
+.slick-dots li button:hover, .slick-dots li button:focus {
+    outline: none;
+}
+
+.slick-dots li button:hover:before, .slick-dots li button:focus:before {
+    opacity: 1;
+}
+
+.slick-dots li button:before {
+    font-family: 'slick';
+    font-size: 6px;
+    line-height: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    content: '•';
+    text-align: center;
+    opacity: .25;
+    color: black;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.slick-dots li.slick-active button:before {
+    opacity: .75;
+    color: black;
 }
 
 /* ----------------------------
     PAGER MENU
-------------------------------- */
+ */
 #pager {
   display: none; 
 }
@@ -670,7 +832,7 @@ input.button {
 }
 
 .ui-autocomplete-loading { 
-  background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat; 
+  background: white url(images/ui-anim_basic_16x16.gif) right center no-repeat; 
 }
 
 .ui-autocomplete {
@@ -700,6 +862,10 @@ input.button {
 
 .google-maps-fullscreen-carousel {
 	margin-bottom: 50px;
+	left: 20%;
+	right: 20%;
+	background: transparent;
+	padding: 0;
 }
 
 .google-maps-post {
@@ -797,4 +963,9 @@ input.button {
 	max-width: 300px;
 	max-height: 150px;
 	overflow: hidden;
+}
+
+#elevation-chart {
+	overflow-x: auto;
+	overflow-y: hidden;
 }

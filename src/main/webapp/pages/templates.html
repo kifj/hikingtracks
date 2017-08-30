@@ -33,11 +33,14 @@
 	<br/>
 </script>
 <script type="text/html" id="show-image">
-	<li class="gallery-icon" id="img_{{index}}">
-		<a id="image_name_{{index}}" href="{{hrefUrl}}" title="{{name}}">
+		<a class="chocolat-image gallery-icon" id="img_{{index}}" id="image_name_{{index}}" href="{{hrefUrl}}" title="{{name}}">
 			<img src="{{url}}" class="attachment-thumbnail" title="{{name}}" alt="{{name}}"/>
 		</a>
-	</li>
+</script>
+<script type="text/html" id="show-googlemaps-image">
+	<div class="gallery-icon" id="img_{{index}}">
+		<img src="{{url}}" class="attachment-thumbnail" title="{{name}}" alt="{{name}}"/>
+	</div>
 </script>
 <script type="text/html" id="track-info">
 <div class="post">
@@ -137,9 +140,7 @@
 	<a href="../pages/detail.html#{{link}}">{{name}}</a>
 </script>
 <script type="text/html" id="image-list">
-	<ul id="image-list"></ul> 
-	<a href="#" class="btnNext">{{next}}</a> 
-	<a href="#" class="btnPrevious">{{previous}}</a>
+	<div id="image-list"></div> 
 </script>
 <script type="text/html" id="languages">
 	<li><a id="de"><img alt="Deutsch" src="{{prefix}}/de.png"/></a></li>
