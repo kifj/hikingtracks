@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import x1.hiking.model.User;
 import x1.hiking.rest.SessionValidator;
+import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
 /**

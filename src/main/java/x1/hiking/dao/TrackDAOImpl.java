@@ -358,12 +358,22 @@ public class TrackDAOImpl extends AbstractJpaDAO<Track> implements TrackDAO {
   private void addBoundsClause(CriteriaBuilder cb, CriteriaQuery<Track> q, Root<Track> from, Expression<Boolean> where,
       Bounds bounds) {
     Join<Track, TrackData> join = from.join("trackData", JoinType.LEFT);
-    Predicate p = cb.and(
+    Predicate p1 = cb.and(
         cb.le(join.get("startPoint").get("lng"), bounds.getEast()),
         cb.ge(join.get("startPoint").get("lng"), bounds.getWest()),
         cb.le(join.get("startPoint").get("lat"), bounds.getNorth()),
         cb.ge(join.get("startPoint").get("lat"), bounds.getSouth()));
-    q.where(cb.and(where, p));    
+    Predicate p2 = cb.and(
+        cb.le(join.get("highestPoint").get("lng"), bounds.getEast()),
+        cb.ge(join.get("highestPoint").get("lng"), bounds.getWest()),
+        cb.le(join.get("highestPoint").get("lat"), bounds.getNorth()),
+        cb.ge(join.get("highestPoint").get("lat"), bounds.getSouth()));
+    Predicate p3 = cb.and(
+        cb.le(join.get("endPoint").get("lng"), bounds.getEast()),
+        cb.ge(join.get("endPoint").get("lng"), bounds.getWest()),
+        cb.le(join.get("endPoint").get("lat"), bounds.getNorth()),
+        cb.ge(join.get("endPoint").get("lat"), bounds.getSouth()));
+    q.where(cb.and(where, cb.or(p1, p2, p3)));    
   }
 
   private void buildOrderByClause(CriteriaBuilder cb, CriteriaQuery<?> q, Root<Track> from, String text) {

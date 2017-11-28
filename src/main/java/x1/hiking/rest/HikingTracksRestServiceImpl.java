@@ -46,9 +46,9 @@ import x1.hiking.model.*;
 import x1.hiking.representation.*;
 import x1.hiking.service.HikingTracksService;
 import x1.hiking.thumbnails.ThumbnailService;
+import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ConfigurationValue;
 import x1.hiking.utils.ServletHelper;
-import x1.oauth.AuthorizationConstants;
 
 /**
  * REST Web service frontend for Hiking Tracks Service

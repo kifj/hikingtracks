@@ -14,8 +14,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 
-import x1.oauth.AuthorizationConstants;
-
 /**
  * Servlet helper class.
  * 

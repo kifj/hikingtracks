@@ -466,10 +466,13 @@ Client.prototype.getData = function(url, data) {
     statusCode : {
       401 : function(msg) {
         caller.messageOn(msg_access_denied);
+        $.cookie('x-auth-token', null, {path:'/'});
+        window.location.reload();
       },
       403 : function(msg) {
         caller.messageOn(msg_access_denied);
-        caller.token = null;
+        $.cookie('x-auth-token', null, {path:'/'});
+        window.location.reload();
       },
       404 : function(msg) {
         caller.messageOn(msg_not_found);
@@ -529,9 +532,12 @@ Client.prototype.postData = function(url, method, body, successMsg) {
     },
     statusCode : {
       401 : function(msg) {
+        $.cookie('x-auth-token', null, {path:'/'});
+        caller.token = null;
         caller.handlePostError(msg_access_denied, body, etag);
       },
       403 : function(msg) {
+        $.cookie('x-auth-token', null, {path:'/'});
         caller.token = null;
         caller.handlePostError(msg_access_denied, body, etag);
       },
@@ -738,7 +744,7 @@ Client.prototype.showTrackDetail = function(trackData, showlink) {
   setText('#track_description', trackData.description, true);
   setChecked('track_published', trackData.published);
   setDate('#track_date', trackData.date);
-  var btn = $('#button_edit').attr("disabled", (trackData.id) ? false : true);
+  $('#button_edit').attr("disabled", (trackData.id) ? false : true);
   this.showGoogleMaps('#google-maps', trackData);
   this.showElevationProfile('#elevation-chart', trackData);
   this.addCarousel("#image-parent", trackData);
@@ -1162,7 +1168,7 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
   var hasImages = trackData && trackData['image'] && trackData['image'].length > 0;
   if (!this.isFullScreen()) {
     if (hasImages) {
-      var controlUI = this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].pop();
+      this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].pop();
     }
     if (trackData) {
       this.map.controls[google.maps.ControlPosition.RIGHT_CENTER].pop();
@@ -1314,19 +1320,19 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
   if (!start) {
     start = 0;
   }
-  this.trackList = this.getData(baseurl + serviceTrackUrl, data);
+  caller.trackList = caller.getData(baseurl + serviceTrackUrl, data);
   var suffix = "";
   suffix = addQueryParam(suffix, "name", search);
   suffix = addQueryParam(suffix, "activity", activity);
   if (history.pushState) {
     history.pushState(search, title_bar, "index.html" + suffix);
   }
-  if (this.trackList != null) {
+  if (caller.trackList != null) {
     $('#track-list').empty();
     data = this.trackList;
     var result = data.track;
     if (!result || result.length == 0) {
-      this.showEmptyTrackList();
+      caller.showEmptyTrackList();
     } else {
       var total = parseInt(data.total, 10);
       $('#featured_track').css('display', 'block');
@@ -1337,18 +1343,18 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
       } else {
         $('#track-list').empty();
       }
-      this.loadTrackDetail(result[ontop].name, true, false, true);
+      caller.loadTrackDetail(result[ontop].name, true, false, true);
       for (var i = 0; i < result.length; i++) {
         if (i != ontop) {
           var trackData = result[i];
-          this.showTrackSummaryInfo(trackData, i);
+          caller.showTrackSummaryInfo(trackData, i);
         }
       }
-      this.addNavigationButtons(result, total, search, start, ontop, activity);
-      this.showPaging(data, true, search, start, activity);
+      caller.addNavigationButtons(result, total, search, start, ontop, activity);
+      caller.showPaging(data, true, search, start, activity);
     }
   } else {
-    this.showEmptyTrackList();
+    caller.showEmptyTrackList();
   }
 }
 
@@ -1471,21 +1477,21 @@ Client.prototype.showTrackInfo = function(trackData, index) {
 
 Client.prototype.showTrackSummaryInfo = function(trackData, index) {
   var caller = this;
-  this.localize('#track-list-post', 'summary-info', {
+  caller.localize('#track-list-post', 'summary-info', {
     name : encodeURIComponent(trackData.name),
     index : index
   });
   setText('#track_name_' + index, trackData.name);
   setValue('track_id_' + index, trackData.id);
   setText('#track_location_' + index, this.getLocationInfo(trackData));
-  this.showUser('#track_author_' + index, trackData.user, false);
-  this.addAvatar(trackData.user, '#avatar_' + index);
+  caller.showUser('#track_author_' + index, trackData.user, false);
+  caller.addAvatar(trackData.user, '#avatar_' + index);
   setText('#track_activity_' + index, trackData.activity);
   setFloat('#track_distance_' + index, trackData.distance);
   setText('#track_description_' + index, trackData.description, true);
   setDate('#track_date_' + index, trackData.date);
   if (trackData.image && trackData.image.length > 0) {
-    this.localize('#track_image_' + index, 'image', {
+    caller.localize('#track_image_' + index, 'image', {
       name : trackData.image[0].name,
       url : trackData.image[0].url,
       track_name: encodeURIComponent(trackData.name)
@@ -1574,7 +1580,6 @@ Client.prototype.searchMap = function() {
   var activity = getValue('search_activity');
   $("#search_query").autocomplete("close");
   this.loadMap(text, activity);
-  //setValue('search_query', '');
 }
 
 // --------------------------------------------------
@@ -1851,17 +1856,14 @@ Client.prototype.showElevationProfile = function(elem, trackData) {
     role : 'style'
   });
 
-  var last = null;
-  var intermediate = 100;
-  for (var i = 0; i < latlngs.length; i++) {
+  for (var k = 0; i < latlngs.length; i++) {
     var style = null;
-    if (lowestPoint && lowestPoint.elevation == latlngs[i].elevation) {
+    if (lowestPoint && lowestPoint.elevation == latlngs[k].elevation) {
       style = 'point { size: 10; shape-type: triangle; fill-color: #45742A; }';
-    } else if (highestPoint && highestPoint.elevation == latlngs[i].elevation) {
+    } else if (highestPoint && highestPoint.elevation == latlngs[k].elevation) {
       style = 'point { size: 10; shape-type: star; fill-color: #272727; }';
     }
-    data.addRow([ latlngs[i].distance, latlngs[i].elevation, style ]);
-    last = latlngs[i];
+    data.addRow([latlngs[k].distance, latlngs[k].elevation, style]);
   }
 
   chart.draw(data, {
@@ -1955,8 +1957,7 @@ Client.prototype.showOverviewMap = function(elem, data, latitude, longitude) {
 
 Client.prototype.showTracksForMap = function(data, bounds) {
   var caller = this;
-  //log("Load tracks for data=" + data + ", bounds=" + caller.bounds);
-  this.loadTracksForMap(data, caller.bounds);
+  this.loadTracksForMap(data, bounds);
   if (!this.trackList) {
     return;
   }
@@ -1975,7 +1976,9 @@ Client.prototype.showTracksForMap = function(data, bounds) {
     var trackDataList = tracks[track]['trackdata'];
     if (trackDataList && trackDataList.length > 0) {
       var td = trackDataList[0];
-      if (td.startPoint) {
+      if (td.highestPoint) {
+        p = new google.maps.LatLng(td.highestPoint.lat, td.highestPoint.lng);
+      } else if (td.startPoint) {
         p = new google.maps.LatLng(td.startPoint.lat, td.startPoint.lng);
       }
     }
@@ -2021,7 +2024,7 @@ Client.prototype.loadTracksForMap = function(data, bounds) {
       south: bounds.getSouthWest().lat(),
       west: bounds.getSouthWest().lng()
   };
-  this.trackList = this.postData(baseurl + serviceSearchUrl, "POST", data);
+  caller.trackList = caller.postData(baseurl + serviceSearchUrl, "POST", data);
   var suffix = "";
   suffix = addQueryParam(suffix, "name", data.search);
   suffix = addQueryParam(suffix, "activity", data.activity);

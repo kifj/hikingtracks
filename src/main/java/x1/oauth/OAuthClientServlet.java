@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.service.HikingTracksService;
+import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ConfigurationValue;
 import x1.hiking.utils.ServletHelper;
 

@@ -1,4 +1,4 @@
-package x1.oauth;
+package x1.hiking.utils;
 
 /**
  * Constants for HTTP Headers

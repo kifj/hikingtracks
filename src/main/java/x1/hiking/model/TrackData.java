@@ -215,22 +215,22 @@ public class TrackData implements Model {
 
   public void setLocation(Coord[] coordinates) {
     if (coordinates.length > 0) {
-      Coord startPoint = coordinates[0];
-      Coord endPoint = coordinates[coordinates.length - 1];
-      Coord lowestPoint = coordinates[0];
-      Coord highestPoint = coordinates[0];
+      Coord newStartPoint = coordinates[0];
+      Coord newEndPoint = coordinates[coordinates.length - 1];
+      Coord newLowestPoint = coordinates[0];
+      Coord newHighestPoint = coordinates[0];
       for (Coord c : coordinates) {
-        if (c.getElevation() < lowestPoint.getElevation()) {
-          lowestPoint = c;
+        if (c.getElevation() < newLowestPoint.getElevation()) {
+          newLowestPoint = c;
         }
-        if (c.getElevation() > highestPoint.getElevation()) {
-          highestPoint = c;
+        if (c.getElevation() > newHighestPoint.getElevation()) {
+          newHighestPoint = c;
         }
       }
-      setStartPoint(startPoint);
-      setEndPoint(endPoint);
-      setLowestPoint(lowestPoint);
-      setHighestPoint(highestPoint);
+      setStartPoint(newStartPoint);
+      setEndPoint(newEndPoint);
+      setLowestPoint(newLowestPoint);
+      setHighestPoint(newHighestPoint);
     } else {
       setStartPoint(null);
       setEndPoint(null);
