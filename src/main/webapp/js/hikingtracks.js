@@ -1329,7 +1329,7 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
   }
   if (caller.trackList != null) {
     $('#track-list').empty();
-    data = this.trackList;
+    data = caller.trackList;
     var result = data.track;
     if (!result || result.length == 0) {
       caller.showEmptyTrackList();
@@ -1337,7 +1337,7 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
       var total = parseInt(data.total, 10);
       $('#featured_track').css('display', 'block');
       if (result.length > 1) {
-        this.localize('#track-list', 'track-list-post-more-tracks', {
+        caller.localize('#track-list', 'track-list-post-more-tracks', {
           msg_more_tracks : msg_more_tracks
         });
       } else {
@@ -1360,7 +1360,7 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
 
 Client.prototype.loadMap = function(search, activity) {
   var caller = this;
-  this.messageOn(msg_loading);
+  caller.messageOn(msg_loading);
   var data = {};
   data.max = 20;
   if (search) {
@@ -1370,10 +1370,10 @@ Client.prototype.loadMap = function(search, activity) {
     data.activity = activity;
   }
   if (caller.center) {
-    this.showOverviewMap('#google-maps', data, caller.center.lat(), caller.center.lng());
+    caller.showOverviewMap('#google-maps', data, caller.center.lat(), caller.center.lng());
   } else {
-    this.showOverviewMap('#google-maps', data, null, null);
-    this.getCurrentPosition(function(latitude, longitude) {
+    caller.showOverviewMap('#google-maps', data, null, null);
+    caller.getCurrentPosition(function(latitude, longitude) {
       caller.showOverviewMap('#google-maps', data, latitude, longitude);    
     });  
   }
