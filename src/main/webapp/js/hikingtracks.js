@@ -784,18 +784,19 @@ Client.prototype.addNavigationDetailLink = function(trackData, item, rel, showli
 Client.prototype.addCarousel = function(elem, trackData) {
   var hasImages = trackData['image'] && trackData['image'].length > 0;
   if (hasImages) {
+    var imageCount = trackData['image'].length;
     if (this.initCarousel) {
       $(elem).empty().mustache('image-list', $.i18n.map);
     }
     $(elem).css('display', 'inherit');
-    for (var i = 0; i < trackData['image'].length; i++) {
+    for (var i = 0; i < imageCount; i++) {
       var img = trackData['image'][i];
       if (img != null) {
         this.showImage('#image-list', trackData.name, img, i, "SMALL");
       }
     }
     $('#image-list').slick({
-      infinite: true,
+      infinite: (imageCount > 2),
       slidesToShow: 1,
       variableWidth: true,
       swipeToSlide: true,
@@ -1091,7 +1092,11 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
   this.kmlArray = [];
   this.markers = [];
   if (hasTrackData) {
-    for (var k=0; k<trackDataList.length; k++) {
+    var clickListener = function(e) {
+      caller.statusOn(e.featureData.description);
+    };
+    
+    for (var k = 0; k < trackDataList.length; k++) {
       var td = trackDataList[k];
       if (td != null) {
         var url = td.url;
@@ -1102,9 +1107,7 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
           suppressInfoWindows : true
         });
 
-        google.maps.event.addListener(kmlLayer, 'click', function(e) {
-          caller.statusOn(e.featureData.description);
-        });
+        google.maps.event.addListener(kmlLayer, 'click', clickListener);
         google.maps.event.addListener(kmlLayer, 'metadata_changed', function() {
           // maybe use also defaultviewport_changed
           $(elem).css("visibility", "visible");
@@ -1179,10 +1182,11 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
     $('#google-maps').css('height', '100%');
     google.maps.event.trigger(this.map, 'resize');
     if (hasImages) {
+      var imageCount = trackData['image'].length;
       var controlUI = document.createElement('div');
       controlUI.className = 'google-maps-fullscreen-carousel google-maps-control carousel';
       this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlUI);
-      for (var i = 0; i < trackData['image'].length; i++) {
+      for (var i = 0; i < imageCount; i++) {
         var img = trackData['image'][i];
         if (img != null) {
           var url = img.url + "?thumbnail=SMALL";
@@ -1194,7 +1198,7 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
         }
       }
       $('.google-maps-fullscreen-carousel').slick({
-        infinite: true,
+        infinite: (imageCount > 4),
         slidesToShow: 1,
         centerMode: true,
         variableWidth: true,
@@ -1856,7 +1860,7 @@ Client.prototype.showElevationProfile = function(elem, trackData) {
     role : 'style'
   });
 
-  for (var k = 0; i < latlngs.length; i++) {
+  for (var k = 0; k < latlngs.length; k++) {
     var style = null;
     if (lowestPoint && lowestPoint.elevation == latlngs[k].elevation) {
       style = 'point { size: 10; shape-type: triangle; fill-color: #45742A; }';
@@ -1962,11 +1966,11 @@ Client.prototype.showTracksForMap = function(data, bounds) {
     return;
   }
   var tracks = this.trackList.track;
-  for ( var i in this.markers) { 
+  for (var i = 0; i < this.markers.length; i++) { 
     this.markers[i].setMap(null);
   }
   this.markers = [];
-  for ( var track in tracks ) {
+  for (var track = 0; track < tracks.length; track++) {
     var mlat = tracks[track].latitude;
     var mlon = tracks[track].longitude;
     var p = null;
