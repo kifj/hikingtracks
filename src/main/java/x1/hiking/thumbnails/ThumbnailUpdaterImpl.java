@@ -12,10 +12,10 @@ import javax.ejb.TransactionAttributeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import x1.hiking.control.ImageService;
 import x1.hiking.model.Image;
 import x1.hiking.model.Thumbnail;
 import x1.hiking.model.ThumbnailType;
-import x1.hiking.service.HikingTracksService;
 
 /**
  * Job for updating thumbnails
@@ -27,6 +27,12 @@ import x1.hiking.service.HikingTracksService;
 public class ThumbnailUpdaterImpl implements ThumbnailUpdater {
   private final Logger log = LoggerFactory.getLogger(getClass());
 
+  @EJB
+  private ThumbnailService thumbnailService;
+  
+  @EJB
+  private ImageService imageService;
+
   /*
    * (non-Javadoc)
    * 
@@ -37,11 +43,11 @@ public class ThumbnailUpdaterImpl implements ThumbnailUpdater {
   @Override
   public void updateThumbnails() {
     log.trace("Updating thumbnails...");
-    List<Image> images = service.findImagesToUpdate();
+    List<Image> images = thumbnailService.findImagesToUpdate();
     for (Image image : images) {
       try {
         updateThumbnails(image);
-        hikingTracksService.deleteImageData(image);
+        imageService.deleteImageData(image);
       } catch (Exception e) {
         log.error(null, e);
       }
@@ -70,19 +76,14 @@ public class ThumbnailUpdaterImpl implements ThumbnailUpdater {
 
   private void updateThumbnail(Image image, ThumbnailType type) throws IOException {
     log.info("Updating thumbnail {} for image {}", type, image);
-    List<Thumbnail> thumbnails = service.findThumbnails(image, type);
+    List<Thumbnail> thumbnails = thumbnailService.findThumbnails(image, type);
     for (Thumbnail thumbnail : thumbnails) {
-      service.delete(thumbnail);
+      thumbnailService.delete(thumbnail);
     }
-    Thumbnail thumbnail = service.createThumbnail(image, type);
+    Thumbnail thumbnail = thumbnailService.createThumbnail(image, type);
     if (thumbnail != null) {
-      service.insert(thumbnail);
+      thumbnailService.insert(thumbnail);
     }
   }
 
-  @EJB
-  private ThumbnailService service;
-  
-  @EJB
-  private HikingTracksService hikingTracksService;
 }

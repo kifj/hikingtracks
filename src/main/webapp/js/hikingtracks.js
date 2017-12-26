@@ -792,7 +792,7 @@ Client.prototype.addCarousel = function(elem, trackData) {
     for (var i = 0; i < imageCount; i++) {
       var img = trackData['image'][i];
       if (img != null) {
-        this.showImage('#image-list', trackData.name, img, i, "SMALL");
+        this.showImage('#image-list', img.name, img, i, "SMALL");
       }
     }
     $('#image-list').slick({
@@ -807,7 +807,7 @@ Client.prototype.addCarousel = function(elem, trackData) {
     $('#image-list').Chocolat({
       loop: true,
       imageSize: 'contain'
-    });    
+    });
     this.initCarousel = true;
   } else {
     this.initCarousel = false;
@@ -872,7 +872,7 @@ Client.prototype.makeTrackUpdate = function() {
     this.messageOn(msg_sending);
     if (trackData.id != null) {
       this.trackData = this.postData(baseurl + serviceTrackUrl + encodeURIComponent(currentName), "PUT",
-          this.trackData, msg_track_updated);
+        this.trackData, msg_track_updated);
     } else {
       this.trackData = this.postData(baseurl + serviceTrackUrl, "POST", this.trackData, msg_track_added);
     }
@@ -930,15 +930,15 @@ Client.prototype.showTrackList = function(name, activity) {
 Client.prototype.addTrackData = function(td, index) {
   if (this.trackData != null) {
     var trackData = this.trackData;
-    var isNew = (td == null);
     if (td == null) {
       index = trackData['trackdata'].length;
       td = {
-        'name' : null,
-        'url' : null
+        'name': null,
+        'url': null
       };
       trackData['trackdata'][index] = td;
     }
+    var isNew = (td.url == null);
     if ($('#track_data_name_' + index).length == 0) {
       this.localize('#track-data-list', isNew ? 'add-track-data-new' : 'add-track-data', {
         index : index
@@ -959,17 +959,18 @@ Client.prototype.addImage = function(img, index) {
   var caller = this;
   if (this.trackData != null) {
     var trackData = this.trackData;
-    var isNew = (img == null);
     var isLast = (index == trackData['image'].length - 1);
     if (img == null) {
       index = trackData['image'].length;
       img = {
-        'name' : null,
-        'url' : null
+        'name': null,
+        'url': null
       };
+      isNew = true;
       trackData['image'][index] = img;
       isLast = true;
     }
+    var isNew = (img.url == null);
     var isFirst = (index == 0);
     if ($('#image_name_' + index).length == 0) {
       this.localize('#image-list', isNew ? 'add-image-new' : 'add-image', {
@@ -1026,16 +1027,16 @@ Client.prototype.moveImage = function(trackData, fromIndex, toIndex) {
 
 Client.prototype.showImage = function(elem, name, img, index, type) {
   if ($('#image_name_' + index).length == 0) {
-    var url = img.url;
+    var url = img.url.split("?")[0];
     var hrefUrl = url + "?thumbnail=LARGE";
     if (type) {
       url = url + "?thumbnail=" + type;
     }
     $(elem).mustache('show-image', $.extend({
-      index : index,
-      name : img.name,
-      hrefUrl : hrefUrl,
-      url : url
+      index: index,
+      name: name,
+      hrefUrl: hrefUrl,
+      url: url
     }, $.i18n.map));
   }
 }
@@ -1067,7 +1068,6 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
       center : center,
       zoom : 12,
       mapTypeId : google.maps.MapTypeId.TERRAIN
-    // ROADMAP
     };
     var mapContainer = $(elem).get(0);
     this.map = new google.maps.Map(mapContainer, mapOptions);
@@ -1078,11 +1078,15 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
       this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
     }
   } else {
-    for (var i=0; i<this.kmlArray.length; i++) {
-      this.kmlArray[i].setMap(null);
+    if (this.kmlArray) {
+      for (var i=0; i<this.kmlArray.length; i++) {
+        this.kmlArray[i].setMap(null);
+      }
     }
-    for (var j=0; j<this.markers.length; j++) {
-      this.markers[j].setMap(null);
+    if (this.markers) {
+      for (var j=0; j<this.markers.length; j++) {
+        this.markers[j].setMap(null);
+      }
     }
     if (center) {
       this.map.setCenter(center);
@@ -1095,7 +1099,12 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
     var clickListener = function(e) {
       caller.statusOn(e.featureData.description);
     };
-    
+    var metadataChangeListener = function() {
+       // maybe use also defaultviewport_changed
+       $(elem).css("visibility", "visible");
+       isMapLoaded = true;
+    }
+
     for (var k = 0; k < trackDataList.length; k++) {
       var td = trackDataList[k];
       if (td != null) {
@@ -1108,11 +1117,7 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
         });
 
         google.maps.event.addListener(kmlLayer, 'click', clickListener);
-        google.maps.event.addListener(kmlLayer, 'metadata_changed', function() {
-          // maybe use also defaultviewport_changed
-          $(elem).css("visibility", "visible");
-          isMapLoaded = true;
-        });
+        google.maps.event.addListener(kmlLayer, 'metadata_changed', metadataChangeListener);
         kmlLayer.setMap(this.map);
         this.kmlArray.push(kmlLayer);
         if (td.highestPoint) {
@@ -1378,8 +1383,8 @@ Client.prototype.loadMap = function(search, activity) {
   } else {
     caller.showOverviewMap('#google-maps', data, null, null);
     caller.getCurrentPosition(function(latitude, longitude) {
-      caller.showOverviewMap('#google-maps', data, latitude, longitude);    
-    });  
+      caller.showOverviewMap('#google-maps', data, latitude, longitude);
+    });
   }
 }
 
@@ -1966,8 +1971,10 @@ Client.prototype.showTracksForMap = function(data, bounds) {
     return;
   }
   var tracks = this.trackList.track;
-  for (var i = 0; i < this.markers.length; i++) { 
-    this.markers[i].setMap(null);
+  if (this.markers) {
+    for (var i = 0; i < this.markers.length; i++) {
+      this.markers[i].setMap(null);
+    }
   }
   this.markers = [];
   for (var track = 0; track < tracks.length; track++) {
@@ -1975,7 +1982,7 @@ Client.prototype.showTracksForMap = function(data, bounds) {
     var mlon = tracks[track].longitude;
     var p = null;
     if (mlat && mlon) {
-      p = new google.maps.LatLng(mlat, mlon);      
+      p = new google.maps.LatLng(mlat, mlon);
     }
     var trackDataList = tracks[track]['trackdata'];
     if (trackDataList && trackDataList.length > 0) {
@@ -1999,8 +2006,8 @@ Client.prototype.showTracksForMap = function(data, bounds) {
         if (track.date) {
           content += '<div id="siteNotice">' + $.format.date(parseDate(track.date), 'dd MMM yyyy') + '</div>';
         }
-        content += '<h3 id="firstHeading">'; 
-        content += '<a href="../pages/detail.html#' + encodeURIComponent(track.name) + '">' + track.name + '</a>'; 
+        content += '<h3 id="firstHeading">';
+        content += '<a href="../pages/detail.html#' + encodeURIComponent(track.name) + '">' + track.name + '</a>';
         content += '</h3>';
         if (track.description) {
           content += '<div id="bodyContent"><p>' + track.description + '</p></div>';
@@ -2017,7 +2024,45 @@ Client.prototype.showTracksForMap = function(data, bounds) {
       });
       this.markers.push(marker);
     }
-  }  
+  }
+  this.addImagesToMap('#image-parent', tracks);
+}
+
+Client.prototype.addImagesToMap = function(elem, tracks) {
+  if (this.initCarousel) {
+    $(elem).empty().mustache('image-list', $.i18n.map);
+  }
+  var imageCount = 0;
+  for (var track = 0; track < tracks.length; track++) {
+    var images = tracks[track]['image'];
+    if (images && images.length > 0) {
+      var img = images[0];
+      if (img != null) {
+        this.showImage('#image-list', tracks[track].name, img, i, "SMALL");
+        imageCount++;
+      }
+    }
+  }
+  if (imageCount > 0) {
+    $(elem).css('display', 'inherit');
+    $('#image-list').slick({
+      infinite: (imageCount > 2),
+      slidesToShow: 1,
+      variableWidth: true,
+      swipeToSlide: true,
+      centerMode: true,
+      draggable: false,
+      dots: true
+    });
+    $('#image-list').Chocolat({
+      loop: true,
+      imageSize: 'contain'
+    });
+    this.initCarousel = true;
+  } else {
+    this.initCarousel = false;
+    $(elem).css('display', 'none').empty().mustache('image-list', $.i18n.map);
+  }
 }
 
 Client.prototype.loadTracksForMap = function(data, bounds) {

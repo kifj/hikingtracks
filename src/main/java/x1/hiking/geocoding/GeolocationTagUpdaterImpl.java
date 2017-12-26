@@ -9,17 +9,19 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import x1.hiking.dao.GeolocationDAO;
-import x1.hiking.dao.TrackDAO;
-import x1.hiking.dao.TrackDataDAO;
+import x1.hiking.control.TrackService;
 import x1.hiking.model.Coord;
 import x1.hiking.model.Geolocation;
 import x1.hiking.model.Track;
 import x1.hiking.model.TrackData;
+import x1.hiking.utils.ConfigurationValue;
 
 /**
  * Job for updating geolocation tags
@@ -30,10 +32,24 @@ import x1.hiking.model.TrackData;
 @Stateless
 public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   private final Logger log = LoggerFactory.getLogger(getClass());
-  // add config value
-  private static final double MIN_DISTANCE = 10000;
-  private static final int MAX_RESULT = 5;
 
+  @Inject
+  @ConfigurationValue(key = "geolocation.min_distance", defaultValue = "10000")
+  private String minDistance;
+
+  @Inject
+  @ConfigurationValue(key = "geolocation.max_result", defaultValue = "5")
+  private String maxResult;
+
+  @PersistenceContext
+  private EntityManager em;
+
+  @EJB
+  private TrackService trackService;
+
+  @Inject
+  private InverseGeocoder geocoder;
+  
   /*
    * (non-Javadoc)
    * 
@@ -44,32 +60,58 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   @Override
   public void updateGeolocations() {
     log.trace("Updating Geolocations...");
-    trackDAO.findTracksForGeolocationUpdate(MAX_RESULT).forEach(this::updateGeolocationsInternal);
+    findTracksForGeolocationUpdate(getMaxResult()).forEach(this::updateGeolocationsInternal);
     log.trace("Updating Trackdata locations...");
-    trackDataDAO.findTrackDataForUpdate(MAX_RESULT).forEach(this::updateTrackdataLocationInternal);
+    findTrackDataForUpdate(getMaxResult()).forEach(this::updateTrackdataLocationInternal);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see x1.hiking.geocoding.GeolocationTagUpdater#updateGeolocations(x1.hiking.
+   * model.Track)
+   */
+  @TransactionAttribute(TransactionAttributeType.REQUIRED)
+  @Override
+  public void updateGeolocations(Integer id) {
+    updateGeolocationsInternal(em.find(Track.class, id));
   }
 
   /*
    * (non-Javadoc)
    * 
    * @see
-   * x1.hiking.geocoding.GeolocationTagUpdater#updateGeolocations(x1.hiking.
-   * model.Track)
+   * x1.hiking.geocoding.GeolocationTagUpdater#findGeolocation(x1.hiking.model.
+   * Track)
    */
-  @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
-  public void updateGeolocations(Integer id) {
-    updateGeolocationsInternal(trackDAO.find(id));
+  public List<Geolocation> findGeolocation(final Track track) {
+    TypedQuery<Geolocation> q = em.createNamedQuery("Geolocation.findByTrack", Geolocation.class);
+    q.setParameter("track", track);
+    return q.getResultList();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * x1.hiking.geocoding.GeolocationTagUpdater#findTracksForGeolocationUpdate(int)
+   */
+  @Override
+  public List<Track> findTracksForGeolocationUpdate(int maxResults) {
+    TypedQuery<Track> q = em.createNamedQuery("Track.findTracksForGeolocationUpdate", Track.class);
+    q.setMaxResults(maxResults);
+    return q.getResultList();
   }
 
   private void updateGeolocationsInternal(Track track) {
     log.trace("Updating geolocations for track {}", track);
-    geolocationDAO.findGeolocation(track).forEach(geolocationDAO::remove);
-    List<Geolocation> geolocations = createGeolocations(track, MIN_DISTANCE);
-    geolocations.forEach(geolocationDAO::persist);
+    findGeolocation(track).forEach(em::remove);
+    List<Geolocation> geolocations = createGeolocations(track, getMinDistance());
+    geolocations.forEach(em::persist);
     track.setGeolocationAvailable(!geolocations.isEmpty());
     log.info("Found {} geolocations for track {}", geolocations.size(), track);
-    trackDAO.merge(track);
+    trackService.update(track);
   }
 
   private List<Geolocation> createGeolocations(Track track, double minDistance) {
@@ -78,7 +120,7 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
       List<Geolocation> hits = createGeolocation(track, minDistance);
       hits.forEach(geolocation -> addToGeolocations(result, geolocation));
     }
-    trackDataDAO.find(track).forEach(td -> {
+    trackService.loadTrackData(track).forEach(td -> {
       List<Geolocation> hits = createGeolocations(td, minDistance);
       hits.forEach(geolocation -> addToGeolocations(result, geolocation));
     });
@@ -121,28 +163,31 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
     }
     return result;
   }
-  
+
   private void updateTrackdataLocationInternal(TrackData trackdata) {
     log.trace("Updating location for trackdata {}", trackdata);
-    
+
     KmlSampler.Result result = KmlSampler.parse(trackdata);
     Coord[] coordinates = result.getSamples();
     if (coordinates.length > 0) {
       trackdata.setLocation(coordinates);
-      trackDataDAO.merge(trackdata);
+      trackService.update(trackdata);
       log.info("Updated location for trackdata {}", trackdata);
     }
   }
 
-  @EJB
-  private GeolocationDAO geolocationDAO;
+  private List<TrackData> findTrackDataForUpdate(int maxResults) {
+    TypedQuery<TrackData> q = em.createNamedQuery("TrackData.findTrackDataForLocationUpdate", TrackData.class);
+    q.setMaxResults(maxResults);
+    return q.getResultList();
+  }
+  
+  private int getMaxResult() {
+    return Integer.valueOf(maxResult);
+  }
 
-  @EJB
-  private TrackDAO trackDAO;
+  private double getMinDistance() {
+    return Double.valueOf(minDistance);
+  }
 
-  @EJB
-  private TrackDataDAO trackDataDAO;
-
-  @Inject
-  private InverseGeocoder geocoder;
 }

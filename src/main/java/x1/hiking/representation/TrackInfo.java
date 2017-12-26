@@ -547,6 +547,16 @@ public class TrackInfo implements Representation {
     }
   }
 
+  public boolean hasChanged(Double a, Double b) {
+    if (a == null && b == null) {
+      return false;
+    }
+    if (a == null || b == null) {
+      return true;
+    }
+    return Math.abs(a-b) > 0.0001f;
+  }
+
   private List<Link> links;
   @NotNull(message = "Name may not be empty")
   @Size(max = 100)
@@ -570,4 +580,5 @@ public class TrackInfo implements Representation {
   private List<ImageInfo> images;
   @Valid
   private List<TrackDataInfo> trackData;
+
 }

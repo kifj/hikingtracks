@@ -1,5 +1,10 @@
 package x1.hiking.geocoding;
 
+import java.util.List;
+
+import x1.hiking.model.Geolocation;
+import x1.hiking.model.Track;
+
 /** 
  * Job for updating geolocation tags
  * 
@@ -18,4 +23,18 @@ public interface GeolocationTagUpdater {
    *  Update all geolocations which need to be updated
    */
   void updateGeolocations();
+  
+  /** Find geolocations for track
+   * 
+   * @param track the track
+   * @return the geolocations
+   */
+  List<Geolocation> findGeolocation(final Track track);
+  
+  /** Find tracks for location update
+   * 
+   * @param maxResults maximum of result set
+   * @return tracks with no location data
+   */
+  List<Track> findTracksForGeolocationUpdate(int maxResults);
 }

@@ -27,14 +27,13 @@ import x1.hiking.utils.ConfigurationValue;
  * Facility to retrieve geonames for coordinates
  */
 public class InverseGeocoder {
+  private final Logger log = LoggerFactory.getLogger(getClass());
   private static final String PARAM_RESULT_TYPE = "result_type";
   private static final String VALUE_RESULT_TYPE = "locality";
   private static final String PARAM_KEY = "key";
   private static final String PARAM_LATLNG = "latlng";
   private static final String PARAM_LANGUAGE = "language";
   private static final String VALUE_LANGUAGE = "en";
-
-  private final Logger log = LoggerFactory.getLogger(getClass());
 
   @Inject
   @ConfigurationValue(key = "google.apikey")

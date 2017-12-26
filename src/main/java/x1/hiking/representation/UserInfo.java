@@ -10,10 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Email;
 
 import x1.hiking.model.User;
-import x1.hiking.service.GravatarHelper;
 
 /**
- * @author joe
+ * represenation of User
  * 
  */
 @XmlRootElement(name = "user", namespace = Representation.NS_HIKING_TRACKS)

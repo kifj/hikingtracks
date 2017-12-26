@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class ConfigurationValueProducer {
   private final Logger log = LoggerFactory.getLogger(getClass());
-  private static final String INVALID_KEY = "Invalid key '{0}'";
   private static final String MANDATORY_PARAM_MISSING = "No definition found for a mandatory configuration parameter : '{0}'";
   private static final String PROPERTIES_FILE_NAME = "hikingtracks.properties";
   private static final String BUNDLE_FILE_NAME = "application";
@@ -68,7 +67,7 @@ public class ConfigurationValueProducer {
       return value;
     } catch (MissingResourceException e) {
       checkMandatory(param);
-      return MessageFormat.format(INVALID_KEY, new Object[] { param.key() });
+      return param.defaultValue();
     }
   }
 

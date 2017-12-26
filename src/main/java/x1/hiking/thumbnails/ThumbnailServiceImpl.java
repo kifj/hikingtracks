@@ -21,6 +21,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.AbsoluteSize;
@@ -35,9 +39,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import x1.hiking.dao.ImageDAO;
-import x1.hiking.dao.ImageDataDAO;
-import x1.hiking.dao.ThumbnailDAO;
+import x1.hiking.control.ImageService;
 import x1.hiking.model.Image;
 import x1.hiking.model.ImageData;
 import x1.hiking.model.Thumbnail;
@@ -56,8 +58,19 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   private static final int MAX_PIXEL = 2400;
   private static final String OUTPUT_FORMAT_JPEG = "jpeg";
   private static final String PLACEHOLDER_IMAGE = "question.png";
+  private static final String PARAM_ID = "id";
+  private static final String PARAM_USER = "user";
+  private static final String PARAM_NAME = "name";
+  private static final String PARAM_TYPE = "type";
+  private static final String PARAM_IMAGE = "image";
 
   private final Map<ThumbnailType, ThumbnailSize> tumbnailSizeMap = new HashMap<>();
+
+  @EJB
+  private ImageService imageService;
+
+  @PersistenceContext
+  private EntityManager em;
 
   @PostConstruct
   private void setup() {
@@ -172,18 +185,18 @@ public class ThumbnailServiceImpl implements ThumbnailService {
    * (non-Javadoc)
    * 
    * @see
-   * x1.hiking.thumbnails.ThumbnailService#createThumbnail(x1.hiking.model.Image
-   * , x1.hiking.model.ThumbnailType)
+   * x1.hiking.thumbnails.ThumbnailService#createThumbnail(x1.hiking.model.Image ,
+   * x1.hiking.model.ThumbnailType)
    */
   @Override
   public Thumbnail createThumbnail(Image image, ThumbnailType type) throws IOException {
-    ImageData imageData = imageDataDAO.getImageData(image);
+    ImageData imageData = imageService.getImageData(image);
     if (imageData == null || imageData.getData() == null) {
       if (image.getUrl() != null) {
         return createThumbnailFromUrl(image, type);
       } else {
         log.warn("No original Image for " + image + ", will be deleted.");
-        imageDAO.remove(image);
+        imageService.delete(image);
       }
       return null;
     }
@@ -229,41 +242,39 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * x1.hiking.thumbnails.ThumbnailService#insert(x1.hiking.model.Thumbnail)
+   * @see x1.hiking.thumbnails.ThumbnailService#insert(x1.hiking.model.Thumbnail)
    */
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public void insert(Thumbnail entity) {
     log.debug("insert thumbnail {}", entity);
-    thumbnailDAO.persist(entity);
+    em.persist(entity);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * x1.hiking.thumbnails.ThumbnailService#delete(x1.hiking.model.Thumbnail)
+   * @see x1.hiking.thumbnails.ThumbnailService#delete(x1.hiking.model.Thumbnail)
    */
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public void delete(Thumbnail entity) {
     log.debug("delete thumbnail {}", entity);
-    thumbnailDAO.remove(entity);
-    thumbnailDAO.flush(entity);
+    entity = em.merge(entity);
+    em.remove(entity);
+    em.flush();
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * x1.hiking.thumbnails.ThumbnailService#update(x1.hiking.model.Thumbnail)
+   * @see x1.hiking.thumbnails.ThumbnailService#update(x1.hiking.model.Thumbnail)
    */
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public Thumbnail update(Thumbnail entity) {
     log.debug("update thumbnail {}", entity);
-    return thumbnailDAO.merge(entity);
+    return em.merge(entity);
   }
 
   /*
@@ -276,7 +287,10 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public List<Thumbnail> findThumbnails(final Image image, final ThumbnailType type) {
-    return thumbnailDAO.findThumbnails(image, type);
+    TypedQuery<Thumbnail> q = em.createNamedQuery("Thumbnail.findThumbnailsByImageAndType", Thumbnail.class);
+    q.setParameter(PARAM_IMAGE, image);
+    q.setParameter(PARAM_TYPE, type);
+    return q.getResultList();
   }
 
   /*
@@ -287,7 +301,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public List<Image> findImagesToUpdate() {
-    return imageDAO.findImagesToUpdate();
+    return imageService.findImagesToUpdate();
   }
 
   /*
@@ -299,16 +313,24 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   @Override
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public Thumbnail findThumbnail(final User user, final String name, final Integer id, final ThumbnailType type) {
-    return thumbnailDAO.findThumbnail(user, name, id, type);
+    TypedQuery<Thumbnail> q;
+    if (user != null) {
+      q = em.createNamedQuery("Thumbnail.findThumbnailByUserAndNameAndId", Thumbnail.class);
+      q.setParameter(PARAM_NAME, name);
+      q.setParameter(PARAM_USER, user);
+      q.setParameter(PARAM_ID, id);
+      q.setParameter(PARAM_TYPE, type);
+    } else {
+      q = em.createNamedQuery("Thumbnail.findPublicThumbnailByNameAndId", Thumbnail.class);
+      q.setParameter(PARAM_NAME, name);
+      q.setParameter(PARAM_ID, id);
+      q.setParameter(PARAM_TYPE, type);
+    }
+    try {
+      return q.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
   }
-
-  @EJB
-  private ThumbnailDAO thumbnailDAO;
-
-  @EJB
-  private ImageDAO imageDAO;
-
-  @EJB
-  private ImageDataDAO imageDataDAO;
 
 }

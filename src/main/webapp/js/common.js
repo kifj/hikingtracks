@@ -91,9 +91,9 @@ function addQueryParam(params, name, value) {
 /**
  * Copyright (c) 2010 Conrad Irwin <conrad@rapportive.com> MIT license. Based
  * loosely on original: Copyright (c) 2008 mkmanning MIT license.
- * 
+ *
  * Parses CGI query strings into javascript objects.
- * 
+ *
  * See the README for details.
  */
 (function($) {
@@ -137,7 +137,7 @@ function addQueryParam(params, name, value) {
 
 /*
  * ! jQuery Cookie Plugin https://github.com/carhartl/jquery-cookie
- * 
+ *
  * Copyright 2011, Klaus Hartl Dual licensed under the MIT or GPL Version 2
  * licenses. http://www.opensource.org/licenses/mit-license.php
  * http://www.opensource.org/licenses/GPL-2.0

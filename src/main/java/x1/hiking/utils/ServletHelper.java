@@ -1,6 +1,7 @@
 package x1.hiking.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -126,12 +127,12 @@ public final class ServletHelper implements AuthorizationConstants {
   }
 
   /**
-   * parses the query string is used because HttpUtils.parseQueryString is
-   * deprecated
+   * parses the query part from an URL
    * 
-   * @param queryString
+   * @param url the URL
    */
-  public static Map<String, String> parseQueryString(String queryString) {
+  public static Map<String, String> parseQueryString(URL url) {
+    String queryString = url.getQuery();
     Map<String, String> map = new HashMap<>();
     if (queryString == null) {
       return map;
