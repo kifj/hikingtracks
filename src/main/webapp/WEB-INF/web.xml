@@ -31,14 +31,6 @@
     <filter-name>authorization</filter-name>
     <filter-class>x1.hiking.oauth.AuthorizationFilter</filter-class>
   </filter>
-  <filter>
-    <filter-name>monitoring</filter-name>
-    <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
-    <init-param>
-      <param-name>datasources</param-name>
-      <param-value>java:jboss/datasources/MysqlDS</param-value>
-    </init-param>
-  </filter>
   <filter-mapping>
     <filter-name>authorization</filter-name>
     <url-pattern>/secure/*</url-pattern>
