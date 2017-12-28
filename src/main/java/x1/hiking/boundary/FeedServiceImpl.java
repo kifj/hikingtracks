@@ -374,11 +374,7 @@ public class FeedServiceImpl implements FeedService {
   }
 
   private String getRequestURL() {
-    String url = ServletHelper.getRequestUrl(httpServletRequest).build().toString();
-    if (url.endsWith(SEP)) {
-      url = url.substring(0, url.length() - 1);
-    }
-    return url;
+    return ServletHelper.getRequestUrl(httpServletRequest).build().toString();
   }
 
 }

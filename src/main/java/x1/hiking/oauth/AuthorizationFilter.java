@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -84,9 +83,8 @@ public class AuthorizationFilter implements Filter, AuthorizationConstants {
     if (StringUtils.isNotEmpty(queryString)) {
       destinationURL += "?" + queryString;
     }
-    UriBuilder b = UriBuilder.fromUri(ServletHelper.getBaseUrl(request) + LOGIN_PAGE);
-    b.queryParam(PARAM_FROM, URLEncoder.encode(destinationURL, UTF_8));
-    String url = b.build().toString();
+    String url = ServletHelper.getBaseUrl(request).path(LOGIN_PAGE).queryParam(PARAM_FROM,
+        URLEncoder.encode(destinationURL, UTF_8)).build().toString();
     log.info("Authentification required, redirecting to login: {}", url);
     ServletHelper.revokeSessionCookie(response);
     response.sendRedirect(url);

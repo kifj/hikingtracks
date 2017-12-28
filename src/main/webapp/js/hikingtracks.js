@@ -966,7 +966,6 @@ Client.prototype.addImage = function(img, index) {
         'name': null,
         'url': null
       };
-      isNew = true;
       trackData['image'][index] = img;
       isLast = true;
     }

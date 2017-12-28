@@ -7,7 +7,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,23 +23,14 @@ public final class ServletHelper implements AuthorizationConstants {
 
   private ServletHelper() {
   }
-
-  /**
-   * Gets the base url.
-   * 
-   * @param request
-   *          the request
-   * @return the base url
+  
+  /** Gets the base url as UriBuilder
+   * @param request the request
+   * @return the base url as UriBuilder
    */
-  public static String getBaseUrl(HttpServletRequest request) {
-    UriBuilder b = getRequestUrl(request);
-    ServletContext ctx = request.getServletContext();
-    b.replacePath(ctx.getContextPath());
-    String baseUrl = b.build().toString();
-    if (!baseUrl.endsWith("/")) {
-      baseUrl += "/";
-    }
-    return baseUrl;
+  public static UriBuilder getBaseUrl(HttpServletRequest request) {
+    // assumes context path is never changed by proxy
+    return getRequestUrl(request).replacePath(request.getContextPath()).path("/");
   }
 
   /**

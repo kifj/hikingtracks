@@ -44,9 +44,12 @@ public class TrackInfo implements Representation {
   /**
    * Instantiates a new track info.
    * 
-   * @param track the track
-   * @param path the path
-   * @param user the user
+   * @param track
+   *          the track
+   * @param path
+   *          the path
+   * @param user
+   *          the user
    */
   public TrackInfo(Track track, String path, User user) {
     this(track, true, true, path, user);
@@ -55,11 +58,16 @@ public class TrackInfo implements Representation {
   /**
    * Instantiates a new track info.
    * 
-   * @param track the track
-   * @param withImages including images 
-   * @param withTrackData including trackdata
-   * @param path the path
-   * @param user the user
+   * @param track
+   *          the track
+   * @param withImages
+   *          including images
+   * @param withTrackData
+   *          including trackdata
+   * @param path
+   *          the path
+   * @param user
+   *          the user
    */
   public TrackInfo(Track track, boolean withImages, boolean withTrackData, String path, User user) {
     setId(track.getId());
@@ -497,14 +505,15 @@ public class TrackInfo implements Representation {
   public String getActivity() {
     return activity;
   }
-  
+
   /**
-   * @param readOnly is track read only
+   * @param readOnly
+   *          is track read only
    */
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
   }
-  
+
   /**
    * @return is track read only
    */
@@ -554,7 +563,7 @@ public class TrackInfo implements Representation {
     if (a == null || b == null) {
       return true;
     }
-    return Math.abs(a-b) > 0.0001f;
+    return Math.abs(a - b) > 0.0001f;
   }
 
   private List<Link> links;

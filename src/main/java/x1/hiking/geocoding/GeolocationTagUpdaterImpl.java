@@ -183,11 +183,11 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   }
   
   private int getMaxResult() {
-    return Integer.valueOf(maxResult);
+    return Integer.parseInt(maxResult);
   }
 
   private double getMinDistance() {
-    return Double.valueOf(minDistance);
+    return Double.parseDouble(minDistance);
   }
 
 }

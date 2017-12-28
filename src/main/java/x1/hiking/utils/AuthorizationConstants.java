@@ -13,6 +13,7 @@ public interface AuthorizationConstants {
   String PARAM_LOGOUT = "logout";
   String PARAM_FROM = "from";
   String PARAM_TO = "to";
+  String PARAM_MESSAGE = "message";
   String STATE = "state";
   String PARAM_REFERER = "referer";
   String LOGIN_PAGE = "login.html";

@@ -93,7 +93,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     String app = request.getParameter(PARAM_URL);
     if (StringUtils.isNotEmpty(logout)) {
       ServletHelper.revokeSessionCookie(response);
-      response.sendRedirect(ServletHelper.getBaseUrl(request));
+      response.sendRedirect(ServletHelper.getBaseUrl(request).build().toString());
       HttpSession session = request.getSession(false);
       if (session != null) {
         session.invalidate();
@@ -114,14 +114,14 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       }
       if (app == null) {
         log.warn("Missing identifier");
-        response.sendRedirect(ServletHelper.getBaseUrl(request) + LOGIN_PAGE);
+        response.sendRedirect(loginPage(request).build().toString());
         return;
       }
       authRequest(OAuthProviderType.valueOf(app), request, response);
     } else {
       if (app == null) {
         log.warn("Missing identifier");
-        response.sendRedirect(ServletHelper.getBaseUrl(request) + LOGIN_PAGE);
+        response.sendRedirect(loginPage(request).build().toString());
         return;
       }
       OAuthParams oauthParams = verifyResponse(OAuthProviderType.valueOf(app), request, response);
@@ -130,13 +130,13 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
         if (oauthParams.getState() != null) {
           redirectUrl = URLDecoder.decode(oauthParams.getState(), UTF_8);
         } else {
-          redirectUrl = ServletHelper.getBaseUrl(request);
+          redirectUrl = ServletHelper.getBaseUrl(request).build().toString();
         }
         ServletHelper.injectSessionCookie(response, oauthParams.getAccessToken());
         log.info("Authentification successful, redirect to: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
       } else if (!response.isCommitted()) {
-        response.sendRedirect(ServletHelper.getBaseUrl(request) + LOGIN_PAGE);
+        response.sendRedirect(loginPage(request).build().toString());
       }
     }
   }
@@ -156,10 +156,13 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     } catch (OAuthSystemException | OAuthProblemException e) {
       oauthParams.setErrorMessage(e.getMessage());
       log.warn(null, e);
-      URI redirect = UriBuilder.fromUri(ServletHelper.getBaseUrl(request) + LOGIN_PAGE)
-          .queryParam("message", oauthParams.getErrorMessage()).build();
+      URI redirect = loginPage(request).queryParam(PARAM_MESSAGE, oauthParams.getErrorMessage()).build();
       response.sendRedirect(redirect.toString());
     }
+  }
+
+  private UriBuilder loginPage(HttpServletRequest request) {
+    return ServletHelper.getBaseUrl(request).path(LOGIN_PAGE);
   }
 
   private String getState(HttpServletRequest request) throws MalformedURLException {
@@ -248,8 +251,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     } catch (OAuthSystemException | OAuthProblemException e) {
       oauthParams.setErrorMessage(e.getMessage());
       log.warn(null, e);
-      URI redirect = UriBuilder.fromUri(ServletHelper.getBaseUrl(request) + LOGIN_PAGE)
-          .queryParam("message", "Login failed").build();
+      URI redirect = loginPage(request).queryParam(PARAM_MESSAGE, "Login failed").build();
       response.sendRedirect(redirect.toString());
     }
     return oauthParams;

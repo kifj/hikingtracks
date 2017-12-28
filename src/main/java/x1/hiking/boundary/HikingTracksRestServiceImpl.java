@@ -64,35 +64,35 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
 
   @Context
   private Request request;
-  
+
   @Context
   private HttpServletRequest httpServletRequest;
-  
+
   @Context
   private HttpServletResponse httpServletResponse;
-  
+
   @EJB
   private TrackService trackService;
-  
+
   @EJB
   private ImageService imageService;
-  
+
   @EJB
   private ThumbnailService thumbnailService;
-  
+
   @Inject
   private SessionValidator sessionValidator;
-  
+
   @EJB
   private UserManagement userManagement;
-  
+
   @Inject
   private Validator validator;
-  
+
   @Inject
   @ConfigurationValue(key = "feed.url")
   private String top;
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -187,7 +187,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (!thumbnail.equals(ThumbnailType.NONE)) {
       Image image = imageService.findFirstImage(track);
       if (image != null) {
-        URI location = UriBuilder.fromPath(getRequestURL() + SEP + track.getName() + SEP + PATH_IMAGES + image.getId())
+        URI location = pathTracks().path(track.getName()).path(PATH_IMAGES).path(String.valueOf(image.getId()))
             .queryParam(THUMBNAIL, thumbnail).build();
         ImageInfo imageInfo = new ImageInfo(image, null);
         imageInfo.setUrl(location.toString());
@@ -208,7 +208,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       log.info("get track [name={}, includePublished={}]", name, includePublished);
       User user = findUser(true);
       Track track = getTrack(name, user, includePublished);
-      TrackInfo trackInfo = new TrackInfo(track, getRequestURL(), user);
+      TrackInfo trackInfo = new TrackInfo(track, pathTracks().path(name).build().toString(), user);
       List<Model> models = addLinks(track, trackInfo, user);
       EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(user, models, track);
       Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
@@ -334,7 +334,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       List<Model> models = addLinks(track, null, user);
       EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(user, models, track);
       return createResponse(Response.status(Response.Status.CREATED).location(location),
-          new TrackInfo(track, getRequestURL(), user), eTag);
+          new TrackInfo(track, pathTracks().path(track.getName()).build().toString(), user), eTag);
     } catch (ConflictException e) {
       log.info(e.getMessage());
       throw e;
@@ -384,7 +384,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       Track updated = trackService.update(oldTrack);
       models = addLinks(updated, null, user);
       eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(user, models, updated);
-      return createResponse(Response.status(Response.Status.OK), new TrackInfo(updated, getRequestURL(), user), eTag);
+      return createResponse(Response.status(Response.Status.OK),
+          new TrackInfo(updated, pathTracks().path(name).build().toString(), user), eTag);
     } catch (NotFoundException e) {
       log.info(e.getMessage());
       throw e;
@@ -570,7 +571,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     ImageData imageData = imageService.getImageData(image);
     if (imageData == null) {
       if (image.getUrl() == null) {
-        URI uri = UriBuilder.fromUri(new URI(getRequestURL())).queryParam(THUMBNAIL, ThumbnailType.LARGE.name()).build();
+        URI uri = pathTracks().path(name).path(PATH_IMAGES).path(String.valueOf(id))
+            .queryParam(THUMBNAIL, ThumbnailType.LARGE.name()).build();
         return Response.status(Response.Status.MOVED_PERMANENTLY).location(uri).build();
       }
       return Response.status(Response.Status.MOVED_PERMANENTLY).location(new URI(image.getUrl())).build();
@@ -844,18 +846,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     return sessionValidator.validateUser(allowPublic, httpServletRequest, httpServletResponse);
   }
 
-  private String getRequestURL() {
-    String url = ServletHelper.getRequestUrl(httpServletRequest).build().toString();
-    if (url.endsWith(SEP)) {
-      url = url.substring(0, url.length() - 1);
-    }
-    if (!url.endsWith(PATH_TRACKS)) {
-      int idx = url.lastIndexOf(SEP);
-      if (idx >= 0) {
-        url = url.substring(0, idx) + PATH_TRACKS;
-      }
-    }
-    return url;
+  private UriBuilder pathTracks() {
+    return ServletHelper.getBaseUrl(httpServletRequest).path(PATH_SERVICE).path(PATH_TRACKS);
   }
 
   /** Streaming output for bytes */

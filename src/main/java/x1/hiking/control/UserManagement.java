@@ -19,6 +19,9 @@ import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.utils.UserCacheKeyGenerator;
 
+/**
+ * control of users
+ */
 @Stateless
 @Local
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
