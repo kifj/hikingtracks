@@ -436,6 +436,7 @@ input.button {
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   border-radius: 5px;
+  max-height: 200px;
 }
 
 #button_list {
@@ -463,7 +464,6 @@ input.button {
 .carousel {
   position: relative;
   padding: 0px 50px;
-  max-height: 150px;
 }
 
 .slick-slider {
@@ -817,6 +817,7 @@ input.button {
 .edit-image-list li {
   list-style-type: none;
   list-style-image: none !important;
+  min-height: 48px;
 }
 
 .avatar-small {

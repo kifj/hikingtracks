@@ -29,7 +29,10 @@ import x1.hiking.utils.ConfigurationValue;
 public class InverseGeocoder {
   private final Logger log = LoggerFactory.getLogger(getClass());
   private static final String PARAM_RESULT_TYPE = "result_type";
-  private static final String VALUE_RESULT_TYPE = "locality";
+  private static final String VALUE_RESULT_TYPE_LOCALITY = "locality";
+  private static final String VALUE_RESULT_TYPE_COUNTRY = "country";
+  private static final String VALUE_RESULT_TYPE_ADM_AREA_1 = "administrative_area_level_1";
+  private static final String VALUE_RESULT_TYPE_ADM_AREA_2 = "administrative_area_level_2";
   private static final String PARAM_KEY = "key";
   private static final String PARAM_LATLNG = "latlng";
   private static final String PARAM_LANGUAGE = "language";
@@ -67,7 +70,7 @@ public class InverseGeocoder {
 
     Coord[] waypoints = getWaypoints(coords, minDistance);
     for (Coord waypoint : waypoints) {
-      URI uri = UriBuilder.fromUri(baseUrl).queryParam(PARAM_RESULT_TYPE, VALUE_RESULT_TYPE)
+      URI uri = UriBuilder.fromUri(baseUrl).queryParam(PARAM_RESULT_TYPE, VALUE_RESULT_TYPE_LOCALITY)
           .queryParam(PARAM_LANGUAGE, VALUE_LANGUAGE).queryParam(PARAM_KEY, key)
           .queryParam(PARAM_LATLNG, waypoint.getLat() + "," + waypoint.getLng()).build();
       Response resp = ClientBuilder.newClient().target(uri).request(MediaType.APPLICATION_JSON).get();
@@ -95,17 +98,17 @@ public class InverseGeocoder {
     String shortName = address.getString("short_name");
     address.getJsonArray("types").getValuesAs(JsonString.class).forEach(type -> {
       switch (type.getString()) {
-      case "administrative_area_level_1":
+      case VALUE_RESULT_TYPE_ADM_AREA_1:
         // level 1 overwrites level 2 if it exists
         geolocation.setArea(shortName);
         break;
-      case "administrative_area_level_2":
+      case VALUE_RESULT_TYPE_ADM_AREA_2:
         geolocation.setArea(longName);
         break;
-      case "country":
+      case VALUE_RESULT_TYPE_COUNTRY:
         geolocation.setCountry(longName);
         break;
-      case "locality":
+      case VALUE_RESULT_TYPE_LOCALITY:
         geolocation.setLocation(longName);
         break;
       default:

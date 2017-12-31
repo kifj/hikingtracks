@@ -372,6 +372,7 @@ Client.prototype.showLoginButtons = function() {
 }
 
 Client.prototype.changeLanguage = function(language, update) {
+  var caller = this;
   if (!language) {
     language = 'en';
   }
@@ -384,6 +385,9 @@ Client.prototype.changeLanguage = function(language, update) {
     });
     if (update) {
       $('#body').fadeOut('slow', function() {
+        if (caller.trackData && caller.trackData.name) {
+          window.location.hash = caller.trackData.name;
+        }
         window.location.reload();
       });
     }

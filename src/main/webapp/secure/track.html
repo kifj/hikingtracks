@@ -14,14 +14,14 @@
   <link type="text/css" rel="stylesheet" href="../css/hikingtracks-large.css" media="screen and (min-width: 1240px)">
   <link type="text/css" rel="stylesheet" href="../css/hikingtracks-small.css" media="screen and (max-width: 870px)">
   <link type="text/css" rel="stylesheet" href="../css/jquery-ui.min.css" media="all"/>
-  <script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="../js/jquery.min.js"></script>
   <script type="text/javascript" src="../js/jquery-ui.min.js" ></script>
   <script type="text/javascript" src="../js/jquery-ui-i18n.min.js"></script>
   <script type="text/javascript" src="../js/jquery.json-2.3.min.js"></script>
   <script type="text/javascript" src="../js/jquery.fileupload.js"></script>
   <script type="text/javascript" src="../js/jquery.i18n.properties-min-1.0.9.js"></script>
-  <script type="text/javascript" src="../js/jquery.mustache.js"></script>
-  <script type="text/javascript" src="../js/mustache.js"></script>
+  <script type="text/javascript" src="../js/jquery.mustache.min.js"></script>
+  <script type="text/javascript" src="../js/mustache.min.js"></script>
   <script type="text/javascript" src="../js/common.js"></script>
   <script type="text/javascript" src="../js/hikingtracks.js"></script>
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDWeHGoMQhMLrjL2P57l54AKhC7w_GyyXQ"></script>
@@ -349,7 +349,7 @@
             onclick="javascript:client.lookupCoordinates()"/>
           
           <label>{{lbl_Date}}</label>
-          <input id="track_date" name="t_date" type="text" size="10" maxlength="10" pattern="{{date_pattern}}" />
+          <input id="track_date" name="t_date" type="text" size="12" maxlength="10" pattern="{{date_pattern}}" />
           <label>{{lbl_Activity}}</label>
           <select id="track_activity" name="t_activity" class="icon" >
             <option></option>
