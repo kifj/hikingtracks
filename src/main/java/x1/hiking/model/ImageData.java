@@ -8,13 +8,18 @@ import javax.persistence.*;
  * @author joe
  */
 @Entity
-@Table(name = "image_data")
+@Table(name = "image_data", uniqueConstraints = {
+    @UniqueConstraint(name = "idx_image_data_image_id", columnNames = { ImageData.COL_IMAGE_ID }) 
+})
 @NamedQueries({
   @NamedQuery(name = "ImageData.getImage", query = "SELECT i FROM ImageData i WHERE i.image = :image"),
   @NamedQuery(name = "ImageData.deleteImage", query = "DELETE FROM ImageData i WHERE i.image = :image")
 })
 public class ImageData implements Model {
   private static final long serialVersionUID = 7915371631791439871L;
+  public static final String ATTR_IMAGE = "image";
+  public static final String COL_IMAGE_ID = "image_id";
+  public static final String COL_IMAGE_DATA = "image_data";
 
   /**
    * Gets the data.
@@ -104,20 +109,20 @@ public class ImageData implements Model {
     return "<" + getId() + ">";
   }
 
-  @Column(name = "image_data", nullable = true)
+  @Column(name = COL_IMAGE_DATA, nullable = true)
   @Lob
   private byte[] data;
 
   @OneToOne(optional = false)
-  @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_image_data_image"))
+  @JoinColumn(name = COL_IMAGE_ID, foreignKey = @ForeignKey(name = "fk_image_data_image"))
   private Image image;
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @Column(name = ImageData.ATTR_ID)
   private Integer id;
 
   @Version
-  @Column(name = "version")
+  @Column(name = ImageData.ATTR_VERSION)
   private Integer version;
 }

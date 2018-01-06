@@ -13,11 +13,12 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "track", 
-  uniqueConstraints = @UniqueConstraint(name = "idx_track_name_unq", columnNames = { "name", "user_id" }),
+  uniqueConstraints = @UniqueConstraint(name = "idx_track_name_unq", columnNames = { Track.ATTR_NAME, Track.COL_USER_ID }),
   indexes = {
-    @Index(name = "idx_track_name", columnList = "name", unique = false),
-    @Index(name = "idx_track_published", columnList = "published", unique = false),
-    @Index(name = "idx_track_location", columnList = "location", unique = false)
+    @Index(name = "idx_track_name", columnList = Track.ATTR_NAME, unique = false),
+    @Index(name = "idx_track_published", columnList = Track.ATTR_PUBLISHED, unique = false),
+    @Index(name = "idx_track_location", columnList = Track.ATTR_LOCATION, unique = false),
+    @Index(name = "idx_track_user_id", columnList = Track.COL_USER_ID, unique = false)
   })
 @NamedQueries({
     @NamedQuery(name = "Track.findTrackByUserAndName", 
@@ -37,7 +38,23 @@ import javax.persistence.*;
     })
 public class Track implements Model {
   private static final long serialVersionUID = -8607582176696499706L;
-
+  public static final String ATTR_GEOLOCATION = "geolocation";
+  public static final String ATTR_TRACK_DATA = "trackData";
+  public static final String ATTR_USER = "user";
+  public static final String ATTR_ACTIVITY = "activity";
+  public static final String ATTR_NAME = "name";
+  public static final String ATTR_PUBLISHED = "published";
+  public static final String ATTR_LOCATION = "location";
+  public static final String ATTR_LONGITUDE = "longitude";
+  public static final String ATTR_LATITUDE = "latitude";
+  public static final String ATTR_DESCRIPTION = "description";
+  public static final String COL_USER_ID = "user_id";
+  public static final String COL_LAT = "lat";
+  public static final String COL_LON = "lon";
+  public static final String COL_LAST_CHANGE = "last_change";
+  public static final String COL_TRACK_DATE = "track_date";
+  public static final String COL_PUBLISH_DATE = "publish_date";
+  
   /**
    * @return the name
    */
@@ -364,47 +381,47 @@ public class Track implements Model {
     return "<track id=" + getId() + ": " + getName() + ">";
   }
 
-  @Column(name = "name", nullable = false, length = 100)
+  @Column(name = ATTR_NAME, nullable = false, length = 100)
   private String name;
-  @Column(name = "description", nullable = true)
+  @Column(name = ATTR_DESCRIPTION, nullable = true)
   @Lob
   private String description;
-  @Column(name = "location", nullable = true, length = 100)
+  @Column(name = ATTR_LOCATION, nullable = true, length = 100)
   private String location;
-  @Column(name = "track_date", nullable = true)
+  @Column(name = COL_TRACK_DATE, nullable = true)
   @Temporal(TemporalType.DATE)
   private Date date;
   @Column(name = "publish_date", nullable = true)
   @Temporal(TemporalType.DATE)
   private Date publishDate;
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, optional = false, fetch = FetchType.EAGER)
-  @PrimaryKeyJoinColumn(name = "user", foreignKey = @ForeignKey(name = "fk_user_track"))
+  @JoinColumn(name = COL_USER_ID, foreignKey = @ForeignKey(name = "fk_user_track"))
   private User user;
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "track")
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = Image.ATTR_TRACK)
   private List<Image> images;
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "track")
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = TrackData.ATTR_TRACK)
   private List<TrackData> trackData;
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "track")
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = Geolocation.ATTR_TRACK)
   private List<Geolocation> geolocation;
-  @Column(name = "published") 
+  @Column(name = ATTR_PUBLISHED) 
   private boolean published;
-  @Column(name = "lat", nullable = true, precision = 9, scale = 6)
+  @Column(name = COL_LAT, nullable = true, precision = 9, scale = 6)
   private Double latitude;
-  @Column(name = "lon", nullable = true, precision = 9, scale = 6)
+  @Column(name = COL_LON, nullable = true, precision = 9, scale = 6)
   private Double longitude;
-  @Column(name = "activity", nullable = true, length = 32)
+  @Column(name = ATTR_ACTIVITY, nullable = true, length = 32)
   @Enumerated(EnumType.STRING)
   private ActivityType activity;
   @Column(name = "geolocation_available")
   private Boolean geolocationAvailable;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @Column(name = ATTR_ID)
   private Integer id;
   @Version
-  @Column(name = "version")
+  @Column(name = ATTR_VERSION)
   private Integer version;
-  @Column(name = "last_change")
+  @Column(name = COL_LAST_CHANGE)
   @Temporal(TemporalType.TIMESTAMP)
   private Date lastChange;  
 }

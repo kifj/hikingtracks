@@ -14,16 +14,21 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Entity
 @Table(name = "user_account", indexes = { 
-  @Index(name = "idx_user_name", columnList = "name", unique = false),
-  @Index(name = "idx_user_token", columnList = "token", unique = true),
-  @Index(name = "idx_user_email", columnList = "email", unique = true) })
+  @Index(name = "idx_user_name", columnList = User.ATTR_NAME, unique = false),
+  @Index(name = "idx_user_token", columnList = User.ATTR_TOKEN, unique = true),
+  @Index(name = "idx_user_email", columnList = User.ATTR_EMAIL, unique = true) })
 @NamedQueries({ 
   @NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
   @NamedQuery(name = "User.findUserByToken", query = "SELECT u FROM User u WHERE u.token= :token") })
 @Cacheable
 public class User implements Model {
   private static final long serialVersionUID = 7944299851758333310L;
-
+  public static final String ATTR_NAME = "name";
+  public static final String ATTR_TOKEN = "token";
+  public static final String ATTR_EMAIL = "email";
+  public static final String ATTR_PUBLISHED = "published";
+  public static final String ATTR_EXPIRES = "expires";
+  
   /**
    * @return the name
    */
@@ -212,24 +217,24 @@ public class User implements Model {
     return result;
   }
 
-  @Column(name = "name", nullable = true, length = 100)
+  @Column(name = User.ATTR_NAME, nullable = true, length = 100)
   private String name;
-  @Column(name = "email", nullable = false, length = 100, unique = true)
+  @Column(name = User.ATTR_EMAIL, nullable = false, length = 100)
   private String email;
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = Track.ATTR_USER)
   private List<Track> tracks;
-  @Column(name = "token", nullable = true, length = 255)
+  @Column(name = User.ATTR_TOKEN, nullable = true, length = 255)
   private String token;
-  @Column(name = "expires", nullable = true)
+  @Column(name = ATTR_EXPIRES, nullable = true)
   @Temporal(TemporalType.TIMESTAMP)
   private Date expires;
-  @Column(name = "published") 
+  @Column(name = ATTR_PUBLISHED) 
   private Boolean published;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @Column(name = ATTR_ID)
   private Integer id;
   @Version
-  @Column(name = "version")
+  @Column(name = ATTR_VERSION)
   private Integer version;
 }

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import x1.hiking.model.ActivityType;
 import x1.hiking.model.Bounds;
+import x1.hiking.model.Coord;
 import x1.hiking.model.Geolocation;
 import x1.hiking.model.Image;
 import x1.hiking.model.Track;
@@ -53,7 +54,7 @@ public class TrackServiceBean implements TrackService {
 
   @Resource
   private SessionContext ctx;
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -174,7 +175,7 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Track> q = cb.createQuery(Track.class);
     Root<Track> from = q.from(Track.class);
-    Join<Track, Geolocation> join = from.join("geolocation", JoinType.LEFT);
+    Join<Track, Geolocation> join = from.join(Track.ATTR_GEOLOCATION, JoinType.LEFT);
     ActivityType activity = null;
     if (options != null && options.getActivity() != null) {
       activity = options.getActivity();
@@ -196,7 +197,7 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Track> q = cb.createQuery(Track.class);
     Root<Track> from = q.from(Track.class);
-    Join<Track, Geolocation> join = from.join("geolocation", JoinType.LEFT);
+    Join<Track, Geolocation> join = from.join(Track.ATTR_GEOLOCATION, JoinType.LEFT);
     ActivityType activity = null;
     if (options != null && options.getActivity() != null) {
       activity = options.getActivity();
@@ -219,7 +220,7 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Track> q = cb.createQuery(Track.class);
     Root<Track> from = q.from(Track.class);
-    Join<Track, Geolocation> join = from.join("geolocation", JoinType.LEFT);
+    Join<Track, Geolocation> join = from.join(Track.ATTR_GEOLOCATION, JoinType.LEFT);
     ActivityType activity = null;
     if (options != null && options.getActivity() != null) {
       activity = options.getActivity();
@@ -253,8 +254,8 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Long> q = cb.createQuery(Long.class);
     Root<Track> from = q.from(Track.class);
-    Join<Track, Geolocation> join = from.join("geolocation", JoinType.LEFT);
-    q.select(cb.countDistinct(from.get("id")));
+    Join<Track, Geolocation> join = from.join(Track.ATTR_GEOLOCATION, JoinType.LEFT);
+    q.select(cb.countDistinct(from.get(Track.ATTR_ID)));
     buildWhereClause(cb, q, from, join, user, text, activity);
     TypedQuery<Long> query = em.createQuery(q);
     return query.getSingleResult();
@@ -272,8 +273,8 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Long> q = cb.createQuery(Long.class);
     Root<Track> from = q.from(Track.class);
-    Join<Track, Geolocation> join = from.join("geolocation", JoinType.LEFT);
-    q.select(cb.countDistinct(from.get("id")));
+    Join<Track, Geolocation> join = from.join(Track.ATTR_GEOLOCATION, JoinType.LEFT);
+    q.select(cb.countDistinct(from.get(Track.ATTR_ID)));
     buildWhereClause(cb, q, from, join, Boolean.TRUE, text, activity);
     TypedQuery<Long> query = em.createQuery(q);
     return query.getSingleResult();
@@ -295,10 +296,12 @@ public class TrackServiceBean implements TrackService {
     }
     return t;
   }
-  
+
   /*
    * (non-Javadoc)
-   * @see x1.hiking.control.TrackService#findTrack(x1.hiking.model.User, java.lang.String)
+   * 
+   * @see x1.hiking.control.TrackService#findTrack(x1.hiking.model.User,
+   * java.lang.String)
    */
   @Override
   public Track findTrack(User user, String name) {
@@ -330,6 +333,7 @@ public class TrackServiceBean implements TrackService {
 
   /*
    * (non-Javadoc)
+   * 
    * @see x1.hiking.control.TrackService#findTrack(java.lang.String)
    */
   @Override
@@ -343,7 +347,6 @@ public class TrackServiceBean implements TrackService {
     }
   }
 
-  
   /*
    * (non-Javadoc)
    * 
@@ -422,17 +425,20 @@ public class TrackServiceBean implements TrackService {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<TrackData> q = cb.createQuery(TrackData.class);
     Root<TrackData> from = q.from(TrackData.class);
-    Expression<Boolean> where = cb.equal(from.get("track"), track);
+    Expression<Boolean> where = cb.equal(from.get(TrackData.ATTR_TRACK), track);
     q.where(where);
-    // in order of the argument list in the constructor, leaving out the expensive data
-    q.multiselect(from.get("id"), from.get("version"), from.get("name"), from.get("track"), from.get("startPoint"),
-        from.get("endPoint"), from.get("lowestPoint"), from.get("highestPoint"), from.get("url"));
+    // in order of the argument list in the constructor, leaving out the expensive
+    // data
+    q.multiselect(from.get(TrackData.ATTR_ID), from.get(TrackData.ATTR_VERSION), from.get(TrackData.ATTR_NAME),
+        from.get(TrackData.ATTR_TRACK), from.get(TrackData.ATTR_START_POINT), from.get(TrackData.ATTR_END_POINT),
+        from.get(TrackData.ATTR_LOWEST_POINT), from.get(TrackData.ATTR_HIGHEST_POINT), from.get(TrackData.ATTR_URL));
     TypedQuery<TrackData> query = em.createQuery(q);
     return query.getResultList();
   }
-  
+
   /*
    * (non-Javadoc)
+   * 
    * @see x1.hiking.control.TrackService#loadImages(x1.hiking.model.Track)
    */
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -442,23 +448,23 @@ public class TrackServiceBean implements TrackService {
     q.setParameter(PARAM_TRACK, track);
     return q.getResultList();
   }
-  
+
   private void buildWhereClause(CriteriaBuilder cb, CriteriaQuery<?> q, Root<Track> from, Join<Track, Geolocation> join,
       User user, String text, ActivityType activity) {
-    Expression<Boolean> where = cb.equal(from.get("user"), user);
+    Expression<Boolean> where = cb.equal(from.get(Track.ATTR_USER), user);
     where = buildSearchClause(cb, from, join, text, where);
     if (activity != null) {
-      where = cb.and(where, cb.equal(from.get("activity"), activity));
+      where = cb.and(where, cb.equal(from.get(Track.ATTR_ACTIVITY), activity));
     }
     q.where(where);
   }
 
   private Expression<Boolean> buildWhereClause(CriteriaBuilder cb, CriteriaQuery<?> q, Root<Track> from,
       Join<Track, Geolocation> join, Boolean published, String text, ActivityType activity) {
-    Expression<Boolean> where = cb.equal(from.get("published"), published);
+    Expression<Boolean> where = cb.equal(from.get(Track.ATTR_PUBLISHED), published);
     where = buildSearchClause(cb, from, join, text, where);
     if (activity != null) {
-      where = cb.and(where, cb.equal(from.get("activity"), activity));
+      where = cb.and(where, cb.equal(from.get(Track.ATTR_ACTIVITY), activity));
     }
     q.where(where);
     return where;
@@ -468,8 +474,9 @@ public class TrackServiceBean implements TrackService {
       String text, Expression<Boolean> where) {
     if (!StringUtils.isEmpty(text)) {
       String value = "%" + text + "%";
-      Predicate p = cb.or(cb.like(from.get("name"), value), cb.like(from.get("location"), value),
-          cb.like(join.get("location"), value), cb.like(join.get("area"), value), cb.like(join.get("country"), value));
+      Predicate p = cb.or(cb.like(from.get(Track.ATTR_NAME), value), cb.like(from.get(Track.ATTR_LOCATION), value),
+          cb.like(join.get(Geolocation.ATTR_LOCATION), value), cb.like(join.get(Geolocation.ATTR_AREA), value),
+          cb.like(join.get(Geolocation.ATTR_COUNTRY), value));
       where = cb.and(where, p);
     }
     return where;
@@ -477,35 +484,31 @@ public class TrackServiceBean implements TrackService {
 
   private void addBoundsClause(CriteriaBuilder cb, CriteriaQuery<Track> q, Root<Track> from, Expression<Boolean> where,
       Bounds bounds) {
-    Join<Track, TrackData> join = from.join("trackData", JoinType.LEFT);
-    Predicate p1 = cb.and(
-        cb.le(join.get("startPoint").get("lng"), bounds.getEast()),
-        cb.ge(join.get("startPoint").get("lng"), bounds.getWest()),
-        cb.le(join.get("startPoint").get("lat"), bounds.getNorth()),
-        cb.ge(join.get("startPoint").get("lat"), bounds.getSouth()));
-    Predicate p2 = cb.and(
-        cb.le(join.get("highestPoint").get("lng"), bounds.getEast()),
-        cb.ge(join.get("highestPoint").get("lng"), bounds.getWest()),
-        cb.le(join.get("highestPoint").get("lat"), bounds.getNorth()),
-        cb.ge(join.get("highestPoint").get("lat"), bounds.getSouth()));
-    Predicate p3 = cb.and(
-        cb.le(join.get("endPoint").get("lng"), bounds.getEast()),
-        cb.ge(join.get("endPoint").get("lng"), bounds.getWest()),
-        cb.le(join.get("endPoint").get("lat"), bounds.getNorth()),
-        cb.ge(join.get("endPoint").get("lat"), bounds.getSouth()));
-    Predicate p4 = cb.and(
-        cb.le(from.get("longitude"), bounds.getEast()),
-        cb.ge(from.get("longitude"), bounds.getWest()),
-        cb.le(from.get("latitude"), bounds.getNorth()),
-        cb.ge(from.get("latitude"), bounds.getSouth()));
-    q.where(cb.and(where, cb.or(p1, p2, p3, p4)));    
+    Join<Track, TrackData> join = from.join(Track.ATTR_TRACK_DATA, JoinType.LEFT);
+    Predicate p1 = cb.and(cb.le(join.get(TrackData.ATTR_START_POINT).get(Coord.ATTR_LNG), bounds.getEast()),
+        cb.ge(join.get(TrackData.ATTR_START_POINT).get(Coord.ATTR_LNG), bounds.getWest()),
+        cb.le(join.get(TrackData.ATTR_START_POINT).get(Coord.ATTR_LAT), bounds.getNorth()),
+        cb.ge(join.get(TrackData.ATTR_START_POINT).get(Coord.ATTR_LAT), bounds.getSouth()));
+    Predicate p2 = cb.and(cb.le(join.get(TrackData.ATTR_HIGHEST_POINT).get(Coord.ATTR_LNG), bounds.getEast()),
+        cb.ge(join.get(TrackData.ATTR_HIGHEST_POINT).get(Coord.ATTR_LNG), bounds.getWest()),
+        cb.le(join.get(TrackData.ATTR_HIGHEST_POINT).get(Coord.ATTR_LAT), bounds.getNorth()),
+        cb.ge(join.get(TrackData.ATTR_HIGHEST_POINT).get(Coord.ATTR_LAT), bounds.getSouth()));
+    Predicate p3 = cb.and(cb.le(join.get(TrackData.ATTR_END_POINT).get(Coord.ATTR_LNG), bounds.getEast()),
+        cb.ge(join.get(TrackData.ATTR_END_POINT).get(Coord.ATTR_LNG), bounds.getWest()),
+        cb.le(join.get(TrackData.ATTR_END_POINT).get(Coord.ATTR_LAT), bounds.getNorth()),
+        cb.ge(join.get(TrackData.ATTR_END_POINT).get(Coord.ATTR_LAT), bounds.getSouth()));
+    Predicate p4 = cb.and(cb.le(from.get(Track.ATTR_LONGITUDE), bounds.getEast()),
+        cb.ge(from.get(Track.ATTR_LONGITUDE), bounds.getWest()),
+        cb.le(from.get(Track.ATTR_LATITUDE), bounds.getNorth()),
+        cb.ge(from.get(Track.ATTR_LATITUDE), bounds.getSouth()));
+    q.where(cb.and(where, cb.or(p1, p2, p3, p4)));
   }
 
   private void buildOrderByClause(CriteriaBuilder cb, CriteriaQuery<?> q, Root<Track> from, String text) {
     if (!StringUtils.isEmpty(text)) {
-      q.orderBy(cb.asc(from.get("name")));
+      q.orderBy(cb.asc(from.get(Track.ATTR_NAME)));
     } else {
-      q.orderBy(cb.desc(from.get("id")));
+      q.orderBy(cb.desc(from.get(Track.ATTR_ID)));
     }
   }
 

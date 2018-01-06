@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 import javax.persistence.*;
 
 /**
- * Model for coordinates (lat, long, elevation) 
+ * Model for coordinates (lat, long, elevation)
  * 
  * @author joe
  *
@@ -17,6 +17,10 @@ public class Coord implements Serializable {
   public static final String COORDINATES_PRECISION = "#,###,###,##0";
   private static final int MINUTES_PER_HOUR = 60;
   private static final int SECONDS_PER_MINUTE = 60;
+  public static final String ATTR_LAT = "lat";
+  public static final String ATTR_LNG = "lng";
+  public static final String COL_ELEV = "elev";
+  public static final String ATTR_ELEVATION = "elevation";
 
   public Coord(Coord coord) {
     this.lat = coord.getLat();
@@ -29,7 +33,7 @@ public class Coord implements Serializable {
     this.lng = lng;
     this.elevation = elevation;
   }
-  
+
   public Coord(Double lat, Double lng) {
     this.lat = lat.floatValue();
     this.lng = lng.floatValue();
@@ -102,11 +106,11 @@ public class Coord implements Serializable {
 
     return latStr.toString() + " - " + lngStr.toString();
   }
-  
-  @Column(name = "lat")
+
+  @Column(name = ATTR_LAT)
   private float lat;
-  @Column(name = "lng")
+  @Column(name = ATTR_LNG)
   private float lng;
-  @Column(name = "elev")
+  @Column(name = COL_ELEV)
   private float elevation;
 }

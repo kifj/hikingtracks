@@ -12,13 +12,21 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Entity
 @Table(name = "geolocation", indexes = {
-    @Index(name = "idx_geolocation_location", columnList = "location", unique = false),
-    @Index(name = "idx_geolocation_area", columnList = "area", unique = false),
-    @Index(name = "idx_geolocation_country", columnList = "country", unique = false) })
+    @Index(name = "idx_geolocation_location", columnList = Geolocation.ATTR_LOCATION, unique = false),
+    @Index(name = "idx_geolocation_area", columnList = Geolocation.ATTR_AREA, unique = false),
+    @Index(name = "idx_geolocation_country", columnList = Geolocation.ATTR_COUNTRY, unique = false),
+    @Index(name = "idx_geolocation_track_id", columnList = Geolocation.COL_TRACK_ID, unique = false) 
+})
 @NamedQueries({
     @NamedQuery(name = "Geolocation.findByTrack", query = "SELECT g FROM Geolocation g WHERE g.track = :track") })
 public class Geolocation implements Model {
   private static final long serialVersionUID = 5320955152495158323L;
+  public static final String ATTR_LOCATION = "location";
+  public static final String ATTR_COUNTRY = "country";
+  public static final String ATTR_AREA = "area";
+  public static final String ATTR_TRACK = "track";
+  public static final String COL_TRACK_ID = "track_id";
+  public static final String ATTR_SOURCE = "source";
 
   /**
    * Default constructor
@@ -194,25 +202,25 @@ public class Geolocation implements Model {
         && ((country == null || other.getCountry() == null) || StringUtils.equals(country, other.getCountry()));
   }
 
-  @Column(name = "location", nullable = true, length = 100)
+  @Column(name = ATTR_LOCATION, nullable = true, length = 100)
   private String location;
-  @Column(name = "area", nullable = true, length = 100)
+  @Column(name = ATTR_AREA, nullable = true, length = 100)
   private String area;
-  @Column(name = "country", nullable = true, length = 100)
+  @Column(name = ATTR_COUNTRY, nullable = true, length = 100)
   private String country;
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, optional = false, fetch = FetchType.LAZY)
-  @PrimaryKeyJoinColumn(name = "track", foreignKey = @ForeignKey(name = "fk_track_geolocation"))
+  @JoinColumn(name = COL_TRACK_ID, foreignKey = @ForeignKey(name = "fk_track_geolocation"))
   private Track track;
   @Embedded
   private Coord coord;
-  @Column(name = "source", nullable = false)
+  @Column(name = ATTR_SOURCE, nullable = false)
   private GeolocationSource source;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @Column(name = ATTR_ID)
   private Integer id;
   @Version
-  @Column(name = "version")
+  @Column(name = ATTR_VERSION)
   private Integer version;
 
 }

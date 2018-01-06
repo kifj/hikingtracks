@@ -9,7 +9,8 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "thumbnail", indexes = {
-    @Index(name = "idx_thumbnail_image_type", unique = true, columnList = "type,image_id")
+    @Index(name = "idx_thumbnail_image_type", unique = true, columnList = Thumbnail.ATTR_TYPE + "," + Thumbnail.COL_IMAGE_ID),
+    @Index(name = "idx_thumbnail_image_id", columnList = Thumbnail.COL_IMAGE_ID, unique = false) 
 })
 @NamedQueries({
     @NamedQuery(name = "Thumbnail.findThumbnailsByImageAndType", 
@@ -25,7 +26,11 @@ import javax.persistence.*;
 })
 public class Thumbnail implements Model {
   private static final long serialVersionUID = -3206759449507185411L;
-
+  public static final String COL_IMAGE_ID = "image_id";
+  public static final String ATTR_IMAGE = "image";
+  public static final String COL_IMAGE_DATA = "image_data";
+  public static final String ATTR_TYPE = "type";
+  
   /**
    * @return the data
    */
@@ -121,19 +126,19 @@ public class Thumbnail implements Model {
     return "<thumbnail id=" + getId() + ":" + getType() + ">";
   }
 
-  @Column(name = "type", nullable = false)
+  @Column(name = ATTR_TYPE, nullable = false)
   private ThumbnailType type;
-  @Column(name = "image_data", nullable = false)
+  @Column(name = COL_IMAGE_DATA, nullable = false)
   @Lob
   private byte[] data;
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @PrimaryKeyJoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_thumbnail_image"))
+  @JoinColumn(name = COL_IMAGE_ID, foreignKey = @ForeignKey(name = "fk_thumbnail_image"))
   private Image image;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id")
+  @Column(name = ATTR_ID)
   private Integer id;
   @Version
-  @Column(name = "version")
+  @Column(name = ATTR_VERSION)
   private Integer version;
 }

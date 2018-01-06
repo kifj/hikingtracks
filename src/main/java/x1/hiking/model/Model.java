@@ -8,6 +8,9 @@ import java.io.Serializable;
  *
  */
 public interface Model extends Serializable {
+  String ATTR_ID = "id";
+  String ATTR_VERSION = "version";
+  
   /**
    * @return the id
    */
