@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -85,7 +86,7 @@ public class KmlSampler {
       KmlSampler parser = new KmlSampler(offsetDistance);
       LOG.debug("Parsing KML data for {}", td);
       if (td.getName().endsWith(Representation.FILE_EXTENSION_KML)) {
-        return parser.parse(new String(td.getData(), Representation.ENC_UTF_8));
+        return parser.parse(new String(td.getData(), StandardCharsets.UTF_8));
       } else if (td.getName().endsWith(Representation.FILE_EXTENSION_KMZ)) {
         return parser.unZipAndParse(td.getData());
       }
@@ -179,7 +180,7 @@ public class KmlSampler {
     try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(compressed))) {
       ZipEntry e = zis.getNextEntry();
       if (e != null) {
-        try (Reader reader = new InputStreamReader(zis, Representation.ENC_UTF_8)) {
+        try (Reader reader = new InputStreamReader(zis, StandardCharsets.UTF_8)) {
           return parse(reader);
         }
       }

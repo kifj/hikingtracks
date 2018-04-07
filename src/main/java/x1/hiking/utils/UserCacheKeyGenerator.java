@@ -11,7 +11,7 @@ import x1.hiking.model.User;
 
 /**
  * Cache key generator for User object
- * 
+ *
  * @author joe
  *
  */
@@ -44,7 +44,7 @@ public class UserCacheKeyGenerator implements CacheKeyGenerator {
    * @author joe
    *
    */
-  private static class UserCacheKey implements GeneratedCacheKey {
+  private static final class UserCacheKey implements GeneratedCacheKey {
     private static final long serialVersionUID = 403916448060586269L;
 
     UserCacheKey() {

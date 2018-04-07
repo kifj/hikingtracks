@@ -1,6 +1,6 @@
 package x1.hiking.boundary;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +12,6 @@ import x1.hiking.model.Model;
 import x1.hiking.model.Track;
 import x1.hiking.model.User;
 import x1.hiking.representation.Cacheable;
-import x1.hiking.representation.Representation;
 
 /**
  * Builder for Entity Tags
@@ -21,7 +20,6 @@ import x1.hiking.representation.Representation;
  */
  public class EntityTagBuilder {
   private static final String HEADER_ACCEPT = "Accept";
-  private static final Charset UTF_8_CS = Charset.forName(Representation.ENC_UTF_8);
 
   public EntityTagBuilder(HttpServletRequest httpServletRequest) {
     this.httpServletRequest = httpServletRequest;
@@ -59,8 +57,8 @@ import x1.hiking.representation.Representation;
   public EntityTag buildEntityTag(StringBuilder buffer) {
     String acceptHeader = httpServletRequest.getHeader(HEADER_ACCEPT);
     buffer.append(";").append(acceptHeader);
-    byte[] encoded = Base64.encodeBase64(buffer.toString().getBytes(UTF_8_CS));
-    return new EntityTag(new String(encoded, UTF_8_CS));
+    byte[] encoded = Base64.encodeBase64(buffer.toString().getBytes(StandardCharsets.UTF_8));
+    return new EntityTag(new String(encoded, StandardCharsets.UTF_8));
   }
   
   private HttpServletRequest httpServletRequest;

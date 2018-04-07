@@ -1,6 +1,6 @@
 package x1.hiking.representation;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -41,10 +41,8 @@ public final class GravatarHelper {
   public static String md5Hex(String message) {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
-      return hex(md.digest(message.getBytes("UTF-8")));
+      return hex(md.digest(message.getBytes(StandardCharsets.UTF_8)));
     } catch (NoSuchAlgorithmException e) {
-      LOG.error(null, e);
-    } catch (UnsupportedEncodingException e) {
       LOG.error(null, e);
     }
     return null;

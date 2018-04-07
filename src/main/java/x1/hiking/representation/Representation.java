@@ -23,7 +23,6 @@ public interface Representation extends Serializable {
   String FILE_EXTENSION_KML = ".kml";
   String FILE_EXTENSION_KMZ = ".kmz";
   String FILE_EXTENSION_JPG = ".jpg";
-  String ENC_UTF_8 = "UTF-8";
   String PATH_SERVICE = "/services/hikingtracks/1.0";
 
   default String getMediaType(String filename) {
