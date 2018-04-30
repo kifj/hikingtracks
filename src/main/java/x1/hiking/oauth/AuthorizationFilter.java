@@ -2,6 +2,7 @@ package x1.hiking.oauth;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -84,7 +85,7 @@ public class AuthorizationFilter implements Filter, AuthorizationConstants {
       destinationURL += "?" + queryString;
     }
     String url = ServletHelper.getBaseUrl(request).path(LOGIN_PAGE).queryParam(PARAM_FROM,
-        URLEncoder.encode(destinationURL, UTF_8)).build().toString();
+        URLEncoder.encode(destinationURL, StandardCharsets.UTF_8.name())).build().toString();
     log.info("Authentification required, redirecting to login: {}", url);
     ServletHelper.revokeSessionCookie(response);
     response.sendRedirect(url);

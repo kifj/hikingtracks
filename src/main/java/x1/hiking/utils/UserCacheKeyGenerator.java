@@ -13,7 +13,6 @@ import x1.hiking.model.User;
  * Cache key generator for User object
  *
  * @author joe
- *
  */
 public class UserCacheKeyGenerator implements CacheKeyGenerator {
   /*
@@ -22,7 +21,7 @@ public class UserCacheKeyGenerator implements CacheKeyGenerator {
    */
   @Override
   public GeneratedCacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
-    final CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
+    CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
 
     String email = null;
     for (int i = 0; i < keyParameters.length; i++) {
@@ -47,10 +46,10 @@ public class UserCacheKeyGenerator implements CacheKeyGenerator {
   private static final class UserCacheKey implements GeneratedCacheKey {
     private static final long serialVersionUID = 403916448060586269L;
 
-    UserCacheKey() {
+    private UserCacheKey() {
     }
 
-    UserCacheKey(String email) {
+    private UserCacheKey(String email) {
       this.email = email;
     }
 

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +84,7 @@ public final class ServletHelper implements AuthorizationConstants {
    */
   public static void injectSessionCookie(HttpServletResponse response, String token) {
     try {
-      Cookie cookie = new Cookie(PARAM_AUTH_TOKEN, URLEncoder.encode(token, UTF_8));
+      Cookie cookie = new Cookie(PARAM_AUTH_TOKEN, URLEncoder.encode(token, StandardCharsets.UTF_8.name()));
       cookie.setPath("/");
       cookie.setSecure(false);
       response.addCookie(cookie);
@@ -106,7 +107,7 @@ public final class ServletHelper implements AuthorizationConstants {
       for (Cookie cookie : cookies) {
         if (cookie.getName().equals(name)) {
           try {
-            return URLDecoder.decode(cookie.getValue(), UTF_8);
+            return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8.name());
           } catch (UnsupportedEncodingException e) {
             // ignore
           }

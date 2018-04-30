@@ -28,7 +28,6 @@ public class OAuthParams {
   private String claimsSet;
   private String jwt;
   private boolean idTokenValid;
-
   private String errorMessage;
 
   public String getClientId() {

@@ -49,7 +49,7 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
 
   @Inject
   private InverseGeocoder geocoder;
-  
+
   /*
    * (non-Javadoc)
    * 

@@ -17,5 +17,4 @@ public interface AuthorizationConstants {
   String STATE = "state";
   String PARAM_REFERER = "referer";
   String LOGIN_PAGE = "login.html";
-  String UTF_8 = "UTF-8";
 }

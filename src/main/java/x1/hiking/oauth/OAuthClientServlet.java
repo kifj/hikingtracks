@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
@@ -105,7 +106,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       if (wanted != null) {
         User user = authUser(wanted);
         if (user != null) {
-          String redirectUrl = URLDecoder.decode(getState(request), UTF_8);
+          String redirectUrl = URLDecoder.decode(getState(request), StandardCharsets.UTF_8.name());
           log.info("Authenticated {}, redirect to: {}", user, redirectUrl);
           ServletHelper.injectSessionCookie(response, user.getToken());
           response.sendRedirect(redirectUrl);
@@ -128,7 +129,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       if (oauthParams.getAccessToken() != null) {
         String redirectUrl;
         if (oauthParams.getState() != null) {
-          redirectUrl = URLDecoder.decode(oauthParams.getState(), UTF_8);
+          redirectUrl = URLDecoder.decode(oauthParams.getState(), StandardCharsets.UTF_8.name());
         } else {
           redirectUrl = ServletHelper.getBaseUrl(request).build().toString();
         }
@@ -230,23 +231,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       oauthParams.setScope(oauthResponse.getScope());
 
       if (oauthProvider == OAuthProviderType.GOOGLE) {
-        OpenIdConnectResponse openIdConnectResponse = (OpenIdConnectResponse) oauthResponse;
-        JWT idToken = openIdConnectResponse.getIdToken();
-        oauthParams.setIdToken(idToken.getRawString());
-
-        oauthParams.setHeader(new JWTHeaderWriter().write(idToken.getHeader()));
-        oauthParams.setClaimsSet(new JWTClaimsSetWriter().write(idToken.getClaimsSet()));
-        URL url = new URL(oauthParams.getTokenEndpoint());
-        oauthParams.setIdTokenValid(openIdConnectResponse.checkId(url.getHost(), oauthParams.getClientId()));
-        String email = idToken.getClaimsSet().getCustomField("email", String.class);
-        log.debug("Access Token: {}, Email: {}", oauthParams.getAccessToken(), email);
-        if (oauthParams.isIdTokenValid() && StringUtils.isNotEmpty(email)) {
-          Date expiryDate = null;
-          if (oauthParams.getExpiresIn() != null) {
-            expiryDate = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
-          }
-          checkUser(oauthParams.getAccessToken(), email, expiryDate);
-        }
+        verifyOpenIdConnectResponse(oauthParams, (OpenIdConnectResponse) oauthResponse, "email");
       }
     } catch (OAuthSystemException | OAuthProblemException e) {
       oauthParams.setErrorMessage(e.getMessage());
@@ -257,10 +242,29 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return oauthParams;
   }
 
-  private User checkUser(String token, String email, Date expires) {
-    if (email == null) {
-      return null;
+  private void verifyOpenIdConnectResponse(OAuthParams oauthParams, OpenIdConnectResponse openIdConnectResponse,
+      String emailField) throws MalformedURLException {
+    JWT idToken = openIdConnectResponse.getIdToken();
+    oauthParams.setIdToken(idToken.getRawString());
+
+    oauthParams.setHeader(new JWTHeaderWriter().write(idToken.getHeader()));
+    oauthParams.setClaimsSet(new JWTClaimsSetWriter().write(idToken.getClaimsSet()));
+    URL url = new URL(oauthParams.getTokenEndpoint());
+    oauthParams.setIdTokenValid(openIdConnectResponse.checkId(url.getHost(), oauthParams.getClientId()));
+    String email = idToken.getClaimsSet().getCustomField(emailField, String.class);
+    log.debug("Access Token: {}, Email: {}", oauthParams.getAccessToken(), email);
+    if (oauthParams.isIdTokenValid() && StringUtils.isNotEmpty(email)) {
+      Date expires = null;
+      if (oauthParams.getExpiresIn() != null) {
+        expires = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
+      }
+      checkUser(oauthParams.getAccessToken(), email, expires);
+    } else {
+      oauthParams.setAccessToken(null);
     }
+  }
+
+  private User checkUser(String token, String email, Date expires) {
     User user;
     try {
       user = userManagement.findUserByEmail(email);

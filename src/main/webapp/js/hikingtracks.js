@@ -306,18 +306,52 @@ Client.prototype.messageOff = function() {
 }
 
 Client.prototype.statusOn = function(msg) {
-  var status = $('#status');
-  status[0].innerHTML = msg;
-  status[0].className = 'statusOn';
+  var caller = this;
+  var options = {
+    title: title_bar,
+    tag: 'hikingtracks',
+    body: msg,
+    onclick: function () {
+      caller.notification.close();
+      caller.notification = null;
+    }
+  };
+  $.notification(options).then(function (notification) {
+    caller.notification = notification;
+  }, function () {
+    caller.notification = null;
+    var status = $('#status');
+    status[0].innerHTML = msg;
+    status[0].className = 'statusOn';
+  });
 }
 
 Client.prototype.errorStatusOn = function(msg) {
-  var status = $('#status');
-  status[0].innerHTML = msg;
-  status[0].className = 'errorStatusOn';
+  var caller = this;
+  var options = {
+    title: title_bar,
+    tag: 'hikingtracks',
+    body: msg,
+    onclick: function () {
+      caller.notification.close();
+      caller.notification = null;
+    }
+  };
+  $.notification(options).then(function (notification) {
+    caller.notification = notification;
+  }, function () {
+    caller.notification = null;
+    var status = $('#status');
+    status[0].innerHTML = msg;
+    status[0].className = 'errorStatusOn';
+  });
 }
 
 Client.prototype.statusOff = function() {
+  var caller = this;
+  if (caller.notification) {
+    caller.notification.close();
+  }
   var status = $('#status');
   status[0].innerHTML = '';
   status[0].className = 'statusOff';
@@ -799,16 +833,14 @@ Client.prototype.addCarousel = function(elem, trackData) {
         this.showImage('#image-list', img.name, img, i, "SMALL");
       }
     }
-    var maxVisible = Math.floor($('#main').outerWidth() / 160);
     $('#image-list').slick({
-      infinite: (imageCount >= maxVisible),
+      infinite: (imageCount > 2),
       slidesToShow: 1,
       variableWidth: true,
       swipeToSlide: true,
-      centerMode: false,
+      centerMode: true,
       draggable: false,
-      dots: (imageCount >= maxVisible),
-      arrows: (imageCount >= maxVisible)
+      dots: true
     });
     $('#image-list').Chocolat({
       loop: true,
@@ -1207,16 +1239,14 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
           }, $.i18n.map));
         }
       }
-      var maxVisible = Math.floor($('#google-maps').outerWidth() / 160);
       $('.google-maps-fullscreen-carousel').slick({
-        infinite: (imageCount >= maxVisible),
+        infinite: (imageCount > 4),
         slidesToShow: 1,
-        centerMode: false,
+        centerMode: true,
         variableWidth: true,
         swipeToSlide: true,
         draggable: false,
-        dots: (imageCount >= maxVisible),
-        arrows: (imageCount >= maxVisible)
+        dots: true
       });
     }
     this.addGoogleMapsDetail(trackData);
@@ -2051,17 +2081,15 @@ Client.prototype.addImagesToMap = function(elem, tracks) {
     }
   }
   if (imageCount > 0) {
-    var maxVisible = Math.floor($('#main').outerWidth() / 160);
     $(elem).css('display', 'inherit');
     $('#image-list').slick({
-      infinite: (imageCount >= maxVisible),
+      infinite: (imageCount > 2),
       slidesToShow: 1,
       variableWidth: true,
       swipeToSlide: true,
-      centerMode: false,
+      centerMode: true,
       draggable: false,
-      dots: (imageCount >= maxVisible),
-      arrows: (imageCount >= maxVisible)
+      dots: true
     });
     $('#image-list').Chocolat({
       loop: true,

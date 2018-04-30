@@ -31,7 +31,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import static javax.ws.rs.core.Response.Status.*;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.BadRequestException;
@@ -114,7 +114,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (builder != null) {
       return builder.build();
     }
-    return Response.status(Response.Status.OK).entity(trackInfoList).tag(eTag).build();
+    return Response.status(OK).entity(trackInfoList).tag(eTag).build();
   }
 
   private void enrichTrackInfoListFromQueryOptions(String name, Integer startPosition, boolean onlyPublished,
@@ -160,7 +160,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (builder != null) {
       return builder.build();
     }
-    return Response.status(Response.Status.OK).entity(trackInfoList).tag(eTag).build();
+    return Response.status(OK).entity(trackInfoList).tag(eTag).build();
   }
 
   private QueryOptions buildQueryOptions(Search search) {
@@ -215,7 +215,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       if (builder != null) {
         return createResponse(builder);
       }
-      return createResponse(Response.status(Response.Status.OK), trackInfo, eTag);
+      return createResponse(Response.status(OK), trackInfo, eTag);
     } catch (NotFoundException e) {
       log.info(e.getMessage());
       throw e;
@@ -274,8 +274,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private Response createResponse(Response.ResponseBuilder builder) {
-    builder.header(HttpHeaders.VARY, HEADER_VARY_ACCEPT).header(ACCESS_CONTROL_ALLOW_ORIGIN, HEADER_CORS_ALL);
-    return builder.build();
+    return builder.header(HttpHeaders.VARY, HEADER_VARY_ACCEPT).header(ACCESS_CONTROL_ALLOW_ORIGIN, HEADER_CORS_ALL)
+        .build();
   }
 
   /*
@@ -291,7 +291,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       if (track != null) {
         log.info("delete track [{}]", name);
         trackService.delete(track);
-        return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.status(NO_CONTENT).build();
       } else {
         throw new NotFoundException("No track found with name " + name);
       }
@@ -322,18 +322,14 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       Track track = new Track();
       updateTrack(trackInfo, track);
       track.setUser(user);
-      for (TrackData td : track.getTrackData()) {
-        td.setTrack(track);
-      }
-      for (Image img : track.getImages()) {
-        img.setTrack(track);
-      }
+      track.getTrackData().forEach(td -> td.setTrack(track));
+      track.getImages().forEach(img -> img.setTrack(track));
       log.info("insert track  [{}]", track);
       trackService.insert(track);
       URI location = UriBuilder.fromPath(track.getName()).build();
       List<Model> models = addLinks(track, null, user);
       EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(user, models, track);
-      return createResponse(Response.status(Response.Status.CREATED).location(location),
+      return createResponse(Response.status(CREATED).location(location),
           new TrackInfo(track, pathTracks().path(track.getName()).build().toString(), user), eTag);
     } catch (ConflictException e) {
       log.info(e.getMessage());
@@ -384,7 +380,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       Track updated = trackService.update(oldTrack);
       models = addLinks(updated, null, user);
       eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(user, models, updated);
-      return createResponse(Response.status(Response.Status.OK),
+      return createResponse(Response.status(OK),
           new TrackInfo(updated, pathTracks().path(name).build().toString(), user), eTag);
     } catch (NotFoundException e) {
       log.info(e.getMessage());
@@ -445,50 +441,68 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
 
   private void updateTrackData(Map<Integer, TrackData> foundTd, TrackDataInfo trackData, Track trackToUpdate) {
     if (trackData.getId() == null) {
-      TrackData newTrackData = new TrackData();
-      newTrackData.setTrack(trackToUpdate);
-      newTrackData.setName(trackData.getName());
-      newTrackData.setUrl(trackData.getUrl());
+      TrackData newTrackData = newTrackDataForUpdate(trackData, trackToUpdate);
       trackToUpdate.addTrackData(newTrackData);
       return;
     }
     for (TrackData td : trackToUpdate.getTrackData()) {
       if (td.getId().equals(trackData.getId())) {
-        td.setName(trackData.getName());
-        if (StringUtils.isNotEmpty(td.getUrl())) {
-          td.setUrl(trackData.getUrl());
-          td.setData(null);
-        }
+        existingTrackDataForUpdate(trackData, td);
         foundTd.put(td.getId(), td);
         break;
       }
     }
   }
 
+  private void existingTrackDataForUpdate(TrackDataInfo trackData, TrackData td) {
+    td.setName(trackData.getName());
+    if (StringUtils.isNotEmpty(td.getUrl())) {
+      td.setUrl(trackData.getUrl());
+      td.setData(null);
+    }
+  }
+
+  private TrackData newTrackDataForUpdate(TrackDataInfo trackData, Track trackToUpdate) {
+    TrackData newTrackData = new TrackData();
+    newTrackData.setTrack(trackToUpdate);
+    newTrackData.setName(trackData.getName());
+    newTrackData.setUrl(trackData.getUrl());
+    return newTrackData;
+  }
+
   private void updateImage(Map<Integer, Image> foundImg, ImageInfo image, Track trackToUpdate, int number) {
     if (image.getId() == null) {
-      Image newImage = new Image();
-      newImage.setName(image.getName());
-      newImage.setUrl(image.getUrl());
-      newImage.setLatitude(image.getLatitude());
-      newImage.setLongitude(image.getLongitude());
-      newImage.setTrack(trackToUpdate);
-      newImage.setNumber(number);
+      Image newImage = newImageForUpdate(image, trackToUpdate, number);
       trackToUpdate.addImage(newImage);
     } else {
       for (Image img : trackToUpdate.getImages()) {
         if (img.getId().equals(image.getId())) {
-          img.setName(image.getName());
-          img.setNumber(number);
-          if (StringUtils.isNotEmpty(img.getUrl())) {
-            img.setUrl(image.getUrl());
-            imageService.deleteImageData(img);
-          }
+          existingImageForUpdate(image, number, img);
           foundImg.put(img.getId(), img);
           break;
         }
       }
     }
+  }
+
+  private void existingImageForUpdate(ImageInfo image, int number, Image img) {
+    img.setName(image.getName());
+    img.setNumber(number);
+    if (StringUtils.isNotEmpty(img.getUrl())) {
+      img.setUrl(image.getUrl());
+      imageService.deleteImageData(img);
+    }
+  }
+
+  private Image newImageForUpdate(ImageInfo image, Track trackToUpdate, int number) {
+    Image newImage = new Image();
+    newImage.setName(image.getName());
+    newImage.setUrl(image.getUrl());
+    newImage.setLatitude(image.getLatitude());
+    newImage.setLongitude(image.getLongitude());
+    newImage.setTrack(trackToUpdate);
+    newImage.setNumber(number);
+    return newImage;
   }
 
   /*
@@ -515,7 +529,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     oldUser.setPublished(user.isPublished());
     log.info("update user [{}]", oldUser);
     User updatedUser = userManagement.update(oldUser);
-    return Response.status(Response.Status.OK).entity(new UserInfo(updatedUser)).build();
+    return Response.status(OK).entity(new UserInfo(updatedUser)).build();
   }
 
   /*
@@ -532,7 +546,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (session != null) {
       session.invalidate();
     }
-    return Response.status(Response.Status.NO_CONTENT).build();
+    return Response.status(NO_CONTENT).build();
   }
 
   /*
@@ -551,7 +565,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       return getImage(name, id, user);
     } catch (URISyntaxException e) {
       log.warn(null, e);
-      throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+      throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -573,11 +587,11 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       if (image.getUrl() == null) {
         URI uri = pathTracks().path(name).path(PATH_IMAGES).path(String.valueOf(id))
             .queryParam(THUMBNAIL, ThumbnailType.LARGE.name()).build();
-        return Response.status(Response.Status.MOVED_PERMANENTLY).location(uri).build();
+        return Response.status(MOVED_PERMANENTLY).location(uri).build();
       }
-      return Response.status(Response.Status.MOVED_PERMANENTLY).location(new URI(image.getUrl())).build();
+      return Response.status(MOVED_PERMANENTLY).location(new URI(image.getUrl())).build();
     }
-    return createResponse(Response.status(Response.Status.OK), new BinaryStreamingOutput(imageData.getData()), eTag);
+    return createResponse(Response.status(OK), new BinaryStreamingOutput(imageData.getData()), eTag);
   }
 
   private Response getImage(final String name, final Integer id, User user, ThumbnailType type)
@@ -589,15 +603,15 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (thumbnail == null) {
       CacheControl cc = new CacheControl();
       cc.setMaxAge(0);
-      return Response.status(Status.TEMPORARY_REDIRECT).location(new URI(getTop() + SEP + IMG_PLACEHOLDER))
-          .cacheControl(cc).build();
+      return Response.status(TEMPORARY_REDIRECT).location(new URI(getTop() + SEP + IMG_PLACEHOLDER)).cacheControl(cc)
+          .build();
     }
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(thumbnail);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
       return createResponse(builder);
     }
-    return createResponse(Response.status(Response.Status.OK), new BinaryStreamingOutput(thumbnail.getData()), eTag);
+    return createResponse(Response.status(OK), new BinaryStreamingOutput(thumbnail.getData()), eTag);
   }
 
   /*
@@ -623,7 +637,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     img.setNumber(number);
     imageService.insert(img, data);
     URI location = UriBuilder.fromPath(track.getName() + SEP + PATH_IMAGES + img.getId()).build();
-    return Response.status(Response.Status.CREATED).location(location).build();
+    return Response.status(CREATED).location(location).build();
   }
 
   /*
@@ -655,7 +669,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     img.setName(filename);
     img = imageService.update(img, data);
     eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
-    return createResponse(Response.status(Response.Status.NO_CONTENT), eTag);
+    return createResponse(Response.status(NO_CONTENT), eTag);
   }
 
   private Image findImage(Track track, Integer id) {
@@ -685,7 +699,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     }
     log.info("Delete image [{}]", id);
     imageService.delete(image);
-    return Response.status(Response.Status.NO_CONTENT).build();
+    return Response.status(NO_CONTENT).build();
   }
 
   /*
@@ -711,14 +725,14 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     }
     try {
       if (td.getData() == null) {
-        return Response.status(Response.Status.SEE_OTHER).location(new URI(td.getUrl())).build();
+        return Response.status(SEE_OTHER).location(new URI(td.getUrl())).build();
       }
     } catch (URISyntaxException e) {
       log.warn(null, e);
-      throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+      throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
     }
     StreamingOutput output = new BinaryStreamingOutput(td.getData());
-    ResponseBuilder response = Response.status(Response.Status.OK).type(getMediaType(td.getName()));
+    ResponseBuilder response = Response.status(OK).type(getMediaType(td.getName()));
     return createResponse(response, output, eTag);
   }
 
@@ -744,7 +758,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     td.setTrack(track);
     trackService.insert(td);
     URI location = UriBuilder.fromPath(track.getName() + SEP + PATH_KML + td.getId()).build();
-    return Response.status(Response.Status.CREATED).location(location).build();
+    return Response.status(CREATED).location(location).build();
   }
 
   /*
@@ -782,7 +796,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     trackService.update(track);
 
     eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
-    return createResponse(Response.status(Response.Status.NO_CONTENT), eTag);
+    return createResponse(Response.status(NO_CONTENT), eTag);
   }
 
   private void setTrackDataFields(TrackData td, String filename, byte[] incomingXML) {
@@ -800,7 +814,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    */
   @Override
   public Response options(String path) {
-    return Response.status(Response.Status.NO_CONTENT).header(ACCESS_CONTROL_ALLOW_ORIGIN, HEADER_CORS_ALL)
+    return Response.status(NO_CONTENT).header(ACCESS_CONTROL_ALLOW_ORIGIN, HEADER_CORS_ALL)
         .header(ACCESS_CONTROL_ALLOW_HEADERS, HEADER_CORS_ALLOWED_HEADERS).build();
   }
 
@@ -835,7 +849,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     track.setGeolocationAvailable(null);
     trackService.update(track);
 
-    return Response.status(Response.Status.NO_CONTENT).build();
+    return Response.status(NO_CONTENT).build();
   }
 
   private User findUser() {
