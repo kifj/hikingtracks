@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,8 @@ public class ConfigurationValueProducer {
 
   private void init() {
     bundle = ResourceBundle.getBundle(BUNDLE_FILE_NAME);
-    String directory = System.getProperty("hikingtracks.config.dir", System.getProperty("jboss.server.config.dir"));
+    String directory = StringUtils.defaultIfEmpty(System.getenv("HIKINGTRACKS_CONFIG_DIR"),
+        System.getProperty("jboss.server.config.dir"));
     File file = new File(directory, PROPERTIES_FILE_NAME);
     if (file.exists()) {
       try (FileInputStream fis = new FileInputStream(file)) {
