@@ -41,8 +41,8 @@ public class ConfigurationValueProducer {
     File file = new File(directory, PROPERTIES_FILE_NAME);
     if (file.exists()) {
       try (FileInputStream fis = new FileInputStream(file)) {
-        log.info("Reading configuration from {}", file.getAbsolutePath());
         properties.load(fis);
+        log.info("Read configuration from {} with {}", file.getAbsolutePath(), properties);        
       } catch (IOException e) {
         log.warn(e.getMessage());
       }
