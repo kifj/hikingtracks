@@ -3,7 +3,6 @@ package x1.hiking.control;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResult;
-import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -23,7 +22,6 @@ import x1.hiking.utils.UserCacheKeyGenerator;
  * control of users
  */
 @Stateless
-@Local
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class UserManagement {
   private final Logger log = LoggerFactory.getLogger(getClass());

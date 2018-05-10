@@ -34,9 +34,7 @@ import javax.persistence.*;
     @NamedQuery(name = "Track.previousPublicTrack", 
       query = "SELECT t FROM Track t WHERE t.published = true AND t.id > :id ORDER BY t.id ASC"),
     @NamedQuery(name = "Track.findTracksForGeolocationUpdate", 
-      query = "SELECT t FROM Track t WHERE t.geolocationAvailable IS NULL"),
-    @NamedQuery(name = "Track.countTracks",
-      query = "SELECT COUNT(t.id) FROM Track t")
+      query = "SELECT t FROM Track t WHERE t.geolocationAvailable IS NULL")
     })
 public class Track implements Model {
   private static final long serialVersionUID = -8607582176696499706L;

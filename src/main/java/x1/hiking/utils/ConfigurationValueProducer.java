@@ -35,7 +35,8 @@ public class ConfigurationValueProducer {
 
   private void init() {
     bundle = ResourceBundle.getBundle(BUNDLE_FILE_NAME);
-    File file = new File(System.getProperty("jboss.server.config.dir"), PROPERTIES_FILE_NAME);
+    String directory = System.getProperty("hikingtracks.config.dir", System.getProperty("jboss.server.config.dir"));
+    File file = new File(directory, PROPERTIES_FILE_NAME);
     if (file.exists()) {
       try (FileInputStream fis = new FileInputStream(file)) {
         log.info("Reading configuration from {}", file.getAbsolutePath());

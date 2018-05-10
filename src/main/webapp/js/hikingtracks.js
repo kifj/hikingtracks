@@ -833,14 +833,16 @@ Client.prototype.addCarousel = function(elem, trackData) {
         this.showImage('#image-list', img.name, img, i, "SMALL");
       }
     }
+    var maxVisible = Math.floor($('#main').outerWidth() / 160);
     $('#image-list').slick({
-      infinite: (imageCount > 2),
+      infinite: (imageCount >= maxVisible),
       slidesToShow: 1,
       variableWidth: true,
       swipeToSlide: true,
-      centerMode: true,
+      centerMode: false,
       draggable: false,
-      dots: true
+      dots: (imageCount >= maxVisible),
+      arrows: (imageCount >= maxVisible)
     });
     $('#image-list').Chocolat({
       loop: true,
@@ -1239,14 +1241,16 @@ Client.prototype.handleFullscreenGoogleMaps = function(close) {
           }, $.i18n.map));
         }
       }
+      var maxVisible = Math.floor($('#google-maps').outerWidth() / 160);
       $('.google-maps-fullscreen-carousel').slick({
-        infinite: (imageCount > 4),
+        infinite: (imageCount >= maxVisible),
         slidesToShow: 1,
-        centerMode: true,
+        centerMode: false,
         variableWidth: true,
         swipeToSlide: true,
         draggable: false,
-        dots: true
+        dots: (imageCount >= maxVisible),
+        arrows: (imageCount >= maxVisible)
       });
     }
     this.addGoogleMapsDetail(trackData);
@@ -2081,15 +2085,17 @@ Client.prototype.addImagesToMap = function(elem, tracks) {
     }
   }
   if (imageCount > 0) {
+    var maxVisible = Math.floor($('#main').outerWidth() / 160);
     $(elem).css('display', 'inherit');
     $('#image-list').slick({
-      infinite: (imageCount > 2),
+      infinite: (imageCount >= maxVisible),
       slidesToShow: 1,
       variableWidth: true,
       swipeToSlide: true,
-      centerMode: true,
+      centerMode: false,
       draggable: false,
-      dots: true
+      dots: (imageCount >= maxVisible),
+      arrows: (imageCount >= maxVisible)
     });
     $('#image-list').Chocolat({
       loop: true,

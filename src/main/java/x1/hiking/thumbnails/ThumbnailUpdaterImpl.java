@@ -1,11 +1,16 @@
 package x1.hiking.thumbnails;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
-import javax.ejb.Stateless;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
@@ -23,22 +28,37 @@ import x1.hiking.model.ThumbnailType;
  * @author joe
  * 
  */
-@Stateless
+@Singleton
+@Startup
 public class ThumbnailUpdaterImpl implements ThumbnailUpdater {
   private final Logger log = LoggerFactory.getLogger(getClass());
-
+  private static final String INFO_TEXT = "ThumbnailUpdater";
+  
   @EJB
   private ThumbnailService thumbnailService;
   
   @EJB
   private ImageService imageService;
 
+  @Resource
+  private TimerService timerService;
+  
+  @PostConstruct
+  public void setup() {
+    Date now = new Date();
+    timerService.getAllTimers().forEach(timer -> {
+      if (timer.isPersistent() && INFO_TEXT.equals(timer.getInfo()) && timer.getNextTimeout().before(now)) {
+        timer.cancel();
+      }
+    });
+  }
+
   /*
    * (non-Javadoc)
    * 
    * @see x1.hiking.thumbnails.ThumbnailUpdater#updateThumbnails()
    */
-  @Schedule(hour = "*", minute = "*/2", second = "0", persistent = false)
+  @Schedule(hour = "*", minute = "*/2", second = "0", persistent = true, info = INFO_TEXT)
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
   public void updateThumbnails() {
