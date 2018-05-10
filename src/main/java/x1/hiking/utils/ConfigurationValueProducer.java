@@ -42,7 +42,7 @@ public class ConfigurationValueProducer {
     if (file.exists()) {
       try (FileInputStream fis = new FileInputStream(file)) {
         properties.load(fis);
-        log.info("Read configuration from {} with {}", file.getAbsolutePath(), properties);        
+        log.info("Read configuration from {} with {}", file.getAbsolutePath(), properties);
       } catch (IOException e) {
         log.warn(e.getMessage());
       }
@@ -50,7 +50,13 @@ public class ConfigurationValueProducer {
   }
 
   private String getValue(String key) {
-    return properties.getProperty(key, bundle.getString(key));
+    String defaultValue = null;
+    try {
+      defaultValue = bundle.getString(key);
+    } catch (MissingResourceException e) {
+      // ignore
+    }
+    return properties.getProperty(key, defaultValue);
   }
 
   @Produces
@@ -61,21 +67,16 @@ public class ConfigurationValueProducer {
       return param.defaultValue();
     }
 
-    try {
-      String value = getValue(param.key());
-      if (value == null || value.trim().length() == 0) {
-        checkMandatory(param);
-        return param.defaultValue();
-      }
-      return value;
-    } catch (MissingResourceException e) {
+    String value = getValue(param.key());
+    if (value == null || value.trim().length() == 0) {
       checkMandatory(param);
       return param.defaultValue();
     }
+    return value;
   }
 
   private void checkMandatory(ConfigurationValue param) {
-    if (param.mandatory()) {
+    if (param.mandatory() && param.defaultValue() == null) {
       throw new IllegalStateException(MessageFormat.format(MANDATORY_PARAM_MISSING, new Object[] { param.key() }));
     }
   }
