@@ -33,9 +33,11 @@ public class UserManagement {
    *
    * @param entity the entity
    */
-  public void insert(User entity) {
+  @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
+  public User insert(@CacheKey User entity) {
     log.debug("insert user {}", entity);
     em.persist(entity);
+    return entity;
   }
 
   /** Delete.
@@ -54,8 +56,7 @@ public class UserManagement {
    * @param entity the entity
    * @return the user
    */
-  @CacheRemove(afterInvocation = false, cacheName = "user-cache")
-  @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class)
+  @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
   public User update(@CacheKey User entity) {
     log.debug("update user {}", entity);
     return em.merge(entity);
@@ -98,7 +99,7 @@ public class UserManagement {
    * @return the user
    * @throws UserNotFoundException 
    */
-  public User findUserByToken(@CacheKey String token) throws UserNotFoundException {
+  public User findUserByToken(String token) throws UserNotFoundException {
     try {
       TypedQuery<User> q = em.createNamedQuery("User.findUserByToken", User.class);
       q.setParameter("token", token);

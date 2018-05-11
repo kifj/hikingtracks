@@ -18,6 +18,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,6 @@ import x1.hiking.model.Coord;
 import x1.hiking.model.Geolocation;
 import x1.hiking.model.Track;
 import x1.hiking.model.TrackData;
-import x1.hiking.utils.ConfigurationValue;
 
 /**
  * Job for updating geolocation tags
@@ -41,12 +41,12 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   private static final String INFO_TEXT = "GeolocationTagUpdater";
 
   @Inject
-  @ConfigurationValue(key = "geolocation.min_distance", defaultValue = "10000")
-  private String minDistance;
+  @ConfigProperty(name = "geolocation.min_distance", defaultValue = "10000")
+  private Double minDistance;
 
   @Inject
-  @ConfigurationValue(key = "geolocation.max_result", defaultValue = "5")
-  private String maxResult;
+  @ConfigProperty(name = "geolocation.max_result", defaultValue = "5")
+  private Integer maxResult;
 
   @PersistenceContext
   private EntityManager em;
@@ -56,10 +56,10 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
 
   @Inject
   private InverseGeocoder geocoder;
-  
+
   @Resource
   private TimerService timerService;
-  
+
   @PostConstruct
   public void setup() {
     Date now = new Date();
@@ -69,7 +69,7 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
       }
     });
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -80,9 +80,9 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   @Override
   public void updateGeolocations() {
     log.trace("Updating Geolocations...");
-    findTracksForGeolocationUpdate(getMaxResult()).forEach(this::updateGeolocationsInternal);
+    findTracksForGeolocationUpdate(maxResult).forEach(this::updateGeolocationsInternal);
     log.trace("Updating Trackdata locations...");
-    findTrackDataForUpdate(getMaxResult()).forEach(this::updateTrackdataLocationInternal);
+    findTrackDataForUpdate(maxResult).forEach(this::updateTrackdataLocationInternal);
   }
 
   /*
@@ -127,7 +127,7 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
   private void updateGeolocationsInternal(Track track) {
     log.trace("Updating geolocations for track {}", track);
     findGeolocation(track).forEach(em::remove);
-    List<Geolocation> geolocations = createGeolocations(track, getMinDistance());
+    List<Geolocation> geolocations = createGeolocations(track, minDistance);
     geolocations.forEach(em::persist);
     track.setGeolocationAvailable(!geolocations.isEmpty());
     log.info("Found {} geolocations for track {}", geolocations.size(), track);
@@ -201,13 +201,4 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
     q.setMaxResults(maxResults);
     return q.getResultList();
   }
-  
-  private int getMaxResult() {
-    return Integer.parseInt(maxResult);
-  }
-
-  private double getMinDistance() {
-    return Double.parseDouble(minDistance);
-  }
-
 }

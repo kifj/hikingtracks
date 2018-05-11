@@ -35,6 +35,7 @@ import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.jwt.JWT;
 import org.apache.oltu.oauth2.jwt.io.JWTClaimsSetWriter;
 import org.apache.oltu.oauth2.jwt.io.JWTHeaderWriter;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,6 @@ import x1.hiking.control.UserManagement;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.utils.AuthorizationConstants;
-import x1.hiking.utils.ConfigurationValue;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -62,11 +62,11 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
   private UserManagement userManagement;
 
   @Inject
-  @ConfigurationValue(key = "google.clientid")
+  @ConfigProperty(name = "google.clientid")
   private String googleClientId;
 
   @Inject
-  @ConfigurationValue(key = "google.clientsecret")
+  @ConfigProperty(name = "google.clientsecret")
   private String googleClientSecret;
 
   /*

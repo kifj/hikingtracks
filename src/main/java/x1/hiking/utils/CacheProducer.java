@@ -5,7 +5,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import org.infinispan.Cache;
-import org.infinispan.manager.EmbeddedCacheManager;
 
 /** CDI producer for Infinispan
  * 
@@ -13,14 +12,13 @@ import org.infinispan.manager.EmbeddedCacheManager;
  *
  */
 public class CacheProducer {
-
-  @Produces
-  @Resource(lookup = "java:jboss/infinispan/container/hikingtracks")
-  private EmbeddedCacheManager defaultCacheManager;
+  
+  @Resource(name = "java:comp/env/cache/feed-cache")  
+  private Cache<String, Object> feedCache;  
   
   @Produces
   @Named("feed-cache")
   private Cache<String, Object> getFeedCache() {
-    return defaultCacheManager.getCache("feed-cache");
+    return feedCache; 
   }
 }

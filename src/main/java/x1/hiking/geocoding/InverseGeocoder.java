@@ -15,13 +15,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import x1.hiking.model.Coord;
 import x1.hiking.model.Geolocation;
 import x1.hiking.model.GeolocationSource;
-import x1.hiking.utils.ConfigurationValue;
 
 /**
  * Facility to retrieve geonames for coordinates
@@ -39,11 +39,11 @@ public class InverseGeocoder {
   private static final String VALUE_LANGUAGE = "en";
 
   @Inject
-  @ConfigurationValue(key = "google.apikey")
+  @ConfigProperty(name = "google.apikey")
   private String key;
 
   @Inject
-  @ConfigurationValue(key = "google.geolocation")
+  @ConfigProperty(name = "google.geolocation")
   private String baseUrl;
 
   public Coord[] getWaypoints(Coord[] coords, double minDistance) {

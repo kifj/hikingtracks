@@ -3,6 +3,7 @@
   <icon id="favicon.jpg"/>
   <display-name>X1 Hiking Tracks</display-name>
   <description>X1 Hiking Tracks</description>
+  <distributable/>
   <persistence-unit-ref>
     <persistence-unit-ref-name>persistence/hikingtracks-emf</persistence-unit-ref-name>
     <persistence-unit-name>HikingTracksPersistenceUnit</persistence-unit-name>
@@ -12,17 +13,9 @@
     <servlet-class>x1.hiking.oauth.OAuthClientServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
-  <servlet>
-    <servlet-name>health</servlet-name>
-    <jsp-file>/health.jsp</jsp-file>
-  </servlet>
   <servlet-mapping>
     <servlet-name>oauth</servlet-name>
     <url-pattern>/oauth</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>health</servlet-name>
-    <url-pattern>/health</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
@@ -36,8 +29,13 @@
     <url-pattern>/secure/*</url-pattern>
   </filter-mapping>
   <resource-env-ref>
-    <resource-env-ref-name>cache/hikingtracks</resource-env-ref-name>  
-    <resource-env-ref-type>org.infinispan.manager.EmbeddedCacheManager</resource-env-ref-type>  
-    <lookup-name>java:jboss/infinispan/container/hikingtracks</lookup-name>  
+    <resource-env-ref-name>cache/feed-cache</resource-env-ref-name>
+    <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
+    <lookup-name>java:jboss/infinispan/cache/hikingtracks/feed-cache</lookup-name>
+  </resource-env-ref>  
+  <resource-env-ref>
+    <resource-env-ref-name>cache/user-cache</resource-env-ref-name>
+    <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
+    <lookup-name>java:jboss/infinispan/cache/hikingtracks/user-cache</lookup-name>
   </resource-env-ref>
 </web-app>

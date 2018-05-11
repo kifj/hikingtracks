@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -49,7 +50,6 @@ import x1.hiking.model.*;
 import x1.hiking.representation.*;
 import x1.hiking.thumbnails.ThumbnailService;
 import x1.hiking.utils.AuthorizationConstants;
-import x1.hiking.utils.ConfigurationValue;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -90,7 +90,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   private Validator validator;
 
   @Inject
-  @ConfigurationValue(key = "feed.url")
+  @ConfigProperty(name = "feed.url")
   private String top;
 
   /*

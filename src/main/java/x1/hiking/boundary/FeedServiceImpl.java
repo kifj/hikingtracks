@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.infinispan.Cache;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
@@ -44,7 +46,6 @@ import x1.hiking.representation.TrackDataInfo;
 import x1.hiking.representation.TrackInfo;
 import x1.hiking.representation.TrackInfoList;
 import x1.hiking.representation.UserInfo;
-import x1.hiking.utils.ConfigurationValue;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -66,20 +67,20 @@ public class FeedServiceImpl implements FeedService {
   private Cache<String, Object> cache;
 
   @Inject
-  @ConfigurationValue(key = "feed.author")
+  @ConfigProperty(name = "feed.author")
   private String author;
   
   @Inject
-  @ConfigurationValue(key = "feed.title")
+  @ConfigProperty(name = "feed.title")
   private String title;
   
   @Inject
-  @ConfigurationValue(key = "feed.id")
+  @ConfigProperty(name = "feed.id")
   private String id;
   
   @Inject
-  @ConfigurationValue(key = "feed.url")
-  private String top;
+  @ConfigProperty(name = "feed.url")
+  private String baseUrl;
 
   @EJB
   private TrackService service;
@@ -105,11 +106,11 @@ public class FeedServiceImpl implements FeedService {
   public Feed getTracks() {
     try {
       log.info("get feed");
-      Feed feed = getFromCache(cache);
-      if (feed != null) {
-        return feed;
+      Optional<Feed> cached = getFromCache(cache);
+      if (cached.isPresent()) {
+        return cached.get();
       }
-      feed = new Feed();
+      Feed feed = new Feed();
       TrackInfoList list = getTrackInfoList();
       String self = getRequestURL();
       setFeedProperties(feed, list, self);
@@ -131,12 +132,12 @@ public class FeedServiceImpl implements FeedService {
     cache.put(SEP, out.toString());
   }
 
-  private Feed getFromCache(Cache<String, Object> cache) throws JAXBException {
-    Feed feed = null;
+  private Optional<Feed> getFromCache(Cache<String, Object> cache) throws JAXBException {
+    Optional<Feed> feed = Optional.empty();
     String value = (String) cache.get(SEP);
     if (value != null) {
       StringReader in = new StringReader(value);
-      return (Feed) unmarshaller.unmarshal(in);
+      return Optional.of((Feed)unmarshaller.unmarshal(in));
     }
     return feed;
   }
@@ -158,7 +159,7 @@ public class FeedServiceImpl implements FeedService {
       if (track == null) {
         throw new NotFoundException();
       }
-      String path = UriBuilder.fromPath(getTop() + PATH_TRACKS).path("{0}").build(track.getName()).toString();
+      String path = UriBuilder.fromPath(baseUrl + PATH_TRACKS).path("{0}").build(track.getName()).toString();
       TrackInfo trackInfo = new TrackInfo(track, false, false, path, null);
       Image image = imageService.findFirstImage(track);
       if (image != null) {
@@ -178,7 +179,7 @@ public class FeedServiceImpl implements FeedService {
     List<Track> tracks = service.findTracks(null, options);
     List<TrackInfo> trackInfos = new ArrayList<>();
     for (Track track : tracks) {
-      String path = UriBuilder.fromPath(getTop() + PATH_TRACKS).path("{0}").build(track.getName()).toString();
+      String path = UriBuilder.fromPath(baseUrl + PATH_TRACKS).path("{0}").build(track.getName()).toString();
       TrackInfo trackInfo = new TrackInfo(track, false, false, path, null);
       Image image = imageService.findFirstImage(track);
       if (image != null) {
@@ -201,7 +202,7 @@ public class FeedServiceImpl implements FeedService {
     if (published != null) {
       entry.setPublished(published);
     }
-    Link link = new Link(null, UriBuilder.fromPath(getTop() + DETAIL_PAGE_PATH).fragment(trackInfo.getName()).build());
+    Link link = new Link(null, UriBuilder.fromPath(baseUrl + DETAIL_PAGE_PATH).fragment(trackInfo.getName()).build());
     entry.getLinks().add(link);
     link = new Link("self", UriBuilder.fromPath(url).build());
     entry.getLinks().add(link);
@@ -285,9 +286,9 @@ public class FeedServiceImpl implements FeedService {
   }
 
   private void setFeedProperties(Feed feed, TrackInfoList list, String self) throws URISyntaxException {
-    feed.getAuthors().add(new Person(getAuthor()));
-    feed.setTitle(getTitle());
-    feed.setId(new URI(getId()));
+    feed.getAuthors().add(new Person(author));
+    feed.setTitle(title);
+    feed.setId(new URI(id));
     Date updated = getUpdated(list);
     if (updated != null) {
       feed.setUpdated(updated);
@@ -295,8 +296,8 @@ public class FeedServiceImpl implements FeedService {
       feed.setUpdated(new Date());
     }
 
-    if (StringUtils.isNotEmpty(getTop())) {
-      feed.getLinks().add(new Link(null, getTop()));
+    if (StringUtils.isNotEmpty(baseUrl)) {
+      feed.getLinks().add(new Link(null, baseUrl));
     }
     feed.getLinks().add(new Link("self", self));
   }
@@ -311,66 +312,6 @@ public class FeedServiceImpl implements FeedService {
       }
     }
     return result;
-  }
-
-  /**
-   * @return the author
-   */
-  public String getAuthor() {
-    return author;
-  }
-
-  /**
-   * @param author
-   *          the author to set
-   */
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
-  /**
-   * @return the title
-   */
-  public String getTitle() {
-    return title;
-  }
-
-  /**
-   * @param title
-   *          the title to set
-   */
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  /**
-   * @return the id
-   */
-  public String getId() {
-    return id;
-  }
-
-  /**
-   * @param id
-   *          the id to set
-   */
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * @return the top
-   */
-  public String getTop() {
-    return top;
-  }
-
-  /**
-   * @param top
-   *          the top to set
-   */
-  public void setTop(String top) {
-    this.top = top;
   }
 
   private String getRequestURL() {

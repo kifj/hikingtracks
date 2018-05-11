@@ -5,13 +5,12 @@
       <module name="org.jboss.as.jmx" />
       <module name="org.infinispan" />
       <module name="org.infinispan.commons" />
-      <module name="org.infinispan.client.hotrod" />
-      <module name="org.jgroups"/>
       <module name="org.jboss.resteasy.resteasy-atom-provider" />
       <module name="com.fasterxml.jackson.core.jackson-core" />
       <module name="com.fasterxml.jackson.core.jackson-annotations" />
       <module name="org.apache.commons.codec"/>
       <module name="org.apache.httpcomponents" />
+      <module name="org.wildfly.extension.microprofile.config"/>
     </dependencies>
   </deployment>
 </jboss-deployment-structure>
