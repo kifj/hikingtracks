@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -60,7 +61,7 @@ import x1.hiking.utils.ServletHelper;
 public class HikingTracksRestServiceImpl implements HikingTracksRestService, AuthorizationConstants {
   private static final long serialVersionUID = 8237702332418932465L;
   private final Logger log = LoggerFactory.getLogger(getClass());
-  private static final String IMG_PLACEHOLDER = "images/placeholder.jpg";
+  private static final String IMG_PLACEHOLDER = "placeholder.jpg";
 
   @Context
   private Request request;
@@ -563,7 +564,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
         return getImage(name, id, user, type);
       }
       return getImage(name, id, user);
-    } catch (URISyntaxException e) {
+    } catch (IOException | URISyntaxException e) {
       log.warn(null, e);
       throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
     }
@@ -595,16 +596,16 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private Response getImage(final String name, final Integer id, User user, ThumbnailType type)
-      throws URISyntaxException {
+      throws IOException {
     Thumbnail thumbnail = thumbnailService.findThumbnail(user, name, id, type);
     if (thumbnail == null && user != null) {
       thumbnail = thumbnailService.findThumbnail(null, name, id, type);
     }
     if (thumbnail == null) {
       CacheControl cc = new CacheControl();
-      cc.setMaxAge(0);
-      return Response.status(TEMPORARY_REDIRECT).location(new URI(getTop() + SEP + IMG_PLACEHOLDER)).cacheControl(cc)
-          .build();
+      cc.setMaxAge(15);
+      byte[] placeholder = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(IMG_PLACEHOLDER));
+      return Response.status(OK).cacheControl(cc).entity(new BinaryStreamingOutput(placeholder)).build();
     }
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(thumbnail);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);

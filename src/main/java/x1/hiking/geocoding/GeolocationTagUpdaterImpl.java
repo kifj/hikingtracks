@@ -19,6 +19,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,8 +131,15 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
     List<Geolocation> geolocations = createGeolocations(track, minDistance);
     geolocations.forEach(em::persist);
     track.setGeolocationAvailable(!geolocations.isEmpty());
+    if (!geolocations.isEmpty() && StringUtils.isEmpty(track.getLocation())) {
+      updateTrackLocation(track, geolocations.get(0));
+    }
     log.info("Found {} geolocations for track {}", geolocations.size(), track);
     trackService.update(track);
+  }
+
+  private void updateTrackLocation(Track track, Geolocation geolocation) {
+    track.setLocation(geolocation.getLocation() + ", " + geolocation.getCountry());
   }
 
   private List<Geolocation> createGeolocations(Track track, double minDistance) {
