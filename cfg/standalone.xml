@@ -561,7 +561,9 @@
             <client-config name="Standard-Client-Config"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:weld:4.0"/>
-        <subsystem xmlns="urn:wildfly:microprofile-config:1.0" />
+        <subsystem xmlns="urn:wildfly:microprofile-config:1.0">
+            <config-source name="hikingtracks" dir="/etc/hikingtracks" />
+        </subsystem>
         <subsystem xmlns="urn:wildfly:microprofile-health:1.0">
             <http path="/-system/health"/>
         </subsystem>
