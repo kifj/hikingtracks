@@ -1,16 +1,12 @@
 package x1.hiking.geocoding;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
@@ -57,19 +53,6 @@ public class GeolocationTagUpdaterImpl implements GeolocationTagUpdater {
 
   @Inject
   private InverseGeocoder geocoder;
-
-  @Resource
-  private TimerService timerService;
-
-  @PostConstruct
-  public void setup() {
-    Date now = new Date();
-    timerService.getAllTimers().forEach(timer -> {
-      if (timer.isPersistent() && INFO_TEXT.equals(timer.getInfo()) && timer.getNextTimeout().before(now)) {
-        timer.cancel();
-      }
-    });
-  }
 
   /*
    * (non-Javadoc)

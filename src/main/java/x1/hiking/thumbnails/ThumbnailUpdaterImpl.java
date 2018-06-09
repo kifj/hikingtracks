@@ -1,16 +1,12 @@
 package x1.hiking.thumbnails;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.TimerService;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
@@ -39,19 +35,6 @@ public class ThumbnailUpdaterImpl implements ThumbnailUpdater {
   
   @EJB
   private ImageService imageService;
-
-  @Resource
-  private TimerService timerService;
-  
-  @PostConstruct
-  public void setup() {
-    Date now = new Date();
-    timerService.getAllTimers().forEach(timer -> {
-      if (timer.isPersistent() && INFO_TEXT.equals(timer.getInfo()) && timer.getNextTimeout().before(now)) {
-        timer.cancel();
-      }
-    });
-  }
 
   /*
    * (non-Javadoc)

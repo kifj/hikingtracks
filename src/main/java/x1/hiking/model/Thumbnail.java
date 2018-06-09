@@ -12,18 +12,16 @@ import javax.persistence.*;
     @Index(name = "idx_thumbnail_image_type", unique = true, columnList = Thumbnail.ATTR_TYPE + "," + Thumbnail.COL_IMAGE_ID),
     @Index(name = "idx_thumbnail_image_id", columnList = Thumbnail.COL_IMAGE_ID, unique = false) 
 })
-@NamedQueries({
-    @NamedQuery(name = "Thumbnail.findThumbnailsByImageAndType", 
-      query = "SELECT t FROM Thumbnail t WHERE t.image = :image AND t.type = :type ORDER BY t.id"),
-    @NamedQuery(name = "Thumbnail.findThumbnailByUserAndNameAndId",
-      query = "SELECT t FROM Thumbnail t "
-            + "WHERE t.image.track.user = :user AND t.image.track.name = :name "
-            + "AND t.image.id = :id AND t.type = :type"),
-    @NamedQuery(name = "Thumbnail.findPublicThumbnailByNameAndId",
-      query = "SELECT t FROM Thumbnail t "
-            + "WHERE t.image.track.published = true AND t.image.track.name = :name "
-            + "AND t.image.id = :id AND t.type = :type")
-})
+@NamedQuery(name = "Thumbnail.findThumbnailsByImageAndType", 
+  query = "SELECT t FROM Thumbnail t WHERE t.image = :image AND t.type = :type ORDER BY t.id")
+@NamedQuery(name = "Thumbnail.findThumbnailByUserAndNameAndId",
+  query = "SELECT t FROM Thumbnail t "
+        + "WHERE t.image.track.user = :user AND t.image.track.name = :name "
+        + "AND t.image.id = :id AND t.type = :type")
+@NamedQuery(name = "Thumbnail.findPublicThumbnailByNameAndId",
+  query = "SELECT t FROM Thumbnail t "
+        + "WHERE t.image.track.published = true AND t.image.track.name = :name "
+        + "AND t.image.id = :id AND t.type = :type")
 public class Thumbnail implements Model {
   private static final long serialVersionUID = -3206759449507185411L;
   public static final String COL_IMAGE_ID = "image_id";

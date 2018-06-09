@@ -20,24 +20,22 @@ import javax.persistence.*;
     @Index(name = "idx_track_location", columnList = Track.ATTR_LOCATION, unique = false),
     @Index(name = "idx_track_user_id", columnList = Track.COL_USER_ID, unique = false)
   })
-@NamedQueries({
-    @NamedQuery(name = "Track.findTrackByUserAndName", 
-      query = "SELECT t FROM Track t WHERE t.user = :user AND t.name = :name"),
-    @NamedQuery(name = "Track.findPublicTrackByName", 
-      query = "SELECT t FROM Track t WHERE t.published = true AND t.name = :name"),
-    @NamedQuery(name = "Track.nextTrack", 
-      query = "SELECT t FROM Track t WHERE t.user = :user AND t.id < :id ORDER BY t.id DESC"),
-    @NamedQuery(name = "Track.previousTrack", 
-      query = "SELECT t FROM Track t WHERE t.user = :user AND t.id > :id ORDER BY t.id ASC"),
-    @NamedQuery(name = "Track.nextPublicTrack", 
-      query = "SELECT t FROM Track t WHERE t.published = true AND t.id < :id ORDER BY t.id DESC"),
-    @NamedQuery(name = "Track.previousPublicTrack", 
-      query = "SELECT t FROM Track t WHERE t.published = true AND t.id > :id ORDER BY t.id ASC"),
-    @NamedQuery(name = "Track.findTracksForGeolocationUpdate", 
-      query = "SELECT t FROM Track t WHERE t.geolocationAvailable IS NULL"),
-    @NamedQuery(name = "Track.countTracks",
-      query = "SELECT COUNT(t.id) FROM Track t")
-    })
+@NamedQuery(name = "Track.findTrackByUserAndName", 
+  query = "SELECT t FROM Track t WHERE t.user = :user AND t.name = :name")
+@NamedQuery(name = "Track.findPublicTrackByName", 
+  query = "SELECT t FROM Track t WHERE t.published = true AND t.name = :name")
+@NamedQuery(name = "Track.nextTrack", 
+  query = "SELECT t FROM Track t WHERE t.user = :user AND t.id < :id ORDER BY t.id DESC")
+@NamedQuery(name = "Track.previousTrack", 
+  query = "SELECT t FROM Track t WHERE t.user = :user AND t.id > :id ORDER BY t.id ASC")
+@NamedQuery(name = "Track.nextPublicTrack", 
+  query = "SELECT t FROM Track t WHERE t.published = true AND t.id < :id ORDER BY t.id DESC")
+@NamedQuery(name = "Track.previousPublicTrack", 
+  query = "SELECT t FROM Track t WHERE t.published = true AND t.id > :id ORDER BY t.id ASC")
+@NamedQuery(name = "Track.findTracksForGeolocationUpdate", 
+  query = "SELECT t FROM Track t WHERE t.geolocationAvailable IS NULL")
+@NamedQuery(name = "Track.countTracks",
+  query = "SELECT COUNT(t.id) FROM Track t")
 public class Track implements Model {
   private static final long serialVersionUID = -8607582176696499706L;
   public static final String ATTR_GEOLOCATION = "geolocation";

@@ -17,8 +17,7 @@ import org.apache.commons.lang3.StringUtils;
     @Index(name = "idx_geolocation_country", columnList = Geolocation.ATTR_COUNTRY, unique = false),
     @Index(name = "idx_geolocation_track_id", columnList = Geolocation.COL_TRACK_ID, unique = false) 
 })
-@NamedQueries({
-    @NamedQuery(name = "Geolocation.findByTrack", query = "SELECT g FROM Geolocation g WHERE g.track = :track") })
+@NamedQuery(name = "Geolocation.findByTrack", query = "SELECT g FROM Geolocation g WHERE g.track = :track")
 public class Geolocation implements Model {
   private static final long serialVersionUID = 5320955152495158323L;
   public static final String ATTR_LOCATION = "location";

@@ -15,15 +15,14 @@ import javax.persistence.*;
     @Index(name = "idx_image_nr", columnList = Image.COL_NR, unique = false), 
     @Index(name = "idx_image_track_id", columnList = Image.COL_TRACK_ID, unique = false) 
 })
-@NamedQueries({
-    @NamedQuery(name = "Image.findImageByUserAndNameAndId", 
-        query = "SELECT i FROM Image i WHERE i.track.user = :user AND i.track.name = :name AND i.id = :id ORDER by i.number"),
-    @NamedQuery(name = "Image.findPublicImageByNameAndId", 
-        query = "SELECT i FROM Image i WHERE i.track.published = true AND i.track.name = :name AND i.id = :id ORDER by i.number"),
-    @NamedQuery(name = "Image.findMissingThumbnails", 
-        query = "SELECT i FROM Image i WHERE i.thumbnails IS EMPTY"),
-    @NamedQuery(name = "Image.getImages", 
-        query = "SELECT i FROM Image i WHERE i.track = :track ORDER BY i.number"), })
+@NamedQuery(name = "Image.findImageByUserAndNameAndId", 
+    query = "SELECT i FROM Image i WHERE i.track.user = :user AND i.track.name = :name AND i.id = :id ORDER by i.number")
+@NamedQuery(name = "Image.findPublicImageByNameAndId", 
+    query = "SELECT i FROM Image i WHERE i.track.published = true AND i.track.name = :name AND i.id = :id ORDER by i.number")
+@NamedQuery(name = "Image.findMissingThumbnails", 
+    query = "SELECT i FROM Image i WHERE i.thumbnails IS EMPTY")
+@NamedQuery(name = "Image.getImages", 
+    query = "SELECT i FROM Image i WHERE i.track = :track ORDER BY i.number")
 @Cacheable
 public class Image implements Model {
   private static final long serialVersionUID = 1260256371051142805L;

@@ -17,9 +17,8 @@ import org.apache.commons.lang3.StringUtils;
   @Index(name = "idx_user_name", columnList = User.ATTR_NAME, unique = false),
   @Index(name = "idx_user_token", columnList = User.ATTR_TOKEN, unique = true),
   @Index(name = "idx_user_email", columnList = User.ATTR_EMAIL, unique = true) })
-@NamedQueries({ 
-  @NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
-  @NamedQuery(name = "User.findUserByToken", query = "SELECT u FROM User u WHERE u.token= :token") })
+@NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM User u WHERE u.email = :email")
+@NamedQuery(name = "User.findUserByToken", query = "SELECT u FROM User u WHERE u.token= :token")
 @Cacheable
 public class User implements Model {
   private static final long serialVersionUID = 7944299851758333310L;

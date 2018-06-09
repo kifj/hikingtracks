@@ -261,6 +261,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
   public void delete(Thumbnail entity) {
     log.debug("delete thumbnail {}", entity);
     entity = em.merge(entity);
+    entity.getImage().getThumbnails().remove(entity);
     em.remove(entity);
     em.flush();
   }
