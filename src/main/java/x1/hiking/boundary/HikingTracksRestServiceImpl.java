@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -258,7 +259,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private Link createTrackInfoLink(String name, String rel) {
-    String path = UriBuilder.fromPath(getTop() + PATH_SERVICE + PATH_TRACKS).path("{0}").build(name).toString();
+    String path = UriBuilder.fromPath(top + PATH_SERVICE + PATH_TRACKS).path("{0}").build(name).toString();
     Link l = new Link();
     l.setHref(path);
     l.setRel(rel);
@@ -285,6 +286,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * @see x1.hiking.rest.HikingTracksRestService#deleteTrack(java.lang.String)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteTrack(String name) {
     try {
       User user = findUser();
@@ -312,6 +314,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * x1.hiking.rest.HikingTracksRestService#insertTrack(x1.hiking.model.Track)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertTrack(TrackInfo trackInfo) {
     try {
       User user = findUser();
@@ -361,6 +364,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * x1.hiking.model.Track)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateTrack(String name, TrackInfo track) {
     try {
       User user = findUser();
@@ -523,6 +527,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * @see x1.hiking.rest.HikingTracksRestService#updateUser(x1.hiking.model.User)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateUser(UserInfo user) {
     validate(user);
     User oldUser = findUser();
@@ -539,6 +544,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * @see x1.hiking.rest.HikingTracksRestService#deleteUser()
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteUser() {
     User user = findUser();
     log.info("delete user [{}]", user);
@@ -557,6 +563,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response getImage(final String name, final Integer id, ThumbnailType type) {
     User user = findUser(true);
     try {
@@ -621,6 +628,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * @see x1.hiking.rest.HikingTracksRestService#insertImage(java.lang.String)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertImage(final String name, final String filename, final byte[] data) {
     User user = findUser();
     Track track = trackService.findTrack(user, name, true);
@@ -648,6 +656,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateImage(final String name, final String filename, final Integer id, final byte[] data) {
     User user = findUser();
     Track track = trackService.findTrack(user, name, true);
@@ -692,6 +701,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteImage(final String name, final Integer id) {
     User user = findUser();
     Image image = imageService.findImage(user, name, id);
@@ -710,6 +720,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response getTrackData(final String name, final Integer id) {
     User user = findUser(true);
     TrackData td = trackService.findTrackData(user, name, id);
@@ -744,6 +755,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.String)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertTrackData(final String name, final String filename, final byte[] incomingXML) {
     User user = findUser();
     Track track = trackService.findTrack(user, name, false);
@@ -769,6 +781,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateTrackData(final String name, final String filename, final Integer id, byte[] incomingXML) {
     User user = findUser();
     Track track = trackService.findTrack(user, name, true);
@@ -838,6 +851,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * java.lang.Integer)
    */
   @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteTrackData(final String name, final Integer id) {
     User user = findUser();
     TrackData td = trackService.findTrackData(user, name, id);
@@ -882,21 +896,6 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     }
 
     private byte[] data;
-  }
-
-  /**
-   * @return the top
-   */
-  public String getTop() {
-    return top;
-  }
-
-  /**
-   * @param top
-   *          the top to set
-   */
-  public void setTop(String top) {
-    this.top = top;
   }
 
   private void validate(Representation r) {

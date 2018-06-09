@@ -3,9 +3,7 @@ package x1.hiking.control;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ejb.Local;
-import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -51,9 +49,6 @@ public class TrackServiceBean implements TrackService {
 
   @PersistenceContext
   private EntityManager em;
-
-  @Resource
-  private SessionContext ctx;
 
   /*
    * (non-Javadoc)
@@ -287,12 +282,12 @@ public class TrackServiceBean implements TrackService {
    * java.lang.String, boolean)
    */
   @Override
-  @TransactionAttribute(TransactionAttributeType.SUPPORTS)
   public Track findTrack(User user, String name, boolean loadAll) {
-    Track t = ctx.getBusinessObject(TrackService.class).findTrack(user, name);
+    Track t = findTrack(user, name);
     if (t != null && loadAll) {
-      t.setImages(ctx.getBusinessObject(TrackService.class).loadImages(t));
-      t.setTrackData(ctx.getBusinessObject(TrackService.class).loadTrackData(t));
+      em.detach(t);
+      t.setImages(loadImages(t));
+      t.setTrackData(loadTrackData(t));
     }
     return t;
   }
@@ -323,10 +318,11 @@ public class TrackServiceBean implements TrackService {
   @Override
   @TransactionAttribute(TransactionAttributeType.SUPPORTS)
   public Track findTrack(String name, boolean loadAll) {
-    Track t = ctx.getBusinessObject(TrackService.class).findTrack(name);
+    Track t = findTrack(name);
     if (t != null && loadAll) {
-      t.setImages(ctx.getBusinessObject(TrackService.class).loadImages(t));
-      t.setTrackData(ctx.getBusinessObject(TrackService.class).loadTrackData(t));
+      em.detach(t);
+      t.setImages(loadImages(t));
+      t.setTrackData(loadTrackData(t));
     }
     return t;
   }
@@ -337,6 +333,7 @@ public class TrackServiceBean implements TrackService {
    * @see x1.hiking.control.TrackService#findTrack(java.lang.String)
    */
   @Override
+  @TransactionAttribute(TransactionAttributeType.SUPPORTS)
   public Track findTrack(String name) {
     TypedQuery<Track> q = em.createNamedQuery("Track.findPublicTrackByName", Track.class);
     q.setParameter(PARAM_NAME, name);
