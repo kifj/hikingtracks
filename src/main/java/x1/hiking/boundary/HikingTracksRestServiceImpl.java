@@ -101,6 +101,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * @see x1.hiking.rest.HikingTracksRestService#getTracks()
    */
   @Override
+  @Transactional(Transactional.TxType.SUPPORTS)
   public Response getTracks(String name, Integer startPosition, Integer maxResults, boolean onlyPublished,
       ThumbnailType thumbnail, ActivityType activity) {
     log.info("get tracks [name={}, activity={}]", name, activity);
@@ -150,6 +151,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   @Override
+  @Transactional(Transactional.TxType.SUPPORTS)
   public Response getTracks(Search search) {
     log.info("get tracks {}", search);
 
@@ -205,6 +207,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * boolean)
    */
   @Override
+  @Transactional(Transactional.TxType.SUPPORTS)
   public Response getTrack(String name, boolean includePublished) {
     try {
       log.info("get track [name={}, includePublished={}]", name, includePublished);

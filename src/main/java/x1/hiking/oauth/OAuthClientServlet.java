@@ -267,10 +267,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
   private User checkUser(String token, String email, Date expires) {
     User user;
     try {
-      user = userManagement.findUserByEmail(email);
-      user.setToken(token);
-      user.setExpires(expires);
-      user = userManagement.update(user);
+      user = userManagement.login(email, token, expires);
     } catch (UserNotFoundException e) {
       user = new User();
       user.setEmail(email);

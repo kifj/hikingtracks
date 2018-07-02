@@ -1,5 +1,7 @@
 package x1.hiking.control;
 
+import java.util.Date;
+
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResult;
@@ -62,6 +64,22 @@ public class UserManagement {
     return em.merge(entity);
   }
 
+  /** Update.
+  *
+  * @param entity the entity
+  * @return the user
+  */
+ @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
+ @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+ public User login(@CacheKey String email, String token, Date expires) throws UserNotFoundException {
+   User user = findUserByEmail(email);
+   user.setToken(token);
+   user.setExpires(expires);
+
+   log.debug("update user {}", user);
+   return em.merge(user);
+ }
+
   /**
    * Find user.
    *
@@ -99,6 +117,7 @@ public class UserManagement {
    * @return the user
    * @throws UserNotFoundException 
    */
+  @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
   public User findUserByToken(String token) throws UserNotFoundException {
     try {
       TypedQuery<User> q = em.createNamedQuery("User.findUserByToken", User.class);
