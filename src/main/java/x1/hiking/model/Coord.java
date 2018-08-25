@@ -74,8 +74,6 @@ public class Coord implements Serializable {
   /**
    * Get a string representation of the latitude and longitude in the simplified
    * form 52°39'27"N 143'4"E
-   * 
-   * @return
    */
   public String simpleLocationString() {
     DecimalFormat decimalFormat = new DecimalFormat(COORDINATES_PRECISION);

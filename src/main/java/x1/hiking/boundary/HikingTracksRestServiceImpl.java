@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -345,18 +344,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private void validateForInsert(TrackInfo track) {
-    Iterator<TrackDataInfo> it1 = track.getTrackData().iterator();
-    while (it1.hasNext()) {
-      if (!it1.next().validateFilename()) {
-        it1.remove();
-      }
-    }
-    Iterator<ImageInfo> it2 = track.getImages().iterator();
-    while (it2.hasNext()) {
-      if (!it2.next().validateFilename()) {
-        it2.remove();
-      }
-    }
+    track.getTrackData().removeIf(trackDataInfo -> !trackDataInfo.validateFilename());
+    track.getImages().removeIf(imageInfo -> !imageInfo.validateFilename());
     validate(track);
   }
 
@@ -420,13 +409,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
         updateTrackData(foundTd, td, trackToUpdate);
       }
     }
-    Iterator<TrackData> it = trackToUpdate.getTrackData().iterator();
-    while (it.hasNext()) {
-      TrackData td = it.next();
-      if (td.getId() != null && !foundTd.containsKey(td.getId())) {
-        it.remove();
-      }
-    }
+    trackToUpdate.getTrackData().removeIf(td -> td.getId() != null && !foundTd.containsKey(td.getId()));
   }
 
   private void updateImages(TrackInfo track, Track trackToUpdate) {
@@ -438,13 +421,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       }
       number++;
     }
-    Iterator<Image> it = trackToUpdate.getImages().iterator();
-    while (it.hasNext()) {
-      Image img = it.next();
-      if (img.getId() != null && !foundImg.containsKey(img.getId())) {
-        it.remove();
-      }
-    }
+    trackToUpdate.getImages().removeIf(img -> img.getId() != null && !foundImg.containsKey(img.getId()));
   }
 
   private void updateTrackData(Map<Integer, TrackData> foundTd, TrackDataInfo trackData, Track trackToUpdate) {

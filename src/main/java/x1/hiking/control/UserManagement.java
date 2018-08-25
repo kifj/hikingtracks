@@ -96,7 +96,7 @@ public class UserManagement {
    *
    * @param email the email
    * @return the user
-   * @throws UserNotFoundException 
+   * @throws UserNotFoundException if user is not found
    */
   @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class)
   public User findUserByEmail(@CacheKey String email) throws UserNotFoundException {
@@ -115,7 +115,7 @@ public class UserManagement {
    *
    * @param token the token
    * @return the user
-   * @throws UserNotFoundException 
+   * @throws UserNotFoundException if user is not found
    */
   @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
   public User findUserByToken(String token) throws UserNotFoundException {

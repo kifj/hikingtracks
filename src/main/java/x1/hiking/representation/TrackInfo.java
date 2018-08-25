@@ -2,7 +2,6 @@ package x1.hiking.representation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -88,7 +87,7 @@ public class TrackInfo implements Representation {
     }
     setReadOnly(!track.getUser().equals(user));
     if (withImages) {
-      Collections.sort(track.getImages(), new ImageNumberComparator());
+      track.getImages().sort(new ImageNumberComparator());
       for (Image image : track.getImages()) {
         addImage(new ImageInfo(image, path + SEP + PATH_IMAGES));
       }

@@ -48,7 +48,7 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
     try {
       log.trace("get user for token: {}", token);
       User user = userManagement.findUserByToken(token);
-      if (user == null || user.getExpires() == null || user.getExpires().compareTo(new Date()) < 0) {
+      if (user == null || (user.getExpires() != null && user.getExpires().compareTo(new Date()) < 0)) {
         if (allowPublic) {
           return null;
         }

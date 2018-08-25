@@ -1,6 +1,7 @@
 package x1.hiking.oauth;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -11,6 +12,9 @@ import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,10 +27,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
+import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
 import org.apache.oltu.oauth2.client.response.GitHubTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.oltu.oauth2.client.response.OAuthResourceResponse;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.OAuthProviderType;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
@@ -68,6 +75,14 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
   @Inject
   @ConfigProperty(name = "google.clientsecret")
   private String googleClientSecret;
+
+  @Inject
+  @ConfigProperty(name = "github.clientid")
+  private String githubClientId;
+
+  @Inject
+  @ConfigProperty(name = "github.clientsecret")
+  private String githubClientSecret;
 
   /*
    * (non-Javadoc)
@@ -174,7 +189,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
         return queryParams.get(PARAM_FROM);
       }
     }
-    return null;
+    return "/";
   }
 
   private OAuthParams buildOAuthParams(OAuthProviderType oauthProvider, HttpServletRequest request) {
@@ -188,6 +203,11 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       oauthParams.setClientId(googleClientId);
       oauthParams.setClientSecret(googleClientSecret);
       oauthParams.setScope("openid email");
+      break;
+    case GITHUB:
+      oauthParams.setClientId(githubClientId);
+      oauthParams.setClientSecret(githubClientSecret);
+      oauthParams.setScope("user:email");
       break;
     default:
       throw new NotImplementedException("No implementation for " + oauthProvider + " available");
@@ -223,15 +243,23 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
 
       OAuthClient client = new OAuthClient(new URLConnectionClient());
       Class<? extends OAuthAccessTokenResponse> cl = getOAuthAccessTokenResponse(oauthProvider);
-
       OAuthAccessTokenResponse oauthResponse = client.accessToken(oauthRequest, cl);
+      client.shutdown();
+
       oauthParams.setAccessToken(oauthResponse.getAccessToken());
       oauthParams.setExpiresIn(oauthResponse.getExpiresIn());
       oauthParams.setRefreshToken(oauthResponse.getRefreshToken());
       oauthParams.setScope(oauthResponse.getScope());
 
-      if (oauthProvider == OAuthProviderType.GOOGLE) {
-        verifyOpenIdConnectResponse(oauthParams, (OpenIdConnectResponse) oauthResponse, "email");
+      switch (oauthProvider) {
+      case GOOGLE:
+        verifyResponse(oauthParams, (OpenIdConnectResponse) oauthResponse, "email");
+        break;
+      case GITHUB:
+        verifyResponse(oauthParams, (GitHubTokenResponse) oauthResponse);
+        break;
+      default:
+        throw new NotImplementedException(oauthProvider.name());
       }
     } catch (OAuthSystemException | OAuthProblemException e) {
       oauthParams.setErrorMessage(e.getMessage());
@@ -242,8 +270,8 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return oauthParams;
   }
 
-  private void verifyOpenIdConnectResponse(OAuthParams oauthParams, OpenIdConnectResponse openIdConnectResponse,
-      String emailField) throws MalformedURLException {
+  private void verifyResponse(OAuthParams oauthParams, OpenIdConnectResponse openIdConnectResponse, String emailField)
+      throws MalformedURLException {
     JWT idToken = openIdConnectResponse.getIdToken();
     oauthParams.setIdToken(idToken.getRawString());
 
@@ -258,13 +286,40 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       if (oauthParams.getExpiresIn() != null) {
         expires = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
       }
-      checkUser(oauthParams.getAccessToken(), email, expires);
+      checkUser(oauthParams.getAccessToken(), email, expires, null);
     } else {
       oauthParams.setAccessToken(null);
     }
   }
 
-  private User checkUser(String token, String email, Date expires) {
+  private void verifyResponse(OAuthParams oauthParams, GitHubTokenResponse githubTokenResponse)
+      throws OAuthProblemException, OAuthSystemException {
+    OAuthClientRequest bearerClientRequest = new OAuthBearerClientRequest("https://api.github.com/user")
+        .setAccessToken(oauthParams.getAccessToken()).buildQueryMessage();
+    OAuthClient client = new OAuthClient(new URLConnectionClient());
+
+    OAuthResourceResponse resourceResponse = client.resource(bearerClientRequest, OAuth.HttpMethod.GET,
+        OAuthResourceResponse.class);
+    String body = resourceResponse.getBody();
+    try (JsonReader reader = Json.createReader(new StringReader(body))) {
+      JsonObject userData = reader.readObject();
+      String email = userData.getString("email");
+      log.debug("Access Token: {}, Email: {}", oauthParams.getAccessToken(), email);
+      if (StringUtils.isNotEmpty(email)) {
+        Date expires = null;
+        if (oauthParams.getExpiresIn() != null) {
+          expires = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
+        }
+        String name = userData.getString("name");
+        checkUser(oauthParams.getAccessToken(), email, expires, name);
+      } else {
+        oauthParams.setAccessToken(null);
+      }
+    }
+    client.shutdown();
+  }
+
+  private User checkUser(String token, String email, Date expires, String name) {
     User user;
     try {
       user = userManagement.login(email, token, expires);
@@ -273,6 +328,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       user.setEmail(email);
       user.setToken(token);
       user.setExpires(expires);
+      user.setName(name);
       userManagement.insert(user);
     }
     return user;
@@ -285,6 +341,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
         if (user.getExpires() == null || user.getExpires().before(new Date())) {
           return null;
         }
+        return user;
       } catch (UserNotFoundException e) {
         return null;
       }

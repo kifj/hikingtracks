@@ -977,3 +977,7 @@ input.button {
 	overflow-x: auto;
 	overflow-y: hidden;
 }
+
+#openid_btns input {
+	max-width: 450px;
+}
