@@ -62,7 +62,7 @@ public class InverseGeocoder {
         }
       }
     }
-    return result.toArray(new Coord[result.size()]);
+    return result.toArray(new Coord[0]);
   }
 
   public Geolocation[] getLocationsForWaypoints(Coord[] coords, double minDistance) {
@@ -81,7 +81,7 @@ public class InverseGeocoder {
       obj.getJsonArray("results").getValuesAs(JsonObject.class).forEach(
           result -> extractGeolocation(geolocations, new Geolocation(waypoint, GeolocationSource.TRACKDATA), result));
     }
-    return geolocations.toArray(new Geolocation[geolocations.size()]);
+    return geolocations.toArray(new Geolocation[0]);
   }
 
   private void extractGeolocation(List<Geolocation> result, Geolocation geolocation, JsonObject jsonObject) {

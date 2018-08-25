@@ -54,7 +54,7 @@
             <li id="login"><a id="current" href="#">{{nav_login}}</a></li>
             <li id="logout"><a href="openid?logout=true">{{nav_logout}}</a></li>
             <li><a href="pages/about.html">{{nav_about}}</a></li>
-            <li id="language"><a id="current-language" href="#"><img class="rss" /></a>
+            <li id="language"><a id="current-language" href="#"><img class="rss"  src=""/></a>
             <ul id="languages"></ul></li>
             <li><a href="services/hikingtracks/feed"><img class="rss" alt="RSS Feed" src="images/rss.png" /></a></li>
           </ul>
@@ -82,7 +82,7 @@
         <div id="main">
           <div class="post">
             <h1>
-              <a id="Login">{{hdr_login}}</a>
+              <a id="login-form">{{hdr_login}}</a>
             </h1>
             <form action="oauth" method="get" id="login_form">
               <fieldset>
@@ -90,6 +90,7 @@
                 <div id="openid_choice">
                   <div id="openid_btns">
                     <input id="btn_google" type="image" src="images/google.png" alt="Sign in with Google" />
+                    <input id="btn_github" type="image" src="images/github.png" alt="Sign in with Github" />
                   </div>
                 </div>
                 <noscript>{{{txt_openid}}}</noscript>

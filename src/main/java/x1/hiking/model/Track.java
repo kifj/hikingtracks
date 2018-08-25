@@ -156,10 +156,6 @@ public class Track implements Model {
     this.trackData = trackData;
   }
 
-  /**
-   * 
-   * @param element
-   */
   public void addTrackData(TrackData element) {
     if (this.trackData == null) {
       this.trackData = new ArrayList<>();
@@ -167,11 +163,6 @@ public class Track implements Model {
     this.trackData.add(element);
   }
 
-  /**
-   * 
-   * @param element
-   * @return
-   */
   public boolean removeTrackData(TrackData element) {
     if (this.trackData == null) {
       return false;
@@ -179,10 +170,6 @@ public class Track implements Model {
     return this.trackData.remove(element);
   }
 
-  /**
-   * 
-   * @param element
-   */
   public void addImage(Image element) {
     if (this.images == null) {
       this.images = new ArrayList<>();
@@ -190,11 +177,6 @@ public class Track implements Model {
     this.images.add(element);
   }
 
-  /**
-   * 
-   * @param element
-   * @return
-   */
   public boolean removeImage(Image element) {
     if (this.images == null) {
       return false;
@@ -212,39 +194,22 @@ public class Track implements Model {
     return trackData;
   }
 
-  /**
-   * 
-   * @return
-   */
   public boolean isPublished() {
     return published;
   }
 
-  /**
-   * 
-   * @param published
-   */
   public void setPublished(boolean published) {
     this.published = published;    
   }
   
-  /**
-   * @return 
-   */
   public Date getPublishDate() {
       return publishDate;
   }
 
-  /**
-   * @param publishDate 
-   */
   public void setPublishDate(Date publishDate) {
       this.publishDate = publishDate;
   }
   
-  /**
-   * @return the latitude
-   */
   public Double getLatitude() {
     return latitude;
   }

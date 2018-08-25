@@ -97,7 +97,7 @@ public class AuthorizationFilter implements Filter, AuthorizationConstants {
    * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
    */
   @Override
-  public void init(FilterConfig config) throws ServletException {
+  public void init(FilterConfig config) {
     // not needed
   }
 

@@ -133,13 +133,12 @@ public class FeedServiceImpl implements FeedService {
   }
 
   private Optional<Feed> getFromCache(Cache<String, Object> cache) throws JAXBException {
-    Optional<Feed> feed = Optional.empty();
     String value = (String) cache.get(SEP);
     if (value != null) {
       StringReader in = new StringReader(value);
       return Optional.of((Feed)unmarshaller.unmarshal(in));
     }
-    return feed;
+    return Optional.empty();
   }
 
   /*

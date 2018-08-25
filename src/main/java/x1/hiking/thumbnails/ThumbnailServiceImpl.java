@@ -97,7 +97,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
     int width = image.getWidth();
     int height = image.getHeight();
     if (size.isKeepAspect()) {
-      log.info("Resizing image from {}x{} to {}x{}", new Object[] { width, height, size.getWidth(), size.getHeight() });
+      log.info("Resizing image from {}x{} to {}x{}", width, height, size.getWidth(), size.getHeight());
       Thumbnails.of(image).size(size.getWidth(), size.getHeight()).keepAspectRatio(true)
           .outputQuality(size.getQuality()).outputFormat(OUTPUT_FORMAT_JPEG).toOutputStream(out);
     } else {
@@ -114,7 +114,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
         h = (int) (w * targetRatio);
         y = (image.getHeight() - h) / 2;
       }
-      log.info("Resizing image from {}x{} to {}x{}", new Object[] { width, height, size.getWidth(), size.getHeight() });
+      log.info("Resizing image from {}x{} to {}x{}", width, height, size.getWidth(), size.getHeight());
       Region r = new Region(new Coordinate(x, y), new AbsoluteSize(w, h));
       Thumbnails.of(image).size(size.getWidth(), size.getHeight()).sourceRegion(r).outputQuality(size.getQuality())
           .outputFormat(OUTPUT_FORMAT_JPEG).toOutputStream(out);

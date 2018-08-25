@@ -58,7 +58,7 @@ public class KmlSampler {
     }
 
     public Result(List<Waypoint> samples, double distance) {
-      this.samples = samples.toArray(new Waypoint[samples.size()]);
+      this.samples = samples.toArray(new Waypoint[0]);
       this.distance = distance;
     }
 

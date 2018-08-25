@@ -1799,6 +1799,9 @@ Client.prototype.initOpenID = function() {
   $('#btn_google').click(function(e) {
     caller.login('GOOGLE');
   });
+  $('#btn_github').click(function(e) {
+    caller.login('GITHUB');
+  });
 }
 
 Client.prototype.login = function(app) {

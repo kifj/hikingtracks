@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 
 /**
- * OAuth 2 parameters
- * 
- * @author joe
- *
+ * OAuth2 parameters
  */
 public class OAuthHelper {
 

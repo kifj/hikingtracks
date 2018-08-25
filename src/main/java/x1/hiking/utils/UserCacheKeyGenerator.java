@@ -23,9 +23,9 @@ public class UserCacheKeyGenerator implements CacheKeyGenerator {
   public GeneratedCacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
     CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
 
-    String email = null;
-    for (int i = 0; i < keyParameters.length; i++) {
-      Object value = keyParameters[i].getValue();
+    String email;
+    for (CacheInvocationParameter keyParameter : keyParameters) {
+      Object value = keyParameter.getValue();
       if (value instanceof User) {
         email = ((User) value).getEmail();
         return new UserCacheKey(email);
