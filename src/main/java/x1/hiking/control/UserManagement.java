@@ -64,11 +64,10 @@ public class UserManagement {
     return em.merge(entity);
   }
 
-  /** Update.
-  *
-  * @param entity the entity
-  * @return the user
-  */
+  /**
+   * Login a given user with token
+   * @return the user
+   */
  @CacheResult(cacheName = "user-cache", cacheKeyGenerator = UserCacheKeyGenerator.class, skipGet = true)
  @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
  public User login(@CacheKey String email, String token, Date expires) throws UserNotFoundException {

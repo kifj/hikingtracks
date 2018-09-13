@@ -27,7 +27,8 @@ public final class GravatarHelper {
   private static String hex(byte[] array) {
     StringBuilder sb = new StringBuilder();
       for (byte b : array) {
-          sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
+        //noinspection RedundantStringOperation
+        sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
       }
     return sb.toString();
   }

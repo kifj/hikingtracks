@@ -104,7 +104,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
    * javax.servlet.http.HttpServletResponse)
    */
   @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String logout = request.getParameter(PARAM_LOGOUT);
     String app = request.getParameter(PARAM_URL);
     if (StringUtils.isNotEmpty(logout)) {
