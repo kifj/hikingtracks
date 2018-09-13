@@ -3,6 +3,7 @@
   <deployment>
     <dependencies>
       <module name="org.infinispan" />
+      <module name="org.infinispan.commons" />
       <module name="org.apache.httpcomponents" />
       <module name="org.jboss.resteasy.resteasy-atom-provider" />
       <module name="com.fasterxml.jackson.core.jackson-core" />
