@@ -466,6 +466,13 @@
                 <smtp-server outbound-socket-binding-ref="mail-smtp"/>
             </mail-session>
         </subsystem>
+        <subsystem xmlns="urn:wildfly:microprofile-config-smallrye:1.0">
+            <config-source name="hikingtracks">
+                <dir path="/etc/hikingtracks" />
+            </config-source>
+        </subsystem>
+        <subsystem xmlns="urn:wildfly:microprofile-health-smallrye:1.0" security-enabled="false"/>
+        <subsystem xmlns="urn:wildfly:microprofile-opentracing-smallrye:1.0"/>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <remote-naming/>
         </subsystem>
@@ -553,12 +560,6 @@
             <client-config name="Standard-Client-Config"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:weld:4.0"/>
-        <subsystem xmlns="urn:wildfly:microprofile-config:1.0">
-            <config-source name="hikingtracks" dir="/etc/hikingtracks" />
-        </subsystem>
-        <subsystem xmlns="urn:wildfly:microprofile-health:1.0">
-            <http path="/-system/health"/>
-        </subsystem>
     </profile>
     <interfaces>
         <interface name="management">
