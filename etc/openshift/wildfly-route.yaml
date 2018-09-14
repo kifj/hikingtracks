@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    app: wildfly
+  name: wildfly
+  namespace: hikingtracks
+spec:
+  host: wildfly-hikingtracks.1d35.starter-us-east-1.openshiftapps.com
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: wildfly
+    weight: 100
+  wildcardPolicy: None

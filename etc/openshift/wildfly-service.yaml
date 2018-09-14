@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftWebConsole
+    service.alpha.openshift.io/dependencies: '[{"name":"mysql","namespace":"","kind":"Service"}]'
+  creationTimestamp: 2017-05-03T18:44:02Z
+  labels:
+    app: wildfly
+  name: wildfly
+  namespace: hikingtracks
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deploymentconfig: wildfly
+  sessionAffinity: None
+  type: ClusterIP

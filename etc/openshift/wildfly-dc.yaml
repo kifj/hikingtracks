@@ -1,0 +1,97 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: wildfly
+  name: wildfly
+  namespace: hikingtracks
+spec:
+  replicas: 1
+  selector:
+    name: wildfly
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: wildfly
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATASOURCE
+          value: MysqlDS
+        - name: MYSQL_DATABASE
+          value: "true"
+        - name: MYSQL_DATABASE
+          value: hikingtracks
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              key: database-user
+              name: mysql
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: mysql
+        image: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:64b47aef1c9a47d3e862cb4bf5067c9416ddc486d9b4161fcf081aa0b570c7fd
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 9990
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 30
+        name: wildfly
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 9990
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 180
+        resources:
+          limits:
+            memory: 512Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: hikingtracks-secret
+          mountPath: /etc/hikingtracks
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: hikingtracks-secret
+        secret:
+          secretName: hikingtracks-secret
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - wildfly
+      from:
+        kind: ImageStreamTag
+        name: wildfly-hikingtracks:2.2
+        namespace: hikingtracks
+      lastTriggeredImage: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:64b47aef1c9a47d3e862cb4bf5067c9416ddc486d9b4161fcf081aa0b570c7fd
+    type: ImageChange
+  - type: ConfigChange
+

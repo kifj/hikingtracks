@@ -11,7 +11,7 @@ missing on GitHub repo
 
 ## Kubernetes resources
 
-missing on GitHub
+see etc/openshift
 
 ## Arquillian tests
 
