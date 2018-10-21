@@ -43,8 +43,8 @@ spec:
         livenessProbe:
           failureThreshold: 3
           httpGet:
-            path: /health
-            port: 9990
+            path: /alive
+            port: 8080
             scheme: HTTP
           initialDelaySeconds: 120
           periodSeconds: 10

@@ -472,18 +472,16 @@ Client.prototype.initMessages = function(path, templates, imagePath) {
 
 // ---------------------------------------------------------------------
 
-Client.prototype.getData = function(url, data) {
+Client.prototype.getData = function(url, data, onSuccess) {
   var caller = this;
   caller.statusOff();
   $('#indicator').css('visibility', 'visible');
-  var response = null;
   $.ajax({
     url : url,
     global : false,
     type : 'GET',
     dataType : 'json',
     data : data,
-    async : false,
     headers : {
       'Cache-Control' : 'no-cache'
     },
@@ -493,13 +491,14 @@ Client.prototype.getData = function(url, data) {
       log(msg);
     },
     success : function(data, status, xhr) {
-      response = data;
+      var response = data;
       var etag = xhr.getResponseHeader("Etag");
       if (etag) {
         response.etag = etag;
       }
       $('#indicator').css('visibility', 'hidden');
       caller.messageOff();
+      onSuccess(response);
     },
     statusCode : {
       401 : function(msg) {
@@ -526,23 +525,21 @@ Client.prototype.getData = function(url, data) {
       }
     }
   });
-  return response;
 }
 
-Client.prototype.postData = function(url, method, body, successMsg) {
+Client.prototype.postData = function(url, method, body, successMsg, onSuccess) {
   $('#indicator').css('visibility', 'visible');
   var caller = this;
   var etag = body.etag;
   delete body.etag;
   caller.statusOff();
-  var response = null;
   $.ajax({
     url : url,
     global : false,
     type : method,
     data : $.toJSON(body),
     dataType : 'json',
-    async : false,
+    async : true,
     headers : {
       'Cache-Control' : 'no-cache'
     },
@@ -553,7 +550,8 @@ Client.prototype.postData = function(url, method, body, successMsg) {
       }
     },
     success : function(data, status, xhr) {
-      response = data;
+      document.body.style.cursor = "default";
+      var response = data;
       var etag = xhr.getResponseHeader("Etag");
       if (etag) {
         response.etag = etag;
@@ -563,8 +561,12 @@ Client.prototype.postData = function(url, method, body, successMsg) {
       if (successMsg) {
         caller.statusOn(successMsg);
       }
+      if (onSuccess) {
+        onSuccess(response);
+      }
     },
     error : function(msg) {
+      document.body.style.cursor = "default";
       $('#indicator').css('visibility', 'hidden');
       log(msg);
     },
@@ -599,8 +601,6 @@ Client.prototype.postData = function(url, method, body, successMsg) {
       }
     }
   });
-  document.body.style.cursor = "default";
-  return response;
 }
 
 // ---------------------------------------------------------------------
@@ -614,33 +614,38 @@ Client.prototype.handlePostError = function(message, body, etag) {
 // ---------------------------------------------------------------------
 
 Client.prototype.makeProfileUpdate = function() {
-  $.cookie('show-banner', this.showBanner, {
+  var caller = this;
+  $.cookie('show-banner', caller.showBanner, {
     path : '/', expires: 30
   });
-  if (this.profileData != null) {
-    var userData = this.profileData;
+  if (caller.profileData != null) {
+    var userData = caller.profileData;
     userData.name = getValue('profile_name');
     userData.email = getValue('profile_email');
     userData.published = getChecked('profile_published');
-    this.messageOn(msg_sending);
-    var response = this.postData(baseurl + serviceUserUrl, "PUT", this.profileData, msg_profile_updated);
-    if (response) {
-      this.profileData = response;
-    }
+    caller.messageOn(msg_sending);
+    caller.postData(baseurl + serviceUserUrl, "PUT", caller.profileData, msg_profile_updated, function(response) {
+      if (response) {
+        caller.profileData = response;
+      }      
+    });
   }
 }
 
 Client.prototype.loadProfile = function() {
-  this.messageOn(msg_loading);
-  this.profileData = this.getData(baseurl + serviceUserUrl);
-  if (this.profileData != null) {
-    var userData = this.profileData;
-    setValue('profile_name', userData.name);
-    setValue('profile_email', userData.email);
-    setChecked('profile_published', userData.published);
-    this.addAvatar(userData, '#avatar');
-    this.messageOff();
-  }
+  var caller = this;
+  caller.messageOn(msg_loading);
+  caller.getData(baseurl + serviceUserUrl, null, function(response) {
+    caller.profileData = response;
+    if (caller.profileData != null) {
+      var userData = caller.profileData;
+      setValue('profile_name', userData.name);
+      setValue('profile_email', userData.email);
+      setChecked('profile_published', userData.published);
+      caller.addAvatar(userData, '#avatar');
+      caller.messageOff();
+    }
+  });
 }
 
 Client.prototype.addAvatar = function(user, image) {
@@ -657,11 +662,13 @@ Client.prototype.addAvatar = function(user, image) {
 }
 
 Client.prototype.makeProfileDelete = function() {
-  if (this.profileData != null) {
-    this.messageOn(msg_deleting);
-    this.postData(baseurl + serviceUserUrl, "DELETE", null, msg_profile_deleted);
-    this.profileData = null;
-    window.location.href = "../login.html";
+  var caller = this;
+  if (caller.profileData != null) {
+    caller.messageOn(msg_deleting);
+    caller.postData(baseurl + serviceUserUrl, "DELETE", null, msg_profile_deleted, function(response) {
+      caller.profileData = null;
+      window.location.href = "../login.html";      
+    });
   }
 }
 
@@ -678,47 +685,55 @@ Client.prototype.newTrackData = function() {
 }
 
 Client.prototype.loadTrack = function(name) {
+  var caller = this;
   if (name == null) {
-    name = this.nameFromAnchor();
+    name = caller.nameFromAnchor();
   }
   if (name) {
-    this.messageOn(msg_loading);
-    this.trackData = this.getData(baseurl + serviceTrackUrl + encodeURIComponent(name));
-    if (this.trackData == null) {
-      this.newTrackData();
-      this.addTrackData();
-      this.addImage();
-    }
+    caller.messageOn(msg_loading);
+    caller.getData(baseurl + serviceTrackUrl + encodeURIComponent(name), null, function(response) {
+      caller.trackData = response;
+      if (caller.trackData == null) {
+        caller.newTrackData();
+        caller.addTrackData();
+        caller.addImage();
+      }
+      caller.showTrack(caller.trackData);
+    });
   } else {
-    this.newTrackData();
-    this.addTrackData();
-    this.addImage();
+    caller.newTrackData();
+    caller.addTrackData();
+    caller.addImage();
+    caller.showTrack(caller.trackData);
   }
-  this.showTrack(this.trackData);
 }
 
 Client.prototype.loadTrackDetail = function(name, showlink, updateHistory, includePublic) {
+  var caller = this;
   if (name == null) {
-    name = this.nameFromAnchor();
+    name = caller.nameFromAnchor();
   }
   if (name) {
-    this.messageOn(msg_loading);
+    caller.messageOn(msg_loading);
     if (updateHistory && history.pushState) {
       history.pushState(name, title_bar, "detail.html#" + encodeURIComponent(name));
     }
     var data = {};
     data.public = includePublic;
-    this.trackData = this.getData(baseurl + serviceTrackUrl + encodeURIComponent(name), data);
-    if (this.trackData == null) {
-      this.newTrackData();
-    }
+    caller.getData(baseurl + serviceTrackUrl + encodeURIComponent(name), data, function(response) {
+      caller.trackData = response;  
+      if (caller.trackData == null) {
+        caller.newTrackData();
+      }
+      caller.showTrackDetail(caller.trackData, showlink);
+    });
   } else {
-    this.newTrackData();
+    caller.newTrackData();
     if (history.pushState) {
       history.pushState(null, title_bar, "detail.html");
     }
+    caller.showTrackDetail(caller.trackData, showlink);
   }
-  this.showTrackDetail(this.trackData, showlink);
 }
 
 Client.prototype.showTrack = function(trackData) {
@@ -869,9 +884,10 @@ Client.prototype.getLink = function(trackData, rel) {
 }
 
 Client.prototype.makeTrackUpdate = function() {
-  if (this.trackData != null) {
-    var oldData = this.trackData;
-    var trackData = this.trackData;
+  var caller = this;
+  if (caller.trackData != null) {
+    var oldData = caller.trackData;
+    var trackData = caller.trackData;
     var currentName = trackData.name;
     trackData.name = getValue('track_name');
     trackData.location = getValue('track_location');
@@ -909,35 +925,40 @@ Client.prototype.makeTrackUpdate = function() {
       }
       index++;
     }
-    this.messageOn(msg_sending);
+    caller.messageOn(msg_sending);
+    onSuccess = function(response) {
+      caller.trackData = response;
+      if (caller.trackData == null) {
+        caller.trackData = oldData;
+      }
+      history.pushState(name, title_bar, "track.html#" + encodeURIComponent(caller.trackData.name));
+      caller.showTrack(caller.trackData);
+    }
     if (trackData.id != null) {
-      this.trackData = this.postData(baseurl + serviceTrackUrl + encodeURIComponent(currentName), "PUT",
-        this.trackData, msg_track_updated);
+      caller.postData(baseurl + serviceTrackUrl + encodeURIComponent(currentName), "PUT",
+          caller.trackData, msg_track_updated, onSuccess);
     } else {
-      this.trackData = this.postData(baseurl + serviceTrackUrl, "POST", this.trackData, msg_track_added);
+      caller.postData(baseurl + serviceTrackUrl, "POST", caller.trackData, msg_track_added, onSuccess);
     }
-    if (this.trackData == null) {
-      this.trackData = oldData;
-    }
-    history.pushState(name, title_bar, "track.html#" + encodeURIComponent(this.trackData.name));
-    this.showTrack(this.trackData);
   }
 }
 
 Client.prototype.makeTrackDelete = function() {
-  if (this.trackData != null) {
-    var trackData = this.trackData;
+  var caller = this;
+  if (caller.trackData != null) {
+    var trackData = caller.trackData;
     trackData.name = getValue('track_name');
     trackData.published = getChecked('track_published');
     trackData.id = getValue('track_id');
     if (trackData.id != null) {
-      this.messageOn(msg_deleting);
-      this.postData(baseurl + serviceTrackUrl + encodeURIComponent(trackData.name), "DELETE", this.trackData,
-          msg_track_deleted);
-      this.newTrackData();
-      $('#image-list').empty();
-      $('#track-data-list').empty();
-      this.showTrack(this.trackData);
+      caller.messageOn(msg_deleting);
+      caller.postData(baseurl + serviceTrackUrl + encodeURIComponent(trackData.name), "DELETE", caller.trackData,
+          msg_track_deleted, function(response) {
+        caller.newTrackData();
+        $('#image-list').empty();
+        $('#track-data-list').empty();
+        caller.showTrack(caller.trackData);        
+      });
     }
   }
 }
@@ -1101,9 +1122,11 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
   if (!this.map) {
     var mapOptions = {
       disableDefaultUI : true,
+      fullscreenControl : false,
       navigationControl : true,
       mapTypeControl : true,
       scaleControl : true,
+      zoomControl : true,
       center : center,
       zoom : 12,
       mapTypeId : google.maps.MapTypeId.TERRAIN
@@ -1113,6 +1136,9 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
     if (this.supportsFullScreen(mapContainer)) {
       var controlDiv = document.createElement('div');
       this.addGoogleMapsControls(controlDiv, this.map);
+      this.handleFullScreenChange(function(e) {
+        caller.handleFullscreenGoogleMaps();
+      });
       controlDiv.index = 1;
       this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
     }
@@ -1202,7 +1228,7 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
   }
 }
 
-Client.prototype.toggleFullscreenGoogleMaps = function(close) {
+Client.prototype.toggleFullscreenGoogleMaps = function() {
   if (this.isFullScreen()) {
     this.exitFullScreen();
   } else {
@@ -1210,7 +1236,7 @@ Client.prototype.toggleFullscreenGoogleMaps = function(close) {
   }
 }
 
-Client.prototype.handleFullscreenGoogleMaps = function(close) {
+Client.prototype.handleFullscreenGoogleMaps = function() {
   var trackData = this.trackData;
   var hasImages = trackData && trackData['image'] && trackData['image'].length > 0;
   if (!this.isFullScreen()) {
@@ -1273,9 +1299,6 @@ Client.prototype.addGoogleMapsControls = function(controlDiv, map) {
   google.maps.event.addDomListener(controlUI, 'click', function() {
     caller.toggleFullscreenGoogleMaps();
   });
-  this.handleFullScreenChange(function(e) {
-    caller.handleFullscreenGoogleMaps();
-  });
 }
 
 Client.prototype.addGoogleMapsDetail = function(trackData) {
@@ -1313,9 +1336,10 @@ Client.prototype.deleteImage = function(index) {
 }
 
 Client.prototype.loadTrackList = function(search, start, activity) {
-  this.messageOn(msg_loading);
+  var caller = this;
+  caller.messageOn(msg_loading);
   var data = {};
-  data.max = this.maxResults;
+  data.max = caller.maxResults;
   data.public = false;
   if (start) {
     data.start = start;
@@ -1326,34 +1350,36 @@ Client.prototype.loadTrackList = function(search, start, activity) {
   if (activity) {
     data.activity = activity;
   }
-  this.trackData = this.getData(baseurl + serviceTrackUrl, data);
   var suffix = "";
   suffix = addQueryParam(suffix, "name", search);
   suffix = addQueryParam(suffix, "activity", activity);
   if (history.pushState) {
     history.pushState(search, title_bar, "tracks.html" + suffix);
   }
-  if (this.trackData != null) {
-    $('#track-list').empty();
-    var result = this.trackData.track;
-    if (!result || result.length == 0) {
-      this.showEmptyTrackList();
-    } else {
-      for (var i = 0; i < result.length; i++) {
-        this.showTrackInfo(result[i], i);
+  caller.getData(baseurl + serviceTrackUrl, data, function(response) {
+    caller.trackData = response;
+    if (caller.trackData != null) {
+      $('#track-list').empty();
+      var result = caller.trackData.track;
+      if (!result || result.length == 0) {
+        caller.showEmptyTrackList();
+      } else {
+        for (var i = 0; i < result.length; i++) {
+          caller.showTrackInfo(result[i], i);
+        }
       }
+      caller.showPaging(caller.trackData, false, search, start, activity);
+    } else {
+      caller.showEmptyTrackList();
     }
-    this.showPaging(this.trackData, false, search, start, activity);
-  } else {
-    this.showEmptyTrackList();
-  }
+  });
 }
 
 Client.prototype.loadOverview = function(search, start, ontop, activity) {
   var caller = this;
-  this.messageOn(msg_loading);
+  caller.messageOn(msg_loading);
   var data = {};
-  data.max = this.maxResults;
+  data.max = caller.maxResults;
   data.public = true;
   if (start) {
     data.start = start;
@@ -1370,42 +1396,44 @@ Client.prototype.loadOverview = function(search, start, ontop, activity) {
   if (!start) {
     start = 0;
   }
-  caller.trackList = caller.getData(baseurl + serviceTrackUrl, data);
   var suffix = "";
   suffix = addQueryParam(suffix, "name", search);
   suffix = addQueryParam(suffix, "activity", activity);
   if (history.pushState) {
     history.pushState(search, title_bar, "index.html" + suffix);
   }
-  if (caller.trackList != null) {
-    $('#track-list').empty();
-    data = caller.trackList;
-    var result = data.track;
-    if (!result || result.length == 0) {
-      caller.showEmptyTrackList();
-    } else {
-      var total = parseInt(data.total, 10);
-      $('#featured_track').css('display', 'block');
-      if (result.length > 1) {
-        caller.localize('#track-list', 'track-list-post-more-tracks', {
-          msg_more_tracks : msg_more_tracks
-        });
+  caller.getData(baseurl + serviceTrackUrl, data, function(response) {
+    caller.trackList = response;
+    if (caller.trackList != null) {
+      $('#track-list').empty();
+      data = caller.trackList;
+      var result = data.track;
+      if (!result || result.length == 0) {
+        caller.showEmptyTrackList();
       } else {
-        $('#track-list').empty();
-      }
-      caller.loadTrackDetail(result[ontop].name, true, false, true);
-      for (var i = 0; i < result.length; i++) {
-        if (i != ontop) {
-          var trackData = result[i];
-          caller.showTrackSummaryInfo(trackData, i);
+        var total = parseInt(data.total, 10);
+        $('#featured_track').css('display', 'block');
+        if (result.length > 1) {
+          caller.localize('#track-list', 'track-list-post-more-tracks', {
+            msg_more_tracks : msg_more_tracks
+          });
+        } else {
+          $('#track-list').empty();
         }
+        caller.loadTrackDetail(result[ontop].name, true, false, true);
+        for (var i = 0; i < result.length; i++) {
+          if (i != ontop) {
+            var trackData = result[i];
+            caller.showTrackSummaryInfo(trackData, i);
+          }
+        }
+        caller.addNavigationButtons(result, total, search, start, ontop, activity);
+        caller.showPaging(data, true, search, start, activity);
       }
-      caller.addNavigationButtons(result, total, search, start, ontop, activity);
-      caller.showPaging(data, true, search, start, activity);
-    }
-  } else {
-    caller.showEmptyTrackList();
-  }
+    } else {
+      caller.showEmptyTrackList();
+    }    
+  });
 }
 
 Client.prototype.loadMap = function(search, activity) {
@@ -1954,20 +1982,24 @@ Client.prototype.showOverviewMap = function(elem, data, latitude, longitude) {
   $(elem).css("display", "block");
   if (!this.map) {
     var mapOptions = {
-      disableDefaultUI : false,
+      disableDefaultUI : true,
+      fullscreenControl : false,
       navigationControl : true,
       mapTypeControl : true,
       scaleControl : true,
+      zoomControl : true,
       center : (hasCoordinates ? caller.center : new google.maps.LatLng(0, 0)),
       zoom : (hasCoordinates ? 8 : 2),
       mapTypeId : google.maps.MapTypeId.TERRAIN
-    // ROADMAP
     };
     var mapContainer = $(elem).get(0);
     this.map = new google.maps.Map(mapContainer, mapOptions);
     if (this.supportsFullScreen(mapContainer)) {
       var controlDiv = document.createElement('div');
       this.addGoogleMapsControls(controlDiv, this.map);
+      this.handleFullScreenChange(function(e) {
+        caller.handleFullscreenGoogleMapsForOverview();
+      });
       controlDiv.index = 1;
       this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
     }
@@ -2010,66 +2042,67 @@ Client.prototype.showOverviewMap = function(elem, data, latitude, longitude) {
 
 Client.prototype.showTracksForMap = function(data, bounds) {
   var caller = this;
-  this.loadTracksForMap(data, bounds);
-  if (!this.trackList) {
-    return;
-  }
-  var tracks = this.trackList.track;
-  if (this.markers) {
-    for (var i = 0; i < this.markers.length; i++) {
-      this.markers[i].setMap(null);
+  caller.loadTracksForMap(data, bounds, function() {
+    if (!caller.trackList) {
+      return;
     }
-  }
-  this.markers = [];
-  for (var track = 0; track < tracks.length; track++) {
-    var mlat = tracks[track].latitude;
-    var mlon = tracks[track].longitude;
-    var p = null;
-    if (mlat && mlon) {
-      p = new google.maps.LatLng(mlat, mlon);
-    }
-    var trackDataList = tracks[track]['trackdata'];
-    if (trackDataList && trackDataList.length > 0) {
-      var td = trackDataList[0];
-      if (td.highestPoint) {
-        p = new google.maps.LatLng(td.highestPoint.lat, td.highestPoint.lng);
-      } else if (td.startPoint) {
-        p = new google.maps.LatLng(td.startPoint.lat, td.startPoint.lng);
+    var tracks = caller.trackList.track;
+    if (caller.markers) {
+      for (var i = 0; i < caller.markers.length; i++) {
+        caller.markers[i].setMap(null);
       }
     }
-    if (p) {
-      var marker = new google.maps.Marker({
-        position : p,
-        map : this.map,
-        title : tracks[track].name,
-        track : tracks[track]
-      });
-      marker.addListener('click', function() {
-        var track = this.track;
-        var content = '<div class="marker">';
-        if (track.date) {
-          content += '<div id="siteNotice">' + $.format.date(parseDate(track.date), 'dd MMM yyyy') + '</div>';
+    caller.markers = [];
+    for (var track = 0; track < tracks.length; track++) {
+      var mlat = tracks[track].latitude;
+      var mlon = tracks[track].longitude;
+      var p = null;
+      if (mlat && mlon) {
+        p = new google.maps.LatLng(mlat, mlon);
+      }
+      var trackDataList = tracks[track]['trackdata'];
+      if (trackDataList && trackDataList.length > 0) {
+        var td = trackDataList[0];
+        if (td.highestPoint) {
+          p = new google.maps.LatLng(td.highestPoint.lat, td.highestPoint.lng);
+        } else if (td.startPoint) {
+          p = new google.maps.LatLng(td.startPoint.lat, td.startPoint.lng);
         }
-        content += '<h3 id="firstHeading">';
-        content += '<a href="../pages/detail.html#' + encodeURIComponent(track.name) + '">' + track.name + '</a>';
-        content += '</h3>';
-        if (track.description) {
-          content += '<div id="bodyContent"><p>' + track.description + '</p></div>';
-        }
-        content += '</div>';
-        var infowindow = new google.maps.InfoWindow({
-          content: content
+      }
+      if (p) {
+        var marker = new google.maps.Marker({
+          position : p,
+          map : caller.map,
+          title : tracks[track].name,
+          track : tracks[track]
         });
-        if (caller.infowindow) {
-          caller.infowindow.close();
-        }
-        infowindow.open(caller.map, this);
-        caller.infowindow = infowindow;
-      });
-      this.markers.push(marker);
+        marker.addListener('click', function() {
+          var track = this.track;
+          var content = '<div class="marker">';
+          if (track.date) {
+            content += '<div id="siteNotice">' + $.format.date(parseDate(track.date), 'dd MMM yyyy') + '</div>';
+          }
+          content += '<h3 id="firstHeading">';
+          content += '<a href="../pages/detail.html#' + encodeURIComponent(track.name) + '">' + track.name + '</a>';
+          content += '</h3>';
+          if (track.description) {
+            content += '<div id="bodyContent"><p>' + track.description + '</p></div>';
+          }
+          content += '</div>';
+          var infowindow = new google.maps.InfoWindow({
+            content: content
+          });
+          if (caller.infowindow) {
+            caller.infowindow.close();
+          }
+          infowindow.open(caller.map, this);
+          caller.infowindow = infowindow;
+        });
+        caller.markers.push(marker);
+      }
     }
-  }
-  this.addImagesToMap('#image-parent', tracks);
+    caller.addImagesToMap('#image-parent', tracks);    
+  });
 }
 
 Client.prototype.addImagesToMap = function(elem, tracks) {
@@ -2082,7 +2115,7 @@ Client.prototype.addImagesToMap = function(elem, tracks) {
     if (images && images.length > 0) {
       var img = images[0];
       if (img != null) {
-        this.showImage('#image-list', tracks[track].name, img, i, "SMALL");
+        this.showImage('#image-list', tracks[track].name, img, 0, "SMALL");
         imageCount++;
       }
     }
@@ -2111,7 +2144,7 @@ Client.prototype.addImagesToMap = function(elem, tracks) {
   }
 }
 
-Client.prototype.loadTracksForMap = function(data, bounds) {
+Client.prototype.loadTracksForMap = function(data, bounds, onSuccess) {
   var caller = this;
   data.bounds = {
       north: bounds.getNorthEast().lat(),
@@ -2119,11 +2152,64 @@ Client.prototype.loadTracksForMap = function(data, bounds) {
       south: bounds.getSouthWest().lat(),
       west: bounds.getSouthWest().lng()
   };
-  caller.trackList = caller.postData(baseurl + serviceSearchUrl, "POST", data);
   var suffix = "";
   suffix = addQueryParam(suffix, "name", data.search);
   suffix = addQueryParam(suffix, "activity", data.activity);
   if (history.pushState) {
     history.pushState(data.search, title_bar, "map.html" + suffix);
+  }
+  caller.postData(baseurl + serviceSearchUrl, "POST", data, null, function(response) {
+    caller.trackList = response;
+    onSuccess();
+  });
+}
+
+Client.prototype.handleFullscreenGoogleMapsForOverview = function() {
+  var tracks = this.trackList.track;
+  var result = [];
+  for (var track = 0; track < tracks.length; track++) {
+    var images = tracks[track]['image'];
+    if (images && images.length > 0) {
+      var img = images[0];
+      if (img != null) {
+        result.push(img);
+      }
+    }
+  }  
+  var hasImages = result.length > 0;
+  if (!this.isFullScreen()) {
+    if (hasImages) {
+      this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].pop();
+    }
+    $('#google-maps').css('height', '450px');
+    google.maps.event.trigger(this.map, 'resize');
+  } else {
+    $('#google-maps').css('height', '100%');
+    google.maps.event.trigger(this.map, 'resize');
+    if (hasImages) {      
+      var controlUI = document.createElement('div');
+      controlUI.className = 'google-maps-fullscreen-carousel google-maps-control carousel';
+      this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(controlUI);
+      for (var i = 0; i < result.length; i++) {
+        var img = result[i];
+        var url = img.url;
+        $('.google-maps-fullscreen-carousel').mustache('show-googlemaps-image', $.extend({
+          index : i,
+          name : img.name,
+          url : url
+        }, $.i18n.map));
+      }
+      var maxVisible = Math.floor($('#google-maps').outerWidth() / 160);
+      $('.google-maps-fullscreen-carousel').slick({
+        infinite: (result.length >= maxVisible),
+        slidesToShow: 1,
+        centerMode: false,
+        variableWidth: true,
+        swipeToSlide: true,
+        draggable: false,
+        dots: (result.length >= maxVisible),
+        arrows: (result.length >= maxVisible)
+      });
+    }
   }
 }
