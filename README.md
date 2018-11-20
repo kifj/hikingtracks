@@ -7,11 +7,11 @@ Its public on Github to run the STI build on openshift.
 
 ## CLI-Scripts for Wildfly 14.0
 
-see cfg/standalone.xml
+see [standalone.xml](cfg/standalone.xml)
 
 ## Kubernetes resources
 
-see etc/openshift
+see [etc/openshift](etc/openshift)
 
 ## Arquillian tests
 
