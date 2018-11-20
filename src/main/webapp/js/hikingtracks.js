@@ -926,7 +926,7 @@ Client.prototype.makeTrackUpdate = function() {
       index++;
     }
     caller.messageOn(msg_sending);
-    onSuccess = function(response) {
+    var onSuccess = function(response) {
       caller.trackData = response;
       if (caller.trackData == null) {
         caller.trackData = oldData;
@@ -2170,12 +2170,11 @@ Client.prototype.handleFullscreenGoogleMapsForOverview = function() {
   for (var track = 0; track < tracks.length; track++) {
     var images = tracks[track]['image'];
     if (images && images.length > 0) {
-      var img = images[0];
-      if (img != null) {
-        result.push(img);
+      if (images[0] != null) {
+        result.push(images[0]);
       }
     }
-  }  
+  }
   var hasImages = result.length > 0;
   if (!this.isFullScreen()) {
     if (hasImages) {

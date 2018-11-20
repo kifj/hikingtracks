@@ -7,7 +7,7 @@ Its public on Github to run the STI build on openshift.
 
 ## CLI-Scripts for Wildfly 14.0
 
-missing on GitHub repo
+see cfg/standalone.xml
 
 ## Kubernetes resources
 

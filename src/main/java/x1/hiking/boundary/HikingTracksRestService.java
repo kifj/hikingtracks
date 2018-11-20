@@ -12,7 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import static javax.ws.rs.core.MediaType.*;
 import javax.ws.rs.core.Response;
 
 import x1.hiking.model.ActivityType;
@@ -28,8 +28,8 @@ import x1.hiking.representation.UserInfo;
  * @author joe
  */
 @Path("/1.0/")
-@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+@Produces({ APPLICATION_XML, APPLICATION_JSON })
+@Consumes({ APPLICATION_XML, APPLICATION_JSON })
 public interface HikingTracksRestService extends Representation {
   String PATH_USER = "/user";
   String PATH_TRACKS = "/tracks";
@@ -43,6 +43,8 @@ public interface HikingTracksRestService extends Representation {
   String ACCESS_CONTROL_ALLOW_ORIGIN = "ACCESS_CONTROL_ALLOW_ORIGIN";
   String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
   String HEADER_CORS_ALLOWED_HEADERS = "Content-Type, Cache-Control";
+  String PARAM_ID = "{id}";
+  String PARAM_NAME = "{name}";
 
   /**
    * get all tracks.
@@ -80,7 +82,7 @@ public interface HikingTracksRestService extends Representation {
    * @return the track
    */
   @GET
-  @Path(PATH_TRACKS + SEP + "{name}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME)
   Response getTrack(@PathParam("name") String name, @QueryParam("public") boolean includePublished);
 
   /**
@@ -90,7 +92,7 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @DELETE
-  @Path(PATH_TRACKS + SEP + "{name}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME)
   Response deleteTrack(@PathParam("name") String name);
 
   /**
@@ -111,7 +113,7 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @PUT
-  @Path(PATH_TRACKS + SEP + "{name}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME)
   Response updateTrack(@PathParam("name") String name, TrackInfo track);
 
   /**
@@ -152,7 +154,7 @@ public interface HikingTracksRestService extends Representation {
    */
   @GET
   @Produces({ MEDIA_TYPE_IMAGE_JPEG })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_IMAGES + "{id}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES + PARAM_ID)
   Response getImage(@PathParam("name") String name, @PathParam("id") Integer id,
       @QueryParam("thumbnail") ThumbnailType type);
 
@@ -166,7 +168,7 @@ public interface HikingTracksRestService extends Representation {
    */
   @POST
   @Consumes({ MEDIA_TYPE_IMAGE_JPEG })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_IMAGES)
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES)
   Response insertImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename, byte[] data);
 
   /**
@@ -180,7 +182,7 @@ public interface HikingTracksRestService extends Representation {
    */
   @PUT
   @Consumes({ MEDIA_TYPE_IMAGE_JPEG })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_IMAGES + "{id}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES + PARAM_ID)
   Response updateImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
       @PathParam("id") Integer id, byte[] data);
 
@@ -192,7 +194,7 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @DELETE
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_IMAGES + "{id}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES + PARAM_ID)
   Response deleteImage(@PathParam("name") String name, @PathParam("id") Integer id);
 
   /**
@@ -203,8 +205,8 @@ public interface HikingTracksRestService extends Representation {
    * @return the track data
    */
   @GET
-  @Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_KML + "{id}")
+  @Produces({ TEXT_XML, APPLICATION_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
   Response getTrackData(@PathParam("name") String name, @PathParam("id") Integer id);
 
   /**
@@ -216,9 +218,9 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @POST
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
-  @Produces({ MediaType.APPLICATION_XML })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_KML)
+  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Produces({ APPLICATION_XML })
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML)
   Response insertTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
       byte[] incomingXML);
 
@@ -232,9 +234,9 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @PUT
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
-  @Produces({ MediaType.APPLICATION_XML })
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_KML + "{id}")
+  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Produces({ APPLICATION_XML })
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
   Response updateTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
       @PathParam("id") Integer id, byte[] incomingXML);
 
@@ -246,7 +248,7 @@ public interface HikingTracksRestService extends Representation {
    * @return the response
    */
   @DELETE
-  @Path(PATH_TRACKS + SEP + "{name}" + SEP + PATH_KML + "{id}")
+  @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
   Response deleteTrackData(@PathParam("name") String name, @PathParam("id") Integer id);
 
   @OPTIONS

@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -187,7 +182,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   }
 
   private void addImage(ThumbnailType thumbnail, Track track, TrackInfo trackInfo) {
-    if (!thumbnail.equals(ThumbnailType.NONE)) {
+    if (thumbnail != ThumbnailType.NONE) {
       Image image = imageService.findFirstImage(track);
       if (image != null) {
         URI location = pathTracks().path(track.getName()).path(PATH_IMAGES).path(String.valueOf(image.getId()))
@@ -647,10 +642,9 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       throw new BadRequestException(MSG_EMPTY_BODY);
     }
     log.info("update image for track [{}]", track);
-    Image img = findImage(track, id);
-    if (img == null) {
-      throw new NotFoundException("Image with id " + id + " is missing.");
-    }
+    Image img = findImage(track, id).orElseThrow(() ->
+      new NotFoundException("Image with id " + id + " is missing.")
+    );
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -662,16 +656,16 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     return createResponse(Response.status(NO_CONTENT), eTag);
   }
 
-  private Image findImage(Track track, Integer id) {
+  private Optional<Image> findImage(Track track, Integer id) {
     if (id == null) {
-      return null;
+      return Optional.empty();
     }
     for (Image i : track.getImages()) {
       if (i.getId().equals(id)) {
-        return i;
+        return Optional.of(i);
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   /*
@@ -724,7 +718,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
     }
     StreamingOutput output = new BinaryStreamingOutput(td.getData());
-    ResponseBuilder response = Response.status(OK).type(getMediaType(td.getName()));
+    ResponseBuilder response = Response.status(OK).type(TrackDataInfo.getMediaType(td.getName()));
     return createResponse(response, output, eTag);
   }
 
@@ -772,10 +766,9 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       throw new BadRequestException(MSG_EMPTY_BODY);
     }
     log.info("update track data for track [{}]", track);
-    TrackData td = findTrackData(track, id);
-    if (td == null) {
-      throw new NotFoundException("TrackData with id " + id + " is missing.");
-    }
+    TrackData td = findTrackData(track, id).orElseThrow(() ->
+      new NotFoundException("TrackData with id " + id + " is missing.")
+    );
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -812,16 +805,16 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
         .header(ACCESS_CONTROL_ALLOW_HEADERS, HEADER_CORS_ALLOWED_HEADERS).build();
   }
 
-  private TrackData findTrackData(Track track, Integer id) {
+  private Optional<TrackData> findTrackData(Track track, Integer id) {
     if (id == null) {
-      return null;
+      return Optional.empty();
     }
     for (TrackData td : track.getTrackData()) {
       if (td.getId().equals(id)) {
-        return td;
+        return Optional.of(td);
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   /*

@@ -148,7 +148,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
           redirectUrl = ServletHelper.getBaseUrl(request).build().toString();
         }
         ServletHelper.injectSessionCookie(response, oauthParams.getAccessToken());
-        log.info("Authentification successful, redirect to: {}", redirectUrl);
+        log.info("Authentification sucessful, redirect to: {}", redirectUrl);
         response.sendRedirect(redirectUrl);
       } else if (!response.isCommitted()) {
         response.sendRedirect(loginPage(request).build().toString());
@@ -188,7 +188,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
         return queryParams.get(PARAM_FROM);
       }
     }
-    return "/";
+    return ServletHelper.getBaseUrl(request).build().toString();
   }
 
   private OAuthParams buildOAuthParams(OAuthProviderType oauthProvider, HttpServletRequest request) {

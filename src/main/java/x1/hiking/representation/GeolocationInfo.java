@@ -16,7 +16,6 @@ public class GeolocationInfo {
   }
 
   public GeolocationInfo(Geolocation geolocation) {
-    if (geolocation.getCoord() != null)
     this.coord = geolocation.getCoord();
     this.locality = geolocation.getLocation();
     this.area = geolocation.getArea();

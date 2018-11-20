@@ -254,7 +254,7 @@ public class FeedServiceImpl implements FeedService {
   private void addLink(Entry entry, TrackDataInfo trackDataInfo) throws URISyntaxException {
     Link l = new Link();
     l.setHref(new URI(trackDataInfo.getUrl()));
-    String mediaType = trackDataInfo.getMediaType(trackDataInfo.getName());
+    String mediaType = TrackDataInfo.getMediaType(trackDataInfo.getName());
     if (mediaType == null) {
       mediaType = MediaType.APPLICATION_XML;
     }

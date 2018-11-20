@@ -3,10 +3,12 @@ package x1.hiking.representation;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +58,17 @@ public class TrackDataInfo implements Representation, FilenameInfo {
     }
   }
 
+  public static String getMediaType(String filename) {
+    if (StringUtils.endsWith(filename, FILE_EXTENSION_KML)) {
+      return MEDIA_TYPE_VND_KML;
+    } else if (StringUtils.endsWith(filename, FILE_EXTENSION_KMZ)) {
+      return MEDIA_TYPE_VND_KMZ;
+    } else {
+      // META-INF/mime.types
+      return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+    }
+  }
+  
   /*
    * (non-Javadoc)
    * @see x1.hiking.representation.FilenameInfo#getName()
