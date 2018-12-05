@@ -7,10 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -191,8 +188,8 @@ public class ThumbnailService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public Thumbnail createThumbnail(Image image, ThumbnailType type) throws IOException {
-    ImageData imageData = imageService.getImageData(image);
-    if (imageData == null || imageData.getData() == null) {
+    Optional<ImageData> imageData = imageService.getImageData(image);
+    if (!imageData.isPresent() || imageData.get().getData() == null) {
       if (image.getUrl() != null) {
         return createThumbnailFromUrl(image, type);
       } else {
@@ -201,7 +198,7 @@ public class ThumbnailService {
       }
       return null;
     }
-    return createThumbnail(imageData, type);
+    return createThumbnail(imageData.get(), type);
   }
 
   private Thumbnail createThumbnailFromUrl(Image image, ThumbnailType type) throws IOException {
@@ -313,7 +310,7 @@ public class ThumbnailService {
    * @return the thumbnail
    */
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
-  public Thumbnail findThumbnail(final User user, final String name, final Integer id, final ThumbnailType type) {
+  public Optional<Thumbnail> findThumbnail(final User user, final String name, final Integer id, final ThumbnailType type) {
     TypedQuery<Thumbnail> q;
     if (user != null) {
       q = em.createNamedQuery("Thumbnail.findThumbnailByUserAndNameAndId", Thumbnail.class);
@@ -328,10 +325,9 @@ public class ThumbnailService {
       q.setParameter(PARAM_TYPE, type);
     }
     try {
-      return q.getSingleResult();
+      return Optional.of(q.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
-
 }

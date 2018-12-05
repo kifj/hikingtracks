@@ -28,14 +28,14 @@
     <filter-name>authorization</filter-name>
     <url-pattern>/secure/*</url-pattern>
   </filter-mapping>
-  <resource-env-ref>
-    <resource-env-ref-name>cache/feed-cache</resource-env-ref-name>
-    <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
-    <lookup-name>java:jboss/infinispan/cache/hikingtracks/feed-cache</lookup-name>
-  </resource-env-ref>  
-  <resource-env-ref>
-    <resource-env-ref-name>cache/user-cache</resource-env-ref-name>
-    <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
-    <lookup-name>java:jboss/infinispan/cache/hikingtracks/user-cache</lookup-name>
-  </resource-env-ref>
+    <resource-env-ref>
+        <resource-env-ref-name>cache/hikingtracks</resource-env-ref-name>
+        <resource-env-ref-type>org.infinispan.manager.EmbeddedCacheManager</resource-env-ref-type>
+        <lookup-name>java:jboss/infinispan/container/hikingtracks</lookup-name>
+    </resource-env-ref>
+    <resource-env-ref>
+        <resource-env-ref-name>cache/feed-cache</resource-env-ref-name>
+        <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
+        <lookup-name>java:jboss/infinispan/cache/hikingtracks/feed-cache</lookup-name>
+    </resource-env-ref>
 </web-app>

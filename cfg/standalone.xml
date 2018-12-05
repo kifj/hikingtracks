@@ -419,9 +419,6 @@
                 <local-cache name="timestamps"/>
             </cache-container>
             <cache-container name="hikingtracks" statistics-enabled="true">
-                <local-cache name="user-cache" statistics-enabled="true">
-                    <expiration lifespan="300000"/>
-                </local-cache>
                 <local-cache name="feed-cache" statistics-enabled="true">
                     <expiration lifespan="900000"/>
                 </local-cache>

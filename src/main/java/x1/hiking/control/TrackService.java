@@ -2,6 +2,7 @@ package x1.hiking.control;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -353,7 +354,7 @@ public class TrackService {
    * @return the track data
    */
   @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-  public TrackData findTrackData(User user, String name, Integer id) {
+  public Optional<TrackData> findTrackData(User user, String name, Integer id) {
     TypedQuery<TrackData> q;
     if (user != null) {
       q = em.createNamedQuery("TrackData.findTrackDataByUserAndNameAndId", TrackData.class);
@@ -366,9 +367,9 @@ public class TrackService {
       q.setParameter(PARAM_ID, id);
     }
     try {
-      return q.getSingleResult();
+      return Optional.of(q.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
 

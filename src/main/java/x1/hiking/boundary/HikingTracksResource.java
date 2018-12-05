@@ -53,7 +53,7 @@ import x1.hiking.utils.ServletHelper;
  * 
  * @author joe
  */
-public class HikingTracksRestServiceImpl implements HikingTracksRestService, AuthorizationConstants {
+public class HikingTracksResource implements HikingTracksService, AuthorizationConstants {
   private static final long serialVersionUID = 8237702332418932465L;
   private final Logger log = LoggerFactory.getLogger(getClass());
   private static final String IMG_PLACEHOLDER = "placeholder.jpg";
@@ -92,7 +92,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#getTracks()
+   * @see x1.hiking.rest.HikingTracksService#getTracks()
    */
   @Override
   @Transactional(Transactional.TxType.SUPPORTS)
@@ -197,7 +197,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#getTrack(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#getTrack(java.lang.String,
    * boolean)
    */
   @Override
@@ -280,7 +280,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#deleteTrack(java.lang.String)
+   * @see x1.hiking.rest.HikingTracksService#deleteTrack(java.lang.String)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -308,7 +308,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
    * (non-Javadoc)
    * 
    * @see
-   * x1.hiking.rest.HikingTracksRestService#insertTrack(x1.hiking.model.Track)
+   * x1.hiking.rest.HikingTracksService#insertTrack(x1.hiking.model.Track)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -347,7 +347,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#updateTrack(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#updateTrack(java.lang.String,
    * x1.hiking.model.Track)
    */
   @Override
@@ -488,7 +488,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#getUser()
+   * @see x1.hiking.rest.HikingTracksService#getUser()
    */
   @Override
   public UserInfo getUser() {
@@ -499,7 +499,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#updateUser(x1.hiking.model.User)
+   * @see x1.hiking.rest.HikingTracksService#updateUser(x1.hiking.model.User)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -516,7 +516,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#deleteUser()
+   * @see x1.hiking.rest.HikingTracksService#deleteUser()
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -534,7 +534,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#getImage(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#getImage(java.lang.String,
    * java.lang.Integer)
    */
   @Override
@@ -565,8 +565,8 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
     if (builder != null) {
       return createResponse(builder);
     }
-    ImageData imageData = imageService.getImageData(image);
-    if (imageData == null) {
+    Optional<ImageData> imageData = imageService.getImageData(image);
+    if (!imageData.isPresent()) {
       if (image.getUrl() == null) {
         URI uri = pathTracks().path(name).path(PATH_IMAGES).path(String.valueOf(id))
             .queryParam(THUMBNAIL, ThumbnailType.LARGE.name()).build();
@@ -574,21 +574,22 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       }
       return Response.status(MOVED_PERMANENTLY).location(new URI(image.getUrl())).build();
     }
-    return createResponse(Response.status(OK), new BinaryStreamingOutput(imageData.getData()), eTag);
+    return createResponse(Response.status(OK), new BinaryStreamingOutput(imageData.get().getData()), eTag);
   }
 
   private Response getImage(final String name, final Integer id, User user, ThumbnailType type)
       throws IOException {
-    Thumbnail thumbnail = thumbnailService.findThumbnail(user, name, id, type);
-    if (thumbnail == null && user != null) {
-      thumbnail = thumbnailService.findThumbnail(null, name, id, type);
+    Optional<Thumbnail> result = thumbnailService.findThumbnail(user, name, id, type);
+    if (!result.isPresent() && user != null) {
+      result = thumbnailService.findThumbnail(null, name, id, type);
     }
-    if (thumbnail == null) {
+    if (!result.isPresent()) {
       CacheControl cc = new CacheControl();
       cc.setMaxAge(15);
       byte[] placeholder = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(IMG_PLACEHOLDER));
       return Response.status(OK).cacheControl(cc).entity(new BinaryStreamingOutput(placeholder)).build();
     }
+    Thumbnail thumbnail = result.get();
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(thumbnail);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -600,7 +601,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#insertImage(java.lang.String)
+   * @see x1.hiking.rest.HikingTracksService#insertImage(java.lang.String)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -627,7 +628,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#updateImage(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#updateImage(java.lang.String,
    * java.lang.Integer)
    */
   @Override
@@ -642,9 +643,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       throw new BadRequestException(MSG_EMPTY_BODY);
     }
     log.info("update image for track [{}]", track);
-    Image img = findImage(track, id).orElseThrow(() ->
-      new NotFoundException("Image with id " + id + " is missing.")
-    );
+    Image img = findImage(track, id).orElseThrow(() ->  new NotFoundException("Image with id " + id + " is missing."));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -671,7 +670,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#deleteImage(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#deleteImage(java.lang.String,
    * java.lang.Integer)
    */
   @Override
@@ -690,20 +689,21 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#getTrackData(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#getTrackData(java.lang.String,
    * java.lang.Integer)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response getTrackData(final String name, final Integer id) {
     User user = findUser(true);
-    TrackData td = trackService.findTrackData(user, name, id);
-    if (td == null && user != null) {
-      td = trackService.findTrackData(null, name, id);
+    Optional<TrackData> result = trackService.findTrackData(user, name, id);
+    if (!result.isPresent() && user != null) {
+      result = trackService.findTrackData(null, name, id);
     }
-    if (td == null) {
+    if (!result.isPresent()) {
       throw new NotFoundException("No track data in track " + name + " with id " + id);
     }
+    TrackData td = result.get();
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -725,7 +725,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#insertTrackData(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#insertTrackData(java.lang.String,
    * java.lang.String)
    */
   @Override
@@ -751,7 +751,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#updateTrackData(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#updateTrackData(java.lang.String,
    * java.lang.Integer)
    */
   @Override
@@ -766,9 +766,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
       throw new BadRequestException(MSG_EMPTY_BODY);
     }
     log.info("update track data for track [{}]", track);
-    TrackData td = findTrackData(track, id).orElseThrow(() ->
-      new NotFoundException("TrackData with id " + id + " is missing.")
-    );
+    TrackData td = findTrackData(track, id).orElseThrow(() -> new NotFoundException("TrackData with id " + id + " is missing."));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -797,7 +795,7 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#options(java.lang.String)
+   * @see x1.hiking.rest.HikingTracksService#options(java.lang.String)
    */
   @Override
   public Response options(String path) {
@@ -820,17 +818,15 @@ public class HikingTracksRestServiceImpl implements HikingTracksRestService, Aut
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksRestService#deleteTrackData(java.lang.String,
+   * @see x1.hiking.rest.HikingTracksService#deleteTrackData(java.lang.String,
    * java.lang.Integer)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteTrackData(final String name, final Integer id) {
     User user = findUser();
-    TrackData td = trackService.findTrackData(user, name, id);
-    if (td == null) {
-      throw new NotFoundException("No track data in track " + name + " with id " + id);
-    }
+    TrackData td = trackService.findTrackData(user, name, id).
+            orElseThrow(() -> new NotFoundException("No track data in track " + name + " with id " + id));
     log.info("Delete track data [{}]", id);
     trackService.delete(td);
     Track track = trackService.findTrack(user, name);

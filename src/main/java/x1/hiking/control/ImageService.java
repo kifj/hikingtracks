@@ -1,6 +1,7 @@
 package x1.hiking.control;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -109,9 +110,9 @@ public class ImageService {
    * @return the image
    */
   public Image update(Image entity, byte[] data) {
-    ImageData imageData = getImageData(entity);
-    if (imageData != null) {
-      updateImageData(imageData, data);
+    Optional<ImageData> imageData = getImageData(entity);
+    if (imageData.isPresent()) {
+      updateImageData(imageData.get(), data);
     } else {
       insertImageData(entity, data);
     }
@@ -151,16 +152,16 @@ public class ImageService {
    * @param image the image
    * @return the image data
    */
-  public ImageData getImageData(Image image) {
+  public Optional<ImageData> getImageData(Image image) {
     if (image.getId() == null) {
-      return null;
+      return Optional.empty();
     }
     TypedQuery<ImageData> q = em.createNamedQuery("ImageData.getImage", ImageData.class);
     q.setParameter(PARAM_IMAGE, image);
     try {
-      return q.getSingleResult();
+      return Optional.of(q.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
 

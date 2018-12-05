@@ -54,7 +54,7 @@ import x1.hiking.utils.ServletHelper;
  * @author joe
  * 
  */
-public class FeedServiceImpl implements FeedService {
+public class FeedServiceResource implements FeedService {
   private static final long serialVersionUID = 8443300431399389281L;
   private final Logger log = LoggerFactory.getLogger(getClass());
   private static final String PATH_TRACKS = PATH_SERVICE + "/tracks/";

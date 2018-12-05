@@ -30,7 +30,7 @@ import x1.hiking.representation.UserInfo;
 @Path("/1.0/")
 @Produces({ APPLICATION_XML, APPLICATION_JSON })
 @Consumes({ APPLICATION_XML, APPLICATION_JSON })
-public interface HikingTracksRestService extends Representation {
+public interface HikingTracksService extends Representation {
   String PATH_USER = "/user";
   String PATH_TRACKS = "/tracks";
   String PATH_SEARCH = "/search";
