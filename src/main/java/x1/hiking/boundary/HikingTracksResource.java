@@ -286,7 +286,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteTrack(String name) {
     try {
-      User user = findUser();
+      User user = findUser(false);
       Track track = trackService.findTrack(user, name, false);
       if (track != null) {
         log.info("delete track [{}]", name);
@@ -314,7 +314,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertTrack(TrackInfo trackInfo) {
     try {
-      User user = findUser();
+      User user = findUser(false);
       validateForInsert(trackInfo);
       Track oldTrack = trackService.findTrack(user, trackInfo.getName(), false);
       if (oldTrack != null) {
@@ -354,7 +354,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateTrack(String name, TrackInfo track) {
     try {
-      User user = findUser();
+      User user = findUser(false);
       Track oldTrack = trackService.findTrack(user, name, true);
       if (oldTrack == null) {
         return insertTrack(track);
@@ -492,7 +492,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   public UserInfo getUser() {
-    User user = findUser();
+    User user = findUser(false);
     return new UserInfo(user);
   }
 
@@ -505,7 +505,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateUser(UserInfo user) {
     validate(user);
-    User oldUser = findUser();
+    User oldUser = findUser(false);
     oldUser.setName(user.getName());
     oldUser.setPublished(user.isPublished());
     log.info("update user [{}]", oldUser);
@@ -521,7 +521,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteUser() {
-    User user = findUser();
+    User user = findUser(false);
     log.info("delete user [{}]", user);
     userManagement.delete(user);
     HttpSession session = httpServletRequest.getSession(false);
@@ -606,7 +606,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertImage(final String name, final String filename, final byte[] data) {
-    User user = findUser();
+    User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw new NotFoundException("Track with name " + name + " is missing.");
@@ -634,7 +634,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateImage(final String name, final String filename, final Integer id, final byte[] data) {
-    User user = findUser();
+    User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw new NotFoundException("Track with name " + name + " is missing.");
@@ -676,7 +676,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteImage(final String name, final Integer id) {
-    User user = findUser();
+    User user = findUser(false);
     Image image = imageService.findImage(user, name, id);
     if (image == null) {
       throw new NotFoundException("No image in track " + name + " with id " + id);
@@ -731,7 +731,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response insertTrackData(final String name, final String filename, final byte[] incomingXML) {
-    User user = findUser();
+    User user = findUser(false);
     Track track = trackService.findTrack(user, name, false);
     if (track == null) {
       throw new NotFoundException("Track with name " + name + " is missing.");
@@ -757,7 +757,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response updateTrackData(final String name, final String filename, final Integer id, byte[] incomingXML) {
-    User user = findUser();
+    User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw new NotFoundException("Track with name " + name + " is missing.");
@@ -824,7 +824,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public Response deleteTrackData(final String name, final Integer id) {
-    User user = findUser();
+    User user = findUser(false);
     TrackData td = trackService.findTrackData(user, name, id).
             orElseThrow(() -> new NotFoundException("No track data in track " + name + " with id " + id));
     log.info("Delete track data [{}]", id);
@@ -834,10 +834,6 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     trackService.update(track);
 
     return Response.status(NO_CONTENT).build();
-  }
-
-  private User findUser() {
-    return findUser(false);
   }
 
   private User findUser(boolean allowPublic) {

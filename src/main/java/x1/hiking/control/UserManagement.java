@@ -13,6 +13,7 @@ import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import x1.hiking.model.TokenExpiredException;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 
@@ -89,7 +90,7 @@ public class UserManagement {
    * @return the user
    * @throws UserNotFoundException if user is not found
    */
-  public User findUserByEmail(String email) throws UserNotFoundException {
+  public User findUserByEmail(String email) throws UserNotFoundException{
     try {
       TypedQuery<User> q = em.createNamedQuery("User.findUserByEmail", User.class);
       q.setParameter("email", email);
@@ -106,12 +107,17 @@ public class UserManagement {
    * @param token the token
    * @return the user
    * @throws UserNotFoundException if user is not found
+   * @throws TokenExpiredException if token is expired
    */
-  public User findUserByToken(String token) throws UserNotFoundException {
+  public User findUserByToken(String token) throws UserNotFoundException, TokenExpiredException  {
     try {
       TypedQuery<User> q = em.createNamedQuery("User.findUserByToken", User.class);
       q.setParameter("token", token);
-      return q.getSingleResult();
+      User user = q.getSingleResult();
+      if (user.getExpires() == null || user.getExpires().before(new Date())) {
+        throw new TokenExpiredException("token expired: " + user.getExpires());
+      }
+      return user;
     } catch (NoResultException e) {
       log.info("No user found for token {}", token);
       throw new UserNotFoundException("No user found for token " + token);

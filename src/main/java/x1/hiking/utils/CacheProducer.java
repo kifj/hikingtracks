@@ -1,5 +1,7 @@
 package x1.hiking.utils;
 
+import java.util.Date;
+
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -24,6 +26,12 @@ public class CacheProducer {
   @Named("feed-cache")
   private Cache<String, Object> getFeedCache() {
     return cacheManager.getCache("feed-cache");
+  }
+
+  @Produces
+  @Named("user-cache")
+  private Cache<String, Date> getUserCache() {
+    return cacheManager.getCache("user-cache");
   }
 
   @Produces

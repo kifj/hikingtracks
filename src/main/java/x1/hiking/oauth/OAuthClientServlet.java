@@ -7,6 +7,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,7 +25,6 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import x1.hiking.control.UserManagement;
+import x1.hiking.model.TokenExpiredException;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
 import x1.hiking.utils.AuthorizationConstants;
@@ -118,11 +120,10 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     if (request.getParameter(PARAM_AUTHENTICATE) == null) {
       String wanted = ServletHelper.getSessionCookieValue(request, PARAM_AUTH_TOKEN);
       if (wanted != null) {
-        User user = authUser(wanted);
-        if (user != null) {
+        if (authUser(wanted)) {
           String redirectUrl = URLDecoder.decode(getState(request), StandardCharsets.UTF_8.name());
-          log.info("Authenticated {}, redirect to: {}", user, redirectUrl);
-          ServletHelper.injectSessionCookie(response, user.getToken());
+          log.info("Authenticated {}, redirect to: {}", wanted, redirectUrl);
+          ServletHelper.injectSessionCookie(response, wanted);
           response.sendRedirect(redirectUrl);
           return;
         }
@@ -283,7 +284,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     if (oauthParams.isIdTokenValid() && StringUtils.isNotEmpty(email)) {
       Date expires = null;
       if (oauthParams.getExpiresIn() != null) {
-        expires = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
+        expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
       }
       checkUser(oauthParams.getAccessToken(), email, expires, null);
     } else {
@@ -307,7 +308,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       if (StringUtils.isNotEmpty(email)) {
         Date expires = null;
         if (oauthParams.getExpiresIn() != null) {
-          expires = DateUtils.addSeconds(new Date(), oauthParams.getExpiresIn().intValue());
+          expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
         }
         String name = userData.getString("name");
         checkUser(oauthParams.getAccessToken(), email, expires, name);
@@ -333,19 +334,16 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return user;
   }
 
-  private User authUser(String token) {
+  private boolean authUser(String token) {
     if (token != null) {
       try {
-        User user = userManagement.findUserByToken(token);
-        if (user.getExpires() == null || user.getExpires().before(new Date())) {
-          return null;
-        }
-        return user;
-      } catch (UserNotFoundException e) {
-        return null;
+        userManagement.findUserByToken(token);
+        return true;
+      } catch (UserNotFoundException | TokenExpiredException e) {
+        return false;
       }
     }
-    return null;
+    return false;
   }
 
   private Class<? extends OAuthAccessTokenResponse> getOAuthAccessTokenResponse(OAuthProviderType oauthProvider) {

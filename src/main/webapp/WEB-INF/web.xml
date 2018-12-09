@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" metadata-complete="false" version="3.1">
-  <icon id="favicon.jpg"/>
-  <display-name>X1 Hiking Tracks</display-name>
-  <description>X1 Hiking Tracks</description>
-  <distributable/>
-  <persistence-unit-ref>
-    <persistence-unit-ref-name>persistence/hikingtracks-emf</persistence-unit-ref-name>
-    <persistence-unit-name>HikingTracksPersistenceUnit</persistence-unit-name>
-  </persistence-unit-ref>
-  <servlet>
-    <servlet-name>oauth</servlet-name>
-    <servlet-class>x1.hiking.oauth.OAuthClientServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>oauth</servlet-name>
-    <url-pattern>/oauth</url-pattern>
-  </servlet-mapping>
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-  </welcome-file-list>
-  <filter>
-    <filter-name>authorization</filter-name>
-    <filter-class>x1.hiking.oauth.AuthorizationFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>authorization</filter-name>
-    <url-pattern>/secure/*</url-pattern>
-  </filter-mapping>
+<web-app metadata-complete="false" version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <description>X1 Hiking Tracks</description>
+    <display-name>X1 Hiking Tracks</display-name>
+    <icon>
+        <small-icon>/favicon.jpg</small-icon>
+    </icon>
+    <distributable />
+    <filter>
+        <filter-name>authorization</filter-name>
+        <filter-class>x1.hiking.oauth.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>authorization</filter-name>
+        <url-pattern>/secure/*</url-pattern>
+    </filter-mapping>
+    <servlet>
+        <servlet-name>oauth</servlet-name>
+        <servlet-class>x1.hiking.oauth.OAuthClientServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>oauth</servlet-name>
+        <url-pattern>/oauth</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
     <resource-env-ref>
         <resource-env-ref-name>cache/hikingtracks</resource-env-ref-name>
         <resource-env-ref-type>org.infinispan.manager.EmbeddedCacheManager</resource-env-ref-type>
@@ -38,4 +38,13 @@
         <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
         <lookup-name>java:jboss/infinispan/cache/hikingtracks/feed-cache</lookup-name>
     </resource-env-ref>
+    <resource-env-ref>
+        <resource-env-ref-name>cache/user-cache</resource-env-ref-name>
+        <resource-env-ref-type>org.infinispan.Cache</resource-env-ref-type>
+        <lookup-name>java:jboss/infinispan/cache/hikingtracks/user-cache</lookup-name>
+    </resource-env-ref>    
+    <persistence-unit-ref>
+        <persistence-unit-ref-name>persistence/hikingtracks-emf</persistence-unit-ref-name>
+        <persistence-unit-name>HikingTracksPersistenceUnit</persistence-unit-name>
+    </persistence-unit-ref>
 </web-app>

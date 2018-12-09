@@ -3,7 +3,6 @@ package x1.hiking.oauth;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 import javax.inject.Inject;
 import javax.servlet.Filter;
@@ -22,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import x1.hiking.boundary.SessionValidator;
-import x1.hiking.model.User;
 import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
@@ -60,19 +58,8 @@ public class AuthorizationFilter implements Filter, AuthorizationConstants {
   private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     try {
-      User user = validator.validateUser(false, request, response);
-      Date expiration = user.getExpires();
-      if (expiration != null && expiration.compareTo(new Date()) < 0) {
-        log.info("Token {} has expired {}", user.getToken(), expiration);
-        user = null;
-      } else {
-        log.debug("found={}", user);
-      }
-      if (user != null) {
-        chain.doFilter(request, response);
-      } else {
-        redirectToLogin(request, response);
-      }
+      validator.validateToken(request, response);
+      chain.doFilter(request, response);
     } catch (ForbiddenException | NotAuthorizedException e) {
       redirectToLogin(request, response);
     }
@@ -84,8 +71,8 @@ public class AuthorizationFilter implements Filter, AuthorizationConstants {
     if (StringUtils.isNotEmpty(queryString)) {
       destinationURL += "?" + queryString;
     }
-    String url = ServletHelper.getBaseUrl(request).path(LOGIN_PAGE).queryParam(PARAM_FROM,
-        URLEncoder.encode(destinationURL, StandardCharsets.UTF_8.name())).build().toString();
+    String url = ServletHelper.getBaseUrl(request).path(LOGIN_PAGE)
+        .queryParam(PARAM_FROM, URLEncoder.encode(destinationURL, StandardCharsets.UTF_8.name())).build().toString();
     log.info("Authentification required, redirecting to login: {}", url);
     ServletHelper.revokeSessionCookie(response);
     response.sendRedirect(url);

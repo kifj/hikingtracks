@@ -422,6 +422,9 @@
                 <local-cache name="feed-cache" statistics-enabled="true">
                     <expiration lifespan="900000"/>
                 </local-cache>
+                <local-cache name="user-cache" statistics-enabled="true">
+                    <expiration lifespan="60000"/>
+                </local-cache>
             </cache-container>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:io:3.0">
