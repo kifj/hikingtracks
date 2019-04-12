@@ -12,8 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import x1.hiking.model.User;
 
 /**
- * represenation of User
- * 
+ * represenation of user entity
  */
 @XmlRootElement(name = "user", namespace = Representation.NS_HIKING_TRACKS)
 public class UserInfo implements Representation {
@@ -25,8 +24,9 @@ public class UserInfo implements Representation {
   public UserInfo() {
   }
 
-  /** 
-   * Constructor with user 
+  /**
+   * Constructor with user
+   * @param user the user
    */
   public UserInfo(User user) {
     setName(user.getName());

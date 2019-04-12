@@ -1,6 +1,6 @@
 package x1.hiking.representation;
 
-import javax.ws.rs.BadRequestException;
+import static x1.hiking.representation.ErrorMessageBuilder.badRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,13 +25,17 @@ public interface FilenameInfo {
 
   /**
    * set name
-   * @param name the name
+   * 
+   * @param name
+   *          the name
    */
   void setName(String name);
 
   /**
    * set URL
-   * @param url the URL
+   * 
+   * @param url
+   *          the URL
    */
   void setUrl(String url);
 
@@ -43,10 +47,10 @@ public interface FilenameInfo {
       return true;
     }
     if (StringUtils.isEmpty(getUrl())) {
-      if (getId() == null && (StringUtils.isEmpty(getName()))) {
+      if (getId() == null && StringUtils.isEmpty(getName())) {
         return false;
       }
-      throw new BadRequestException(this + " must contain an URL");
+      throw badRequest("x1.hiking.representation.FilenameInfo.url_missing.message", getName());
     }
     if (StringUtils.isEmpty(getName()) && StringUtils.isNotEmpty(getUrl())) {
       int idx = getUrl().lastIndexOf('/');

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -29,9 +28,10 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import static javax.ws.rs.core.Response.Status.*;
+import static x1.hiking.representation.ErrorMessageBuilder.*;
+
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
@@ -39,12 +39,12 @@ import org.slf4j.LoggerFactory;
 
 import x1.hiking.control.ImageService;
 import x1.hiking.control.QueryOptions;
+import x1.hiking.control.ThumbnailService;
 import x1.hiking.control.TrackService;
 import x1.hiking.control.UserManagement;
 import x1.hiking.geocoding.KmlSampler;
 import x1.hiking.model.*;
 import x1.hiking.representation.*;
-import x1.hiking.thumbnails.ThumbnailService;
 import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
@@ -55,7 +55,7 @@ import x1.hiking.utils.ServletHelper;
  */
 public class HikingTracksResource implements HikingTracksService, AuthorizationConstants {
   private static final long serialVersionUID = 8237702332418932465L;
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(HikingTracksResource.class);
   private static final String IMG_PLACEHOLDER = "placeholder.jpg";
 
   @Context
@@ -197,8 +197,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   /*
    * (non-Javadoc)
    * 
-   * @see x1.hiking.rest.HikingTracksService#getTrack(java.lang.String,
-   * boolean)
+   * @see x1.hiking.rest.HikingTracksService#getTrack(java.lang.String, boolean)
    */
   @Override
   @Transactional(Transactional.TxType.SUPPORTS)
@@ -230,7 +229,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       track = trackService.findTrack(user, name, true);
     }
     if (track == null) {
-      throw new NotFoundException("No track found with name " + name);
+      throw notFound(MSG_TRACK_MISSING, name);
     }
     return track;
   }
@@ -293,7 +292,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
         trackService.delete(track);
         return Response.status(NO_CONTENT).build();
       } else {
-        throw new NotFoundException("No track found with name " + name);
+        throw notFound(MSG_TRACK_MISSING, name);
       }
     } catch (NotFoundException e) {
       log.info(e.getMessage());
@@ -307,8 +306,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * x1.hiking.rest.HikingTracksService#insertTrack(x1.hiking.model.Track)
+   * @see x1.hiking.rest.HikingTracksService#insertTrack(x1.hiking.model.Track)
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -318,7 +316,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       validateForInsert(trackInfo);
       Track oldTrack = trackService.findTrack(user, trackInfo.getName(), false);
       if (oldTrack != null) {
-        throw new ConflictException("Track with name " + trackInfo.getName() + " already exists.");
+        throw conflict(MSG_TRACK_ALREADY_EXISTS, trackInfo.getName());
       }
       Track track = new Track();
       updateTrack(trackInfo, track);
@@ -548,7 +546,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       return getImage(name, id, user);
     } catch (IOException | URISyntaxException e) {
       log.warn(null, e);
-      throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
+      throw new WebApplicationException(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -558,7 +556,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       imageService.findImage(null, name, id);
     }
     if (image == null) {
-      throw new NotFoundException("No image in track " + name + " with id " + id);
+      throw notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id);
     }
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(image);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
@@ -577,8 +575,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     return createResponse(Response.status(OK), new BinaryStreamingOutput(imageData.get().getData()), eTag);
   }
 
-  private Response getImage(final String name, final Integer id, User user, ThumbnailType type)
-      throws IOException {
+  private Response getImage(final String name, final Integer id, User user, ThumbnailType type) throws IOException {
     Optional<Thumbnail> result = thumbnailService.findThumbnail(user, name, id, type);
     if (!result.isPresent() && user != null) {
       result = thumbnailService.findThumbnail(null, name, id, type);
@@ -609,10 +606,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
-      throw new NotFoundException("Track with name " + name + " is missing.");
-    }
-    if (data == null || data.length == 0) {
-      throw new BadRequestException(MSG_EMPTY_BODY);
+      throw notFound(MSG_TRACK_MISSING, name);
     }
     log.info("insert image for track [{}]", track);
     int number = track.getImages().size();
@@ -637,13 +631,10 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
-      throw new NotFoundException("Track with name " + name + " is missing.");
-    }
-    if (data == null || data.length == 0) {
-      throw new BadRequestException(MSG_EMPTY_BODY);
+      throw notFound(MSG_TRACK_MISSING, name);
     }
     log.info("update image for track [{}]", track);
-    Image img = findImage(track, id).orElseThrow(() ->  new NotFoundException("Image with id " + id + " is missing."));
+    Image img = findImage(track, id).orElseThrow(() -> notFound(MSG_IMAGE_MISSING, id));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -653,18 +644,6 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     img = imageService.update(img, data);
     eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
     return createResponse(Response.status(NO_CONTENT), eTag);
-  }
-
-  private Optional<Image> findImage(Track track, Integer id) {
-    if (id == null) {
-      return Optional.empty();
-    }
-    for (Image i : track.getImages()) {
-      if (i.getId().equals(id)) {
-        return Optional.of(i);
-      }
-    }
-    return Optional.empty();
   }
 
   /*
@@ -679,7 +658,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     User user = findUser(false);
     Image image = imageService.findImage(user, name, id);
     if (image == null) {
-      throw new NotFoundException("No image in track " + name + " with id " + id);
+      throw notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id);
     }
     log.info("Delete image [{}]", id);
     imageService.delete(image);
@@ -701,7 +680,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       result = trackService.findTrackData(null, name, id);
     }
     if (!result.isPresent()) {
-      throw new NotFoundException("No track data in track " + name + " with id " + id);
+      throw notFound(MSG_TRACK_DATA_IN_TRACK_MISSING, name, id);
     }
     TrackData td = result.get();
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
@@ -730,18 +709,15 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
-  public Response insertTrackData(final String name, final String filename, final byte[] incomingXML) {
+  public Response insertTrackData(final String name, final String filename, final byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, false);
     if (track == null) {
-      throw new NotFoundException("Track with name " + name + " is missing.");
-    }
-    if (incomingXML == null || incomingXML.length == 0) {
-      throw new BadRequestException(MSG_EMPTY_BODY);
+      throw notFound(MSG_TRACK_MISSING, name);
     }
     log.info("insert track data for track [{}]", track);
     TrackData td = new TrackData();
-    setTrackDataFields(td, filename, incomingXML);
+    KmlSampler.updateTrackDataFields(td, filename, data);
     td.setTrack(track);
     trackService.insert(td);
     URI location = UriBuilder.fromPath(track.getName() + SEP + PATH_KML + td.getId()).build();
@@ -756,40 +732,28 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
-  public Response updateTrackData(final String name, final String filename, final Integer id, byte[] incomingXML) {
+  public Response updateTrackData(final String name, final String filename, final Integer id, byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
-      throw new NotFoundException("Track with name " + name + " is missing.");
-    }
-    if (incomingXML == null || incomingXML.length == 0) {
-      throw new BadRequestException(MSG_EMPTY_BODY);
+      throw notFound(MSG_TRACK_MISSING, name);
     }
     log.info("update track data for track [{}]", track);
-    TrackData td = findTrackData(track, id).orElseThrow(() -> new NotFoundException("TrackData with id " + id + " is missing."));
+    TrackData td = findTrackData(track, id).orElseThrow(() -> notFound(MSG_TRACK_DATA_MISSING, id));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
       return createResponse(builder);
     }
-    setTrackDataFields(td, filename, incomingXML);
+    KmlSampler.updateTrackDataFields(td, filename, data);
     td.setTrack(track);
     td = trackService.update(td);
 
     track = trackService.findTrack(track.getId());
-    track.setGeolocationAvailable(null);
-    trackService.update(track);
+    resetGeolocationAvailable(track);
 
     eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     return createResponse(Response.status(NO_CONTENT), eTag);
-  }
-
-  private void setTrackDataFields(TrackData td, String filename, byte[] incomingXML) {
-    td.setName(filename);
-    td.setData(incomingXML);
-    KmlSampler.Result result = KmlSampler.parse(td);
-    Coord[] coordinates = result.getSamples();
-    td.setLocation(coordinates);
   }
 
   /*
@@ -801,6 +765,27 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
   public Response options(String path) {
     return Response.status(NO_CONTENT).header(ACCESS_CONTROL_ALLOW_ORIGIN, HEADER_CORS_ALL)
         .header(ACCESS_CONTROL_ALLOW_HEADERS, HEADER_CORS_ALLOWED_HEADERS).build();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see x1.hiking.rest.HikingTracksService#deleteTrackData(java.lang.String,
+   * java.lang.Integer)
+   */
+  @Override
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
+  public Response deleteTrackData(final String name, final Integer id) {
+    User user = findUser(false);
+
+    TrackData td = trackService.findTrackData(user, name, id)
+        .orElseThrow(() -> notFound(MSG_TRACK_DATA_IN_TRACK_MISSING, name, id));
+    log.info("Delete track data [{}]", id);
+    trackService.delete(td);
+    Track track = trackService.findTrack(user, name);
+    resetGeolocationAvailable(track);
+
+    return Response.status(NO_CONTENT).build();
   }
 
   private Optional<TrackData> findTrackData(Track track, Integer id) {
@@ -815,25 +800,21 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
     return Optional.empty();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see x1.hiking.rest.HikingTracksService#deleteTrackData(java.lang.String,
-   * java.lang.Integer)
-   */
-  @Override
-  @Transactional(Transactional.TxType.REQUIRES_NEW)
-  public Response deleteTrackData(final String name, final Integer id) {
-    User user = findUser(false);
-    TrackData td = trackService.findTrackData(user, name, id).
-            orElseThrow(() -> new NotFoundException("No track data in track " + name + " with id " + id));
-    log.info("Delete track data [{}]", id);
-    trackService.delete(td);
-    Track track = trackService.findTrack(user, name);
+  private Optional<Image> findImage(Track track, Integer id) {
+    if (id == null) {
+      return Optional.empty();
+    }
+    for (Image i : track.getImages()) {
+      if (i.getId().equals(id)) {
+        return Optional.of(i);
+      }
+    }
+    return Optional.empty();
+  }
+
+  private void resetGeolocationAvailable(Track track) {
     track.setGeolocationAvailable(null);
     trackService.update(track);
-
-    return Response.status(NO_CONTENT).build();
   }
 
   private User findUser(boolean allowPublic) {

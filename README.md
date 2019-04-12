@@ -6,7 +6,7 @@ Visit https://hikingtracks.johannes-beck.name to this code running on Openshift 
 This is a part of of the whole project, and contains only the application code.
 Its public on Github to run the STI build on openshift.
 
-## CLI-Scripts for Wildfly 14.0
+## CLI-Scripts for Wildfly 16
 
 see [standalone.xml](cfg/standalone.xml)
 

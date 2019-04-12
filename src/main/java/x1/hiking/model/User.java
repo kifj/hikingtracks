@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -217,12 +221,17 @@ public class User implements Model {
   }
 
   @Column(name = User.ATTR_NAME, nullable = true, length = 100)
+  @Size(max = 100)
   private String name;
   @Column(name = User.ATTR_EMAIL, nullable = false, length = 100)
+  @NotNull
+  @Email
+  @Size(max = 100)
   private String email;
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = Track.ATTR_USER)
   private List<Track> tracks;
   @Column(name = User.ATTR_TOKEN, nullable = true, length = 255)
+  @Size(max = 255)
   private String token;
   @Column(name = ATTR_EXPIRES, nullable = true)
   @Temporal(TemporalType.TIMESTAMP)

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<server xmlns="urn:jboss:domain:8.0">
+<server xmlns="urn:jboss:domain:10.0">
     <extensions>
         <extension module="org.jboss.as.clustering.infinispan"/>
         <extension module="org.jboss.as.connector"/>
@@ -31,6 +31,7 @@
         <extension module="org.wildfly.extension.io"/>
         <extension module="org.wildfly.extension.microprofile.config-smallrye"/>
         <extension module="org.wildfly.extension.microprofile.health-smallrye"/>
+        <extension module="org.wildfly.extension.microprofile.metrics-smallrye"/>
         <extension module="org.wildfly.extension.microprofile.opentracing-smallrye"/>
         <extension module="org.wildfly.extension.request-controller"/>
         <extension module="org.wildfly.extension.security.manager"/>
@@ -110,17 +111,23 @@
             <logger category="com.arjuna">
                 <level name="WARN"/>
             </logger>
+            <logger category="io.jaegertracing.Configuration">
+                <level name="WARN"/>
+            </logger>
             <logger category="org.jboss.as.config">
                 <level name="DEBUG"/>
             </logger>
             <logger category="sun.rmi">
                 <level name="WARN"/>
             </logger>
+            <logger category="org.hibernate">
+                <level name="WARN"/>
+            </logger>
             <logger category="x1">
                 <level name="DEBUG"/>
             </logger>
-            <logger category="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener" use-parent-handlers="false">
-                <level name="WARN"/>
+            <logger category="com.arjuna.ats.jta">
+                <level name="ERROR"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
@@ -275,10 +282,10 @@
             <iiop enable-by-default="false" use-qualified-name="false"/>
             <default-security-domain value="other"/>
             <default-missing-method-permissions-deny-access value="true"/>
-            <statistics enabled="true"/>
+            <statistics enabled="${wildfly.ejb3.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
             <log-system-exceptions value="true"/>
         </subsystem>
-        <subsystem xmlns="urn:wildfly:elytron:4.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
+        <subsystem xmlns="urn:wildfly:elytron:6.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
             <providers>
                 <aggregate-providers name="combined-providers">
                     <providers name="elytron"/>
@@ -386,7 +393,7 @@
                 <provider-sasl-server-factory name="global"/>
             </sasl>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:infinispan:7.0">
+        <subsystem xmlns="urn:jboss:domain:infinispan:8.0">
             <cache-container name="server" default-cache="default" module="org.wildfly.clustering.server">
                 <local-cache name="default">
                     <transaction mode="BATCH"/>
@@ -408,7 +415,6 @@
             </cache-container>
             <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
                 <local-cache name="entity">
-                    <transaction mode="NON_XA"/>
                     <object-memory size="10000"/>
                     <expiration max-idle="100000"/>
                 </local-cache>
@@ -472,6 +478,7 @@
             </config-source>
         </subsystem>
         <subsystem xmlns="urn:wildfly:microprofile-health-smallrye:1.0" security-enabled="false"/>
+        <subsystem xmlns="urn:wildfly:microprofile-metrics-smallrye:2.0" security-enabled="false" exposed-subsystems="*" prefix="${wildfly.metrics.prefix:wildfly}"/>
         <subsystem xmlns="urn:wildfly:microprofile-opentracing-smallrye:1.0"/>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <remote-naming/>
@@ -529,9 +536,10 @@
                 </process-id>
             </core-environment>
             <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
+            <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}"/>
             <object-store path="tx-object-store" relative-to="jboss.server.data.dir"/>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:undertow:7.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other">
+        <subsystem xmlns="urn:jboss:domain:undertow:8.0" default-server="default-server" default-virtual-host="default-host" default-servlet-container="default" default-security-domain="other" statistics-enabled="${wildfly.undertow.statistics-enabled:${wildfly.statistics-enabled:false}}">
             <buffer-cache name="default"/>
             <server name="default-server">
                 <http-listener name="default" tcp-keep-alive="true" read-timeout="60000" socket-binding="http" redirect-socket="https" enable-http2="true"/>
@@ -549,7 +557,7 @@
                 <file name="welcome-content" path="${jboss.home.dir}/welcome-content"/>
             </handlers>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:webservices:2.0">
+        <subsystem xmlns="urn:jboss:domain:webservices:2.0" statistics-enabled="${wildfly.webservices.statistics-enabled:${wildfly.statistics-enabled:false}}">
             <wsdl-host>${jboss.bind.address:127.0.0.1}</wsdl-host>
             <endpoint-config name="Standard-Endpoint-Config"/>
             <endpoint-config name="Recording-Endpoint-Config">

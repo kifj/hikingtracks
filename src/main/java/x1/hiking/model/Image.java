@@ -1,8 +1,11 @@
 package x1.hiking.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * Image model class
@@ -36,6 +39,7 @@ public class Image implements Model {
   public static final String COL_LAT = "lat";
   public static final String COL_LON = "lon";
   public static final String COL_NR = "nr";
+  public static final String COL_IMAGE_DATE = "image_date";
 
   /**
    * @return the name
@@ -141,7 +145,22 @@ public class Image implements Model {
   public List<Thumbnail> getThumbnails() {
     return thumbnails;
   }
+  
+  /**
+   * @return the date
+   */
+  public Date getDate() {
+    return date;
+  }
 
+  /**
+   * @param date
+   *          the date to set
+   */
+  public void setDate(Date date) {
+    this.date = date;
+  }
+  
   /*
    * (non-Javadoc)
    * 
@@ -193,12 +212,15 @@ public class Image implements Model {
   }
 
   @Column(name = ATTR_NAME, nullable = false, length = 100)
+  @Size(max = 100)
+  @NotNull
   private String name;
   @Column(name = COL_LAT, nullable = true, precision = 9, scale = 6)
   private Double latitude;
   @Column(name = COL_LON, nullable = true, precision = 9, scale = 6)
   private Double longitude;
   @Column(name = ATTR_URL, nullable = true, length = 200)
+  @Size(max = 200)
   private String url;
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = COL_TRACK_ID, foreignKey = @ForeignKey(name = "fk_track_image"))
@@ -209,6 +231,9 @@ public class Image implements Model {
   private Integer number;
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = ImageData.ATTR_IMAGE, fetch = FetchType.LAZY)
   private List<ImageData> imageData;
+  @Column(name = COL_IMAGE_DATE, nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date date;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = ATTR_ID)

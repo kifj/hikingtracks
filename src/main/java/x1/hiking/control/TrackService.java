@@ -40,7 +40,7 @@ import x1.hiking.model.User;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class TrackService {
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(TrackService.class);
   private static final String PARAM_ID = "id";
   private static final String PARAM_TRACK = "track";
   private static final String PARAM_NAME = "name";
@@ -204,9 +204,10 @@ public class TrackService {
   /**
    * Find tracks within bounds
    *
-   * @param text the text
-   * @param options the options
-   * @return the list
+   * @param text the search input
+   * @param options the search options
+   * @param bounds the boundaries
+   * @return found list of tracks
    */
   @TransactionAttribute(TransactionAttributeType.SUPPORTS)
   public List<Track> findTracks(String text, Bounds bounds, QueryOptions options) {

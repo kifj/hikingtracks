@@ -11,6 +11,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import x1.hiking.model.Image;
 import x1.hiking.model.ImageData;
@@ -65,7 +67,7 @@ public class ImageService {
    *
    * @param entity the entity
    */
-  public void insert(Image entity) {
+  public void insert(@Valid @NotNull Image entity) {
     entity.setTrack(em.merge(entity.getTrack()));
     em.persist(entity);
   }
@@ -76,7 +78,7 @@ public class ImageService {
    * @param entity the entity
    * @param data the data
    */
-  public void insert(Image entity, byte[] data) {
+  public void insert(@Valid @NotNull Image entity, byte[] data) {
     insert(entity);
     insertImageData(entity, data);
   }
@@ -98,7 +100,7 @@ public class ImageService {
    * @param entity the entity
    * @return the image
    */
-  public Image update(Image entity) {
+  public Image update(@Valid @NotNull Image entity) {
     return merge(entity);
   }
 
@@ -109,7 +111,7 @@ public class ImageService {
    * @param data the data
    * @return the image
    */
-  public Image update(Image entity, byte[] data) {
+  public Image update(@Valid @NotNull Image entity, byte[] data) {
     Optional<ImageData> imageData = getImageData(entity);
     if (imageData.isPresent()) {
       updateImageData(imageData.get(), data);
@@ -141,7 +143,7 @@ public class ImageService {
    *
    * @param entity the entity
    */
-  public void delete(Image entity) {
+  public void delete(@NotNull Image entity) {
     entity = merge(entity);
     em.remove(entity);
   }
@@ -152,7 +154,7 @@ public class ImageService {
    * @param image the image
    * @return the image data
    */
-  public Optional<ImageData> getImageData(Image image) {
+  public Optional<ImageData> getImageData(@NotNull Image image) {
     if (image.getId() == null) {
       return Optional.empty();
     }
@@ -170,7 +172,7 @@ public class ImageService {
    *
    * @param image the image
    */
-  public void deleteImageData(Image image) {
+  public void deleteImageData(@NotNull Image image) {
     if (image.getId() == null) {
       return;
     }
@@ -185,7 +187,7 @@ public class ImageService {
    * @param track the track
    * @return the image
    */
-  public Image findFirstImage(Track track) {
+  public Image findFirstImage(@NotNull Track track) {
     TypedQuery<Image> q = em.createNamedQuery("Image.getImages", Image.class);
     q.setParameter(PARAM_TRACK, track);
     q.setMaxResults(1);

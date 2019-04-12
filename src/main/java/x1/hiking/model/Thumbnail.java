@@ -1,6 +1,7 @@
 package x1.hiking.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  * Thumbnail data object
@@ -125,9 +126,11 @@ public class Thumbnail implements Model {
   }
 
   @Column(name = ATTR_TYPE, nullable = false)
+  @NotNull
   private ThumbnailType type;
   @Column(name = COL_IMAGE_DATA, nullable = false)
   @Lob
+  @NotNull
   private byte[] data;
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = COL_IMAGE_ID, foreignKey = @ForeignKey(name = "fk_thumbnail_image"))

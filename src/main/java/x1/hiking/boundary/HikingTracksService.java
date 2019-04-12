@@ -13,6 +13,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import static javax.ws.rs.core.MediaType.*;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 import x1.hiking.model.ActivityType;
@@ -24,8 +27,6 @@ import x1.hiking.representation.UserInfo;
 
 /**
  * Public accessible REST service.
- *
- * @author joe
  */
 @Path("/1.0/")
 @Produces({ APPLICATION_XML, APPLICATION_JSON })
@@ -35,8 +36,6 @@ public interface HikingTracksService extends Representation {
   String PATH_TRACKS = "/tracks";
   String PATH_SEARCH = "/search";
   String HEADER_FILE_NAME = "X-File-Name";
-  String MSG_MISSING_NAME = "Missing name";
-  String MSG_EMPTY_BODY = "Empty body"; 
   String THUMBNAIL = "thumbnail";
   String HEADER_VARY_ACCEPT = "Accept";
   String HEADER_CORS_ALL = "*";
@@ -45,6 +44,13 @@ public interface HikingTracksService extends Representation {
   String HEADER_CORS_ALLOWED_HEADERS = "Content-Type, Cache-Control";
   String PARAM_ID = "{id}";
   String PARAM_NAME = "{name}";
+
+  String MSG_TRACK_MISSING = "x1.hiking.boundary.HikingTracksService.track_missing.message";
+  String MSG_IMAGE_MISSING = "x1.hiking.boundary.HikingTracksService.image_missing.message";
+  String MSG_TRACK_DATA_MISSING = "x1.hiking.boundary.HikingTracksService.track_data_missing.message";
+  String MSG_TRACK_DATA_IN_TRACK_MISSING = "x1.hiking.boundary.HikingTracksService.track_data_in_track_missing.message";
+  String MSG_IMAGE_IN_TRACK_MISSING = "x1.hiking.boundary.HikingTracksService.image_in_track_missing.message";
+  String MSG_TRACK_ALREADY_EXISTS = "x1.hiking.boundary.HikingTracksService.track_already_exists.message";
 
   /**
    * get all tracks.
@@ -72,7 +78,7 @@ public interface HikingTracksService extends Representation {
    */
   @POST
   @Path(PATH_SEARCH)
-  Response getTracks(Search search);
+  Response getTracks(@NotNull Search search);
 
   /**
    * get track.
@@ -103,7 +109,7 @@ public interface HikingTracksService extends Representation {
    */
   @POST
   @Path(PATH_TRACKS)
-  Response insertTrack(TrackInfo track);
+  Response insertTrack(@NotNull TrackInfo track);
 
   /**
    * update track.
@@ -114,7 +120,7 @@ public interface HikingTracksService extends Representation {
    */
   @PUT
   @Path(PATH_TRACKS + SEP + PARAM_NAME)
-  Response updateTrack(@PathParam("name") String name, TrackInfo track);
+  Response updateTrack(@PathParam("name") String name, @NotNull TrackInfo track);
 
   /**
    * get user.
@@ -133,7 +139,7 @@ public interface HikingTracksService extends Representation {
    */
   @PUT
   @Path(PATH_USER)
-  Response updateUser(UserInfo user);
+  Response updateUser(@NotNull UserInfo user);
 
   /**
    * delete user.
@@ -169,7 +175,7 @@ public interface HikingTracksService extends Representation {
   @POST
   @Consumes({ MEDIA_TYPE_IMAGE_JPEG })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES)
-  Response insertImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename, byte[] data);
+  Response insertImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename, @NotEmpty byte[] data);
 
   /**
    * update image.
@@ -183,8 +189,8 @@ public interface HikingTracksService extends Representation {
   @PUT
   @Consumes({ MEDIA_TYPE_IMAGE_JPEG })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES + PARAM_ID)
-  Response updateImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
-      @PathParam("id") Integer id, byte[] data);
+  Response updateImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename,
+      @PathParam("id") Integer id, @NotEmpty byte[] data);
 
   /**
    * delete image.
@@ -214,15 +220,15 @@ public interface HikingTracksService extends Representation {
    *
    * @param name the track name
    * @param filename the filename
-   * @param incomingXML the incoming xml
+   * @param data the incoming xml
    * @return the response
    */
   @POST
   @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
   @Produces({ APPLICATION_XML })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML)
-  Response insertTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
-      byte[] incomingXML);
+  Response insertTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename,
+      @NotEmpty byte[] data);
 
   /**
    * update track data.
@@ -230,15 +236,15 @@ public interface HikingTracksService extends Representation {
    * @param name the track name
    * @param filename the filename
    * @param id the kml id
-   * @param incomingXML the incoming xml
+   * @param data the incoming xml
    * @return the response
    */
   @PUT
   @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
   @Produces({ APPLICATION_XML })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
-  Response updateTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) String filename,
-      @PathParam("id") Integer id, byte[] incomingXML);
+  Response updateTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename,
+      @PathParam("id") Integer id, @NotEmpty byte[] data);
 
   /**
    * delete track data.

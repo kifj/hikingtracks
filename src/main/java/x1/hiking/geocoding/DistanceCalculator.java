@@ -3,7 +3,7 @@ package x1.hiking.geocoding;
 import x1.hiking.model.Coord;
 
 /**
- * Calculate distance between 2 points
+ * Calculate distance between 2 points on the surface of earth (approximated as a perfect sphere)
  */
 public class DistanceCalculator {
   private Coord start;

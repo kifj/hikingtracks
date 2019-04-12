@@ -1,5 +1,7 @@
 package x1.hiking.boundary;
 
+import static x1.hiking.representation.ErrorMessageBuilder.*;
+
 import java.util.Date;
 
 import javax.ejb.EJB;
@@ -7,8 +9,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
 
 import org.infinispan.Cache;
 import org.slf4j.Logger;
@@ -29,7 +29,9 @@ import x1.hiking.utils.ServletHelper;
  */
 @Named("sessionValidator")
 public class SessionValidatorImpl implements AuthorizationConstants, SessionValidator {
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private static final String MSG_OAUTH_CHALLENGE = "Bearer realm=\"%s\", error=\"%s\", error_description=\"%s\"";
+
+  private final Logger log = LoggerFactory.getLogger(SessionValidatorImpl.class);
 
   @Inject
   @Named("user-cache")
@@ -50,7 +52,7 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
       cache.put(token, user.getExpires());
     }
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -77,12 +79,14 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
       if (allowPublic) {
         return null;
       }
-      throw new ForbiddenException(MSG_MISSING_TOKEN + PARAM_AUTH_TOKEN);
+      String realm = ServletHelper.getRequestUrl(request).build().getHost();
+      String challenge = String.format(MSG_OAUTH_CHALLENGE, realm, ERROR_INVALID_TOKEN, "The access token expired");
+      throw notAuthorized(challenge);
     } catch (UserNotFoundException e) {
       String realm = ServletHelper.getRequestUrl(request).build().getHost();
-      String challenge = String.format("Bearer realm=\"%s\", error=\"%s\", error_description=\"%s\"", realm,
-          MSG_INVALID_TOKEN, token);
-      throw new NotAuthorizedException(challenge);
+      String challenge = String.format(MSG_OAUTH_CHALLENGE, realm, ERROR_INVALID_TOKEN,
+          "The access token is not valid");
+      throw notAuthorized(challenge);
     }
   }
 
@@ -95,7 +99,7 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
       if (allowPublic) {
         return null;
       }
-      throw new ForbiddenException(MSG_MISSING_TOKEN + PARAM_AUTH_TOKEN);
+      throw forbidden(MSG_MISSING_TOKEN, PARAM_AUTH_TOKEN);
     }
     return token;
   }

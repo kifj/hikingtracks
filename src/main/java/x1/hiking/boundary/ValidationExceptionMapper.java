@@ -7,10 +7,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.util.stream.Collectors;
 
 /**
  * Exception mapper for validations
- * 
+ *
  * @author joe
  */
 @Provider
@@ -18,20 +19,13 @@ public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViol
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see javax.ws.rs.ext.ExceptionMapper#toResponse(java.lang.Throwable)
    */
   @Override
   public Response toResponse(ConstraintViolationException e) {
-    StringBuilder response = new StringBuilder();
-    boolean isFirst = true;
-    for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
-      if (!isFirst) {
-        response.append("\n");
-      }
-      response.append(violation.getMessage());
-      isFirst = false;
-    }
-    return Response.status(Status.BAD_REQUEST).entity(response.toString()).type(MediaType.TEXT_PLAIN).build();
+    String body = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage)
+        .collect(Collectors.joining("\n"));
+    return Response.status(Status.BAD_REQUEST).entity(body).type(MediaType.TEXT_PLAIN).build();
   }
 }

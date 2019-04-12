@@ -27,7 +27,7 @@ import x1.hiking.model.GeolocationSource;
  * Facility to retrieve geonames for coordinates
  */
 public class InverseGeocoder {
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(InverseGeocoder.class);
   private static final String PARAM_RESULT_TYPE = "result_type";
   private static final String VALUE_RESULT_TYPE_LOCALITY = "locality";
   private static final String VALUE_RESULT_TYPE_COUNTRY = "country";
@@ -66,24 +66,41 @@ public class InverseGeocoder {
   }
 
   public Geolocation[] getLocationsForWaypoints(Coord[] coords, double minDistance) {
-    List<Geolocation> geolocations = new ArrayList<>();
+    if (coords.length == 0) {
+      return new Geolocation[0];
+    }
 
+    List<Geolocation> geolocations = new ArrayList<>();
     Coord[] waypoints = getWaypoints(coords, minDistance);
     for (Coord waypoint : waypoints) {
-      URI uri = UriBuilder.fromUri(baseUrl).queryParam(PARAM_RESULT_TYPE, VALUE_RESULT_TYPE_LOCALITY)
-          .queryParam(PARAM_LANGUAGE, VALUE_LANGUAGE).queryParam(PARAM_KEY, key)
-          .queryParam(PARAM_LATLNG, waypoint.getLat() + "," + waypoint.getLng()).build();
-      Response resp = ClientBuilder.newClient().target(uri).request(MediaType.APPLICATION_JSON).get();
-      String body = resp.readEntity(String.class);
-      JsonReader rdr = Json.createReader(new StringReader(body));
-      JsonObject obj = rdr.readObject();
-
+      JsonObject obj = retrieveGeoinformation(waypoint);
       obj.getJsonArray("results").getValuesAs(JsonObject.class).forEach(
           result -> extractGeolocation(geolocations, new Geolocation(waypoint, GeolocationSource.TRACKDATA), result));
     }
     return geolocations.toArray(new Geolocation[0]);
   }
 
+  public Geolocation getLocationsForImage(Coord coord) {
+    List<Geolocation> geolocations = new ArrayList<>();
+    JsonObject obj = retrieveGeoinformation(coord);
+    obj.getJsonArray("results").getValuesAs(JsonObject.class)
+        .forEach(result -> extractGeolocation(geolocations, new Geolocation(coord, GeolocationSource.IMAGE), result));
+    if (geolocations.isEmpty()) {
+      return null;
+    } else {
+      return geolocations.get(0);
+    }
+  }
+
+  private JsonObject retrieveGeoinformation(Coord coord) {
+    URI uri = UriBuilder.fromUri(baseUrl).queryParam(PARAM_RESULT_TYPE, VALUE_RESULT_TYPE_LOCALITY)
+        .queryParam(PARAM_LANGUAGE, VALUE_LANGUAGE).queryParam(PARAM_KEY, key)
+        .queryParam(PARAM_LATLNG, coord.getLat() + "," + coord.getLng()).build();
+    Response resp = ClientBuilder.newClient().target(uri).request(MediaType.APPLICATION_JSON).get();
+    String body = resp.readEntity(String.class);
+    JsonReader rdr = Json.createReader(new StringReader(body));
+    return rdr.readObject();
+  }
   private void extractGeolocation(List<Geolocation> result, Geolocation geolocation, JsonObject jsonObject) {
     jsonObject.getJsonArray("address_components").getValuesAs(JsonObject.class)
         .forEach(address -> extractGeolocation(geolocation, address));

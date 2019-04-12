@@ -3,7 +3,8 @@ package x1.hiking.boundary;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
-/** Exception for Status Code 409
+/**
+ * Exception for Status Code 409
  * 
  * @author joe
  */
@@ -20,10 +21,10 @@ public class ConflictException extends ClientErrorException {
   /**
    * Create a HTTP 409 (Conflict) exception.
    * 
-   * @param message
-   *          the String that is the entity of the 400 response.
+   * @param response
+   *          the response entity for the 409 response.
    */
-  public ConflictException(String message) {
-    super(message, Response.Status.CONFLICT);
+  public ConflictException(Response response) {
+    super(response);
   }
 }

@@ -96,6 +96,15 @@ public class KmlSampler {
       return EMPTY_RESULT;
     }
   }
+  
+  public static void updateTrackDataFields(TrackData td, String filename, byte[] incomingXML) {
+    td.setName(filename);
+    td.setData(incomingXML);
+    Result result = parse(td);
+    Coord[] coordinates = result.getSamples();
+    td.setLocation(coordinates);
+  }
+
 
   private Result parse(Reader reader) throws XMLStreamException {
     List<Coord> result = new ArrayList<>();

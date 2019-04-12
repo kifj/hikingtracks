@@ -24,7 +24,7 @@ import x1.hiking.model.TrackData;
  */
 public class TrackDataInfo implements Representation, FilenameInfo {
   private static final long serialVersionUID = -9176892648902446018L;
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(TrackDataInfo.class);
 
   /**
    * Default constructor

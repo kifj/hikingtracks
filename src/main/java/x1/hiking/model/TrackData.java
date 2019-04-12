@@ -1,10 +1,12 @@
 package x1.hiking.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * Track data (KML) model class
- * 
+ *
  * @author joe
  *
  */
@@ -36,14 +38,13 @@ public class TrackData implements Model {
   public static final String ATTR_END_POINT = "endPoint";
   public static final String ATTR_LOWEST_POINT = "lowestPoint";
   public static final String ATTR_HIGHEST_POINT = "highestPoint";
-  
-  
+
   /**
    * Default constructor
    */
   public TrackData() {
   }
-  
+
   /**
    * special constructor for JPA query
    */
@@ -60,8 +61,6 @@ public class TrackData implements Model {
     this.highestPoint = highestPoint;
     this.url = url;
   }
-
-
 
   /**
    * @return the name
@@ -195,7 +194,7 @@ public class TrackData implements Model {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see x1.hiking.model.Model#setId(java.lang.Integer)
    */
   @Override
@@ -246,10 +245,9 @@ public class TrackData implements Model {
       setEndPoint(null);
       setLowestPoint(null);
       setHighestPoint(null);
-    }    
+    }
   }
-  
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -261,8 +259,11 @@ public class TrackData implements Model {
   }
 
   @Column(name = ATTR_NAME, nullable = false, length = 100)
+  @NotNull
+  @Size(max = 100)
   private String name;
   @Column(name = ATTR_URL, nullable = true, length = 200)
+  @Size(max = 200)
   private String url;
   @Column(name = "track_data", nullable = true)
   @Lob

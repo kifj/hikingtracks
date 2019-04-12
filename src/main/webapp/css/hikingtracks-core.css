@@ -760,8 +760,6 @@ input.button {
 }
 #pager li a:hover {
   background-color: #EFEDED;
-}
-#pager li a:hover {
   color: #65944A;
 }
 
@@ -793,9 +791,6 @@ input.button {
   position: relative;
   text-align: center;
   zoom: 1;
-}
-
-#pager-feature .fg-button {
   padding: 4px 5px;
 }
 

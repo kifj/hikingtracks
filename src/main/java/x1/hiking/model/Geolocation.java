@@ -1,6 +1,8 @@
 package x1.hiking.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -202,10 +204,13 @@ public class Geolocation implements Model {
   }
 
   @Column(name = ATTR_LOCATION, nullable = true, length = 100)
+  @Size(max = 100)
   private String location;
   @Column(name = ATTR_AREA, nullable = true, length = 100)
+  @Size(max = 100)
   private String area;
   @Column(name = ATTR_COUNTRY, nullable = true, length = 100)
+  @Size(max = 100)
   private String country;
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = COL_TRACK_ID, foreignKey = @ForeignKey(name = "fk_track_geolocation"))
@@ -213,6 +218,7 @@ public class Geolocation implements Model {
   @Embedded
   private Coord coord;
   @Column(name = ATTR_SOURCE, nullable = false)
+  @NotNull
   private GeolocationSource source;
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)

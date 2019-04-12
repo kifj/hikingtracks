@@ -13,15 +13,12 @@ import x1.hiking.representation.Representation;
 
 /**
  * ATOM Feed service
- * 
- * @author joe
- * 
  */
 @Path("/feed")
 public interface FeedService extends Representation {
 
   /**
-   * get newest tracks
+   * get newest tracks as a feed
    */
   @GET
   @Path("/")
@@ -29,7 +26,7 @@ public interface FeedService extends Representation {
   Feed getTracks();
 
   /**
-   * get newest tracks
+   * get the feed entry for a track
    * 
    * @param id the id
    */

@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /** Track model class
  * 
@@ -347,11 +349,14 @@ public class Track implements Model {
   }
 
   @Column(name = ATTR_NAME, nullable = false, length = 100)
+  @Size(max = 100)
+  @NotNull
   private String name;
   @Column(name = ATTR_DESCRIPTION, nullable = true)
   @Lob
   private String description;
   @Column(name = ATTR_LOCATION, nullable = true, length = 100)
+  @Size(max = 100)
   private String location;
   @Column(name = COL_TRACK_DATE, nullable = true)
   @Temporal(TemporalType.DATE)

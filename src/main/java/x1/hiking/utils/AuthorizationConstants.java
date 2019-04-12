@@ -17,4 +17,5 @@ public interface AuthorizationConstants {
   String STATE = "state";
   String PARAM_REFERER = "referer";
   String LOGIN_PAGE = "login.html";
+  String ERROR_INVALID_TOKEN = "invalid_token";
 }

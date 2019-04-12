@@ -57,8 +57,8 @@ import x1.hiking.representation.Cacheable;
   public EntityTag buildEntityTag(StringBuilder buffer) {
     String acceptHeader = httpServletRequest.getHeader(HEADER_ACCEPT);
     buffer.append(";").append(acceptHeader);
-    byte[] encoded = Base64.encodeBase64(buffer.toString().getBytes(StandardCharsets.UTF_8));
-    return new EntityTag(new String(encoded, StandardCharsets.UTF_8));
+    String encoded = Base64.encodeBase64String(buffer.toString().getBytes(StandardCharsets.UTF_8));
+    return new EntityTag(encoded);
   }
   
   private HttpServletRequest httpServletRequest;

@@ -34,7 +34,7 @@ import x1.hiking.model.TrackData;
 @Singleton
 @Startup
 public class GeolocationTagUpdater {
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(GeolocationTagUpdater.class);
   private static final String INFO_TEXT = "GeolocationTagUpdater";
 
   @Inject
@@ -55,7 +55,7 @@ public class GeolocationTagUpdater {
   private InverseGeocoder geocoder;
 
   /**
-   *  Update all geolocations which need to be updated
+   * Update all geolocations which need to be updated
    */
   @Schedule(hour = "*", minute = "*/5", second = "0", persistent = true, info = INFO_TEXT)
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -66,18 +66,22 @@ public class GeolocationTagUpdater {
     findTrackDataForUpdate(maxResult).forEach(this::updateTrackdataLocationInternal);
   }
 
-  /** Update geolocations for track
+  /**
+   * Update geolocations for track
    *
-   * @param id the track id
+   * @param id
+   *          the track id
    */
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   public void updateGeolocations(Integer id) {
     updateGeolocationsInternal(em.find(Track.class, id));
   }
 
-  /** Find geolocations for track
+  /**
+   * Find geolocations for track
    *
-   * @param track the track
+   * @param track
+   *          the track
    * @return the geolocations
    */
   public List<Geolocation> findGeolocation(final Track track) {
@@ -86,9 +90,11 @@ public class GeolocationTagUpdater {
     return q.getResultList();
   }
 
-  /** Find tracks for location update
+  /**
+   * Find tracks for location update
    *
-   * @param maxResults maximum of result set
+   * @param maxResults
+   *          maximum of result set
    * @return tracks with no location data
    */
   public List<Track> findTracksForGeolocationUpdate(int maxResults) {
@@ -143,12 +149,10 @@ public class GeolocationTagUpdater {
   private List<Geolocation> createGeolocations(TrackData trackData, double minDistance) {
     List<Geolocation> result = new ArrayList<>();
     Coord[] coords = KmlSampler.parse(trackData).getSamples();
-    if (coords.length > 0) {
-      Geolocation[] waypoints = geocoder.getLocationsForWaypoints(coords, minDistance);
-      for (Geolocation waypoint : waypoints) {
-        waypoint.setTrack(trackData.getTrack());
-        result.add(waypoint);
-      }
+    Geolocation[] waypoints = geocoder.getLocationsForWaypoints(coords, minDistance);
+    for (Geolocation waypoint : waypoints) {
+      waypoint.setTrack(trackData.getTrack());
+      result.add(waypoint);
     }
     return result;
   }

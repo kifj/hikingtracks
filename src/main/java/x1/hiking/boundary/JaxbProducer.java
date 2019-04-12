@@ -1,5 +1,6 @@
 package x1.hiking.boundary;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -11,9 +12,8 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 
 /**
  * CDI Producer for JAXB
- * 
- * @author joe
  */
+@ApplicationScoped
 public class JaxbProducer {
   
   @Produces

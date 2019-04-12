@@ -12,8 +12,7 @@ import x1.hiking.model.User;
  *
  */
 public interface SessionValidator {
-  String MSG_MISSING_TOKEN = "Missing Auth Token: ";
-  String MSG_INVALID_TOKEN = "Invalid Auth Token";
+  String MSG_MISSING_TOKEN = "x1.hiking.boundary.SessionValidator.missing_auth_token.message";
 
   /**
    * validate user session

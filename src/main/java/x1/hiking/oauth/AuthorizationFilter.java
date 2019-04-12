@@ -31,7 +31,7 @@ import x1.hiking.utils.ServletHelper;
  * 
  */
 public class AuthorizationFilter implements Filter, AuthorizationConstants {
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(AuthorizationFilter.class);
 
   /*
    * (non-Javadoc)

@@ -10,7 +10,7 @@
       <property name="hibernate.hbm2ddl.auto" value="update" />
 -->
       <property name="hibernate.show_sql" value="false" />
-      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL57Dialect" />
       <property name="hibernate.dialect.storage_engine" value="innodb" />
       <property name="hibernate.generate_statistics" value="true" />
 

@@ -566,7 +566,7 @@ public class TrackInfo implements Representation {
   }
 
   private List<Link> links;
-  @NotNull(message = "Name may not be empty")
+  @NotNull(message = "{x1.hiking.representation.TrackInfo.name.null.message}")
   @Size(max = 100)
   private String name;
   private String description;

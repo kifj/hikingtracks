@@ -2,6 +2,7 @@ package x1.hiking.representation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -24,7 +25,7 @@ import x1.hiking.model.Image;
 @JsonInclude(Include.NON_NULL)
 public class ImageInfo implements Representation, FilenameInfo {
   private static final long serialVersionUID = 4915092534000608062L;
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(ImageInfo.class);
   
   /**
    * Default constructor.
@@ -45,6 +46,7 @@ public class ImageInfo implements Representation, FilenameInfo {
     setName(image.getName());
     setLatitude(image.getLatitude());
     setLongitude(image.getLongitude());
+    setDate(image.getDate());
     if (StringUtils.isNotEmpty(image.getUrl())) {
       setUrl(image.getUrl());
     } else {
@@ -120,6 +122,25 @@ public class ImageInfo implements Representation, FilenameInfo {
   public void setLongitude(Double longitude) {
     this.longitude = longitude;
   }
+  
+  /**
+   * Gets the date.
+   * 
+   * @return the date
+   */
+  public Date getDate() {
+    return date;
+  }
+  
+  /**
+   * Sets the date
+   * 
+   * @param date
+   *          the date to set
+   */
+  public void setDate(Date date) {
+    this.date = date;
+  }
 
   /*
    * (non-Javadoc)
@@ -175,4 +196,5 @@ public class ImageInfo implements Representation, FilenameInfo {
   private String url;
   private Double latitude;
   private Double longitude;
+  private Date date;
 }
