@@ -8,9 +8,12 @@ metadata:
   name: wildfly
   namespace: hikingtracks
 spec:
-  host: wildfly-hikingtracks.1d35.starter-us-east-1.openshiftapps.com
+  host: wildfly-hikingtracks.7e14.starter-us-west-2.openshiftapps.com
   port:
     targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
   to:
     kind: Service
     name: wildfly

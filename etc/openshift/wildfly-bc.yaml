@@ -1,0 +1,52 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"build.openshift.io/v1","kind":"BuildConfig","metadata":{"annotations":{},"labels":{"app":"wildfly"},"name":"wildfly","namespace":"hikingtracks"},"spec":{"failedBuildsHistoryLimit":5,"nodeSelector":null,"output":{"to":{"kind":"ImageStreamTag","name":"wildfly-hikingtracks:2.2"}},"postCommit":{},"resources":{},"runPolicy":"Serial","source":{"git":{"ref":"master","uri":"https://github.com/kifj/hikingtracks.git"},"type":"Git"},"strategy":{"sourceStrategy":{"env":[{"name":"MAVEN_OPTS","value":"-Dfile.encoding=UTF-8"}],"from":{"kind":"ImageStreamTag","name":"wildfly:16.0"}},"type":"Source"},"successfulBuildsHistoryLimit":5,"triggers":[{"imageChange":{"lastTriggeredImageID":"docker.io/openshift/wildfly-160-centos7@sha256:a1c9dfdce47a26e808bead74ec7bb6bb3dd0ecf013d2750e8e44d20dbc83188c"},"type":"ImageChange"},{"type":"ConfigChange"},{"generic":{"secret":"b2d381df02968981"},"type":"Generic"},{"github":{"secret":"85478d7e9d7b6e4b"},"type":"GitHub"}]}}
+  creationTimestamp: 2019-04-11T18:37:29Z
+  labels:
+    app: wildfly
+  name: wildfly
+  namespace: hikingtracks
+  resourceVersion: "3536953580"
+  selfLink: /apis/build.openshift.io/v1/namespaces/hikingtracks/buildconfigs/wildfly
+  uid: dc8fff34-5c88-11e9-b220-0a2a2b777307
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: wildfly-hikingtracks:2.2
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: https://github.com/kifj/hikingtracks.git
+    type: Git
+  strategy:
+    sourceStrategy:
+      env:
+      - name: MAVEN_OPTS
+        value: -Dfile.encoding=UTF-8
+      from:
+        kind: ImageStreamTag
+        name: wildfly:16.0
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - imageChange:
+      lastTriggeredImageID: docker.io/openshift/wildfly-160-centos7@sha256:a1c9dfdce47a26e808bead74ec7bb6bb3dd0ecf013d2750e8e44d20dbc83188c
+    type: ImageChange
+  - type: ConfigChange
+  - generic:
+      secret: b2d381df02968981
+    type: Generic
+  - github:
+      secret: 85478d7e9d7b6e4b
+    type: GitHub
+status:
+  lastVersion: 3

@@ -10,6 +10,12 @@ Its public on Github to run the STI build on openshift.
 
 see [standalone.xml](cfg/standalone.xml)
 
+## DDL scripts
+
+The DDL scripts are available for MySQL. 
+
+	create-mysql.cli
+
 ## Kubernetes resources
 
 see [etc/openshift](etc/openshift)

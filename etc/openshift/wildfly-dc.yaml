@@ -27,7 +27,10 @@ spec:
         - name: MYSQL_DATABASE
           value: "true"
         - name: MYSQL_DATABASE
-          value: hikingtracks
+          valueFrom:
+            secretKeyRef:
+              key: database-name
+              name: mysql
         - name: MYSQL_USER
           valueFrom:
             secretKeyRef:
@@ -38,7 +41,7 @@ spec:
             secretKeyRef:
               key: database-password
               name: mysql
-        image: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:64b47aef1c9a47d3e862cb4bf5067c9416ddc486d9b4161fcf081aa0b570c7fd
+        image: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:271627c537209e0013228e716b3a966a0273a92365894e671f8eac7191962e22
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
@@ -70,8 +73,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - name: hikingtracks-secret
-          mountPath: /etc/hikingtracks
+        - mountPath: /etc/hikingtracks
+          name: hikingtracks-secret
           readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -81,7 +84,9 @@ spec:
       volumes:
       - name: hikingtracks-secret
         secret:
+          defaultMode: 420
           secretName: hikingtracks-secret
+  test: false
   triggers:
   - imageChangeParams:
       automatic: true
@@ -91,7 +96,7 @@ spec:
         kind: ImageStreamTag
         name: wildfly-hikingtracks:2.2
         namespace: hikingtracks
-      lastTriggeredImage: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:64b47aef1c9a47d3e862cb4bf5067c9416ddc486d9b4161fcf081aa0b570c7fd
+      lastTriggeredImage: docker-registry.default.svc:5000/hikingtracks/wildfly-hikingtracks@sha256:271627c537209e0013228e716b3a966a0273a92365894e671f8eac7191962e22
     type: ImageChange
   - type: ConfigChange
 

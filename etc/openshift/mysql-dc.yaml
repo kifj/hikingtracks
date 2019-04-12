@@ -40,8 +40,11 @@ spec:
               key: database-root-password
               name: mysql
         - name: MYSQL_DATABASE
-          value: hikingtracks
-        image: registry.access.redhat.com/rhscl/mariadb-101-rhel7@sha256:ef00024301e8e7ee0ec84e3064a641e93324926cbfab7b289656fba705eab1f8
+          valueFrom:
+            secretKeyRef:
+              key: database-name
+              name: mysql
+        image: docker-registry.default.svc:5000/openshift/mariadb@sha256:dbc796bdb20de64bb8015dbb77dffb807830222e58ecc540f3331a6818a65e2a
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -93,8 +96,8 @@ spec:
       - mariadb
       from:
         kind: ImageStreamTag
-        name: mariadb:10.1
+        name: mariadb:10.2
         namespace: openshift
-      lastTriggeredImage: registry.access.redhat.com/rhscl/mariadb-101-rhel7@sha256:e44642d79be9abccfcabed86cd0a5114e2e6e25ba11abffeb2a8c6f764a474bf
+      lastTriggeredImage: docker-registry.default.svc:5000/openshift/mariadb@sha256:dbc796bdb20de64bb8015dbb77dffb807830222e58ecc540f3331a6818a65e2a
     type: ImageChange
   - type: ConfigChange
