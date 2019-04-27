@@ -25,7 +25,7 @@ public class OpenIdConnectResponse extends OAuthJSONAccessTokenResponse {
     idToken = new JWTReader().read(getParam(ID_TOKEN));
   }
 
-  public final JWT getIdToken() {
+  public JWT getIdToken() {
     return idToken;
   }
 

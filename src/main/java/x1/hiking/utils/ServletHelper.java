@@ -16,16 +16,17 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Servlet helper class.
- * 
- * @author joe
+ * helper class for HTTP requests and responses, including cookies
  */
-public final class ServletHelper implements AuthorizationConstants {
+public final class ServletHelper {
+  public static final String PARAM_AUTH_TOKEN = "x-auth-token";
 
   private ServletHelper() {
   }
-  
-  /** Gets the base url as UriBuilder
+
+  /** 
+   * the base url for the application
+   * 
    * @param request the request
    * @return the base url as UriBuilder
    */
@@ -35,7 +36,7 @@ public final class ServletHelper implements AuthorizationConstants {
   }
 
   /**
-   * get the request url including proxy server
+   * the request url including proxy server
    * 
    * @param request
    *          the request
@@ -124,19 +125,17 @@ public final class ServletHelper implements AuthorizationConstants {
    */
   public static Map<String, String> parseQueryString(URL url) {
     String queryString = url.getQuery();
-    Map<String, String> map = new HashMap<>();
+    Map<String, String> result = new HashMap<>();
     if (queryString == null) {
-      return map;
+      return result;
     }
     for (String parameter : queryString.split("&")) {
       String[] entry = parameter.split("=");
       if (entry.length != 2) {
         continue;
       }
-      String key = entry[0];
-      String value = entry[1];
-      map.put(key, value);
+      result.put(entry[0], entry[1]);
     }
-    return map;
+    return result;
   }
 }

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import x1.hiking.geocoding.InverseGeocoder;
 import x1.hiking.model.Coord;
-import x1.hiking.model.Geolocation;
 import x1.hiking.model.Image;
 import x1.hiking.model.ImageData;
 import x1.hiking.model.ThumbnailType;
@@ -78,10 +77,8 @@ public class ThumbnailUpdater {
       image = imageService.update(image);
       Track track = image.getTrack();
       if (StringUtils.isEmpty(track.getLocation()) && image.getLatitude() != null && image.getLongitude() != null) {
-        Geolocation geolocation = inverseGeocoder.getLocationsForImage(new Coord(image.getLatitude(), image.getLongitude()));
-        if (geolocation != null) {
-          track.setLocation(geolocation.getLocation() + ", " + geolocation.getCountry());
-        }
+        inverseGeocoder.getLocationsForImage(new Coord(image.getLatitude(), image.getLongitude()))
+            .ifPresent(geolocation -> track.setLocation(geolocation.getLocation() + ", " + geolocation.getCountry()));
       }
       if (image.getDate() != null && track.getDate() == null) {
         track.setDate(image.getDate());

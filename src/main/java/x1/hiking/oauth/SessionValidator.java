@@ -1,4 +1,4 @@
-package x1.hiking.boundary;
+package x1.hiking.oauth;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +13,8 @@ import x1.hiking.model.User;
  */
 public interface SessionValidator {
   String MSG_MISSING_TOKEN = "x1.hiking.boundary.SessionValidator.missing_auth_token.message";
-
+  String ERROR_INVALID_TOKEN = "invalid_token";
+  
   /**
    * validate user session
    * 

@@ -92,7 +92,7 @@ public class UserManagement {
    * @return the user
    * @throws UserNotFoundException if user is not found
    */
-  public User findUserByEmail(@NotNull String email) throws UserNotFoundException{
+  public User findUserByEmail(@NotNull String email) throws UserNotFoundException {
     try {
       TypedQuery<User> q = em.createNamedQuery("User.findUserByEmail", User.class);
       q.setParameter("email", email);
@@ -104,7 +104,7 @@ public class UserManagement {
   }
 
   /**
-   * Find user.
+   * Find user by token. 
    *
    * @param token the token
    * @return the user

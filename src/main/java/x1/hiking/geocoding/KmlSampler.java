@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -197,24 +198,24 @@ public class KmlSampler {
     }
   }
 
-  private Result reduce(List<Coord> data, int samples, double offsetDistance) {
-    if (data.isEmpty()) {
+  private Result reduce(List<Coord> coordinates, int samples, double offsetDistance) {
+    if (coordinates.isEmpty()) {
       return EMPTY_RESULT;
     }
     double distance = offsetDistance;
-    int step = data.size() / samples;
+    int step = coordinates.size() / samples;
     int counter = 0;
-    Coord l = null;
+    Optional<Coord> last = Optional.empty();
     List<Waypoint> result = new ArrayList<>();
-    for (Coord c : data) {
-      if (l != null) {
-        distance += new DistanceCalculator(l, c).distance();
+    for (Coord current : coordinates) {
+      if (last.isPresent()) {
+        distance += new DistanceCalculator(last.get(), current).distance();
       }
       if (counter++ == step) {
         counter = 0;
-        result.add(new Waypoint(c, distance / 1000.0d));
+        result.add(new Waypoint(current, distance / 1000.0d));
       }
-      l = c;
+      last = Optional.of(current);
     }
     return new Result(result, distance / 1000.0d);
   }

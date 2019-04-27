@@ -1,4 +1,4 @@
-package x1.hiking.utils;
+package x1.hiking.oauth;
 
 /**
  * Constants for HTTP Headers
@@ -6,10 +6,9 @@ package x1.hiking.utils;
  * @author joe
  * 
  */
-public interface AuthorizationConstants {
+public interface OAuthConstants {
   String PARAM_URL = "openid_identifier";
   String PARAM_AUTHENTICATE = "x-auth-authenticate";
-  String PARAM_AUTH_TOKEN = "x-auth-token";
   String PARAM_LOGOUT = "logout";
   String PARAM_FROM = "from";
   String PARAM_TO = "to";
@@ -17,5 +16,4 @@ public interface AuthorizationConstants {
   String STATE = "state";
   String PARAM_REFERER = "referer";
   String LOGIN_PAGE = "login.html";
-  String ERROR_INVALID_TOKEN = "invalid_token";
 }

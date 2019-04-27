@@ -250,41 +250,34 @@ public class OAuthParams {
   }
 
   public void validateTokenParams() throws OAuthProblemException {
-    String authzEndpoint = getAuthzEndpoint();
-    String tokenEndpoint = getTokenEndpoint();
-    String clientId = getClientId();
-    String clientSecret = getClientSecret();
-    String redirectUri = getRedirectUri();
-    String authzCode = getAuthzCode();
-
     StringBuilder sb = new StringBuilder();
 
-    if (StringUtils.isEmpty(authzCode)) {
+    if (StringUtils.isEmpty(getAuthzCode())) {
       sb.append("Authorization Code ");
     }
 
-    if (StringUtils.isEmpty(authzEndpoint)) {
+    if (StringUtils.isEmpty(getAuthzEndpoint())) {
       sb.append("Authorization Endpoint ");
     }
 
-    if (StringUtils.isEmpty(tokenEndpoint)) {
+    if (StringUtils.isEmpty(getTokenEndpoint())) {
       sb.append("Token Endpoint ");
     }
 
-    if (StringUtils.isEmpty(clientId)) {
+    if (StringUtils.isEmpty(getClientId())) {
       sb.append("Client ID ");
     }
 
-    if (StringUtils.isEmpty(clientSecret)) {
+    if (StringUtils.isEmpty(getClientSecret())) {
       sb.append("Client Secret ");
     }
 
-    if (StringUtils.isEmpty(redirectUri)) {
+    if (StringUtils.isEmpty(getRedirectUri())) {
       sb.append("Redirect URI");
     }
 
     String incorrectParams = sb.toString();
-    if ("".equals(incorrectParams)) {
+    if (StringUtils.isEmpty(incorrectParams)) {
       return;
     }
     throw OAuthProblemException.error("Incorrect parameters: " + incorrectParams);

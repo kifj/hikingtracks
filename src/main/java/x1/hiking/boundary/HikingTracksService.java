@@ -175,7 +175,8 @@ public interface HikingTracksService extends Representation {
   @POST
   @Consumes({ MEDIA_TYPE_IMAGE_JPEG })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_IMAGES)
-  Response insertImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename, @NotEmpty byte[] data);
+  Response insertImage(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename, 
+      @NotEmpty byte[] data);
 
   /**
    * update image.

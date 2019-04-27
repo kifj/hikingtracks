@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -80,15 +81,15 @@ public class InverseGeocoder {
     return geolocations.toArray(new Geolocation[0]);
   }
 
-  public Geolocation getLocationsForImage(Coord coord) {
+  public Optional<Geolocation> getLocationsForImage(Coord coord) {
     List<Geolocation> geolocations = new ArrayList<>();
     JsonObject obj = retrieveGeoinformation(coord);
     obj.getJsonArray("results").getValuesAs(JsonObject.class)
         .forEach(result -> extractGeolocation(geolocations, new Geolocation(coord, GeolocationSource.IMAGE), result));
     if (geolocations.isEmpty()) {
-      return null;
+      return Optional.empty();
     } else {
-      return geolocations.get(0);
+      return Optional.of(geolocations.get(0));
     }
   }
 

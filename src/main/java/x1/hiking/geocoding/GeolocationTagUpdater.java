@@ -147,19 +147,17 @@ public class GeolocationTagUpdater {
   }
 
   private List<Geolocation> createGeolocations(TrackData trackData, double minDistance) {
-    List<Geolocation> result = new ArrayList<>();
     Coord[] coords = KmlSampler.parse(trackData).getSamples();
-    Geolocation[] waypoints = geocoder.getLocationsForWaypoints(coords, minDistance);
-    for (Geolocation waypoint : waypoints) {
-      waypoint.setTrack(trackData.getTrack());
-      result.add(waypoint);
-    }
-    return result;
+    return createGeolocation(trackData.getTrack(), coords, minDistance);
   }
 
-  private List<Geolocation> createGeolocation(Track track, double minDistance) {
-    List<Geolocation> result = new ArrayList<>();
+  private List<Geolocation> createGeolocation(Track track, double minDistance) {    
     Coord[] coords = new Coord[] { new Coord(track.getLatitude(), track.getLongitude()) };
+    return createGeolocation(track, coords, minDistance);
+  }
+  
+  private List<Geolocation> createGeolocation(Track track, Coord[] coords, double minDistance) {
+    List<Geolocation> result = new ArrayList<>();
     Geolocation[] waypoints = geocoder.getLocationsForWaypoints(coords, minDistance);
     for (Geolocation waypoint : waypoints) {
       waypoint.setTrack(track);

@@ -17,6 +17,9 @@ import com.drew.metadata.exif.GpsDirectory;
 import x1.hiking.model.Image;
 import x1.hiking.model.ImageData;
 
+/**
+ * retrieve data from image metadata (EXIF)
+ */
 public class ExivReader {
   private final Logger log = LoggerFactory.getLogger(ExivReader.class);
   private ImageData imageData;

@@ -20,8 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import x1.hiking.boundary.SessionValidator;
-import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -30,7 +28,7 @@ import x1.hiking.utils.ServletHelper;
  * @author joe
  * 
  */
-public class AuthorizationFilter implements Filter, AuthorizationConstants {
+public class AuthorizationFilter implements Filter, OAuthConstants {
   private final Logger log = LoggerFactory.getLogger(AuthorizationFilter.class);
 
   /*

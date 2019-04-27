@@ -50,7 +50,6 @@ import x1.hiking.control.UserManagement;
 import x1.hiking.model.TokenExpiredException;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
-import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -59,7 +58,7 @@ import x1.hiking.utils.ServletHelper;
  * @author joe
  *
  */
-public class OAuthClientServlet extends HttpServlet implements AuthorizationConstants {
+public class OAuthClientServlet extends HttpServlet implements OAuthConstants {
   private static final long serialVersionUID = -2880212001549684810L;
   private final Logger log = LoggerFactory.getLogger(OAuthClientServlet.class);
   
@@ -115,7 +114,7 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       return;
     }
     if (request.getParameter(PARAM_AUTHENTICATE) == null) {
-      String wanted = ServletHelper.getSessionCookieValue(request, PARAM_AUTH_TOKEN);
+      String wanted = ServletHelper.getSessionCookieValue(request, ServletHelper.PARAM_AUTH_TOKEN);
       if (wanted != null && authUser(wanted)) {
         String redirectUrl = URLDecoder.decode(getState(request), StandardCharsets.UTF_8.name());
         log.info("Authenticated {}, redirect to: {}", wanted, redirectUrl);
@@ -265,8 +264,8 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     return oauthParams;
   }
 
-  private void verifyResponse(OAuthParams oauthParams, OpenIdConnectResponse openIdConnectResponse, String emailField, String nameField)
-      throws MalformedURLException {
+  private void verifyResponse(OAuthParams oauthParams, OpenIdConnectResponse openIdConnectResponse, String emailField, 
+      String nameField) throws MalformedURLException {
     JWT idToken = openIdConnectResponse.getIdToken();
     oauthParams.setIdToken(idToken.getRawString());
 
@@ -280,6 +279,8 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
       Date expires = null;
       if (oauthParams.getExpiresIn() != null) {
         expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
+      } else {
+        expires = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));        
       }
       String name = idToken.getClaimsSet().getCustomField(nameField, String.class);
       checkUser(openIdConnectResponse.getAccessToken(), email, expires, name);
@@ -288,8 +289,8 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
     }
   }
 
-  private void verifyResponse(OAuthParams oauthParams, GitHubTokenResponse githubTokenResponse, String emailField, String nameField)
-      throws OAuthProblemException, OAuthSystemException {
+  private void verifyResponse(OAuthParams oauthParams, GitHubTokenResponse githubTokenResponse, String emailField,
+      String nameField) throws OAuthProblemException, OAuthSystemException {
     OAuthClientRequest bearerClientRequest = new OAuthBearerClientRequest("https://api.github.com/user")
         .setAccessToken(oauthParams.getAccessToken()).buildQueryMessage();
     OAuthClient client = new OAuthClient(new URLConnectionClient());
@@ -305,6 +306,8 @@ public class OAuthClientServlet extends HttpServlet implements AuthorizationCons
         Date expires = null;
         if (oauthParams.getExpiresIn() != null) {
           expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
+        } else {
+          expires = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));        
         }
         String name = userData.getString(nameField);
         checkUser(githubTokenResponse.getAccessToken(), email, expires, name);

@@ -12,9 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -44,8 +47,8 @@ import x1.hiking.control.TrackService;
 import x1.hiking.control.UserManagement;
 import x1.hiking.geocoding.KmlSampler;
 import x1.hiking.model.*;
+import x1.hiking.oauth.SessionValidator;
 import x1.hiking.representation.*;
-import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -53,7 +56,7 @@ import x1.hiking.utils.ServletHelper;
  * 
  * @author joe
  */
-public class HikingTracksResource implements HikingTracksService, AuthorizationConstants {
+public class HikingTracksResource implements HikingTracksService {
   private static final long serialVersionUID = 8237702332418932465L;
   private final Logger log = LoggerFactory.getLogger(HikingTracksResource.class);
   private static final String IMG_PLACEHOLDER = "placeholder.jpg";
@@ -96,9 +99,12 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.SUPPORTS)
+  @Timed(name = "get-tracks", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getTracks(String name, Integer startPosition, Integer maxResults, boolean onlyPublished,
       ThumbnailType thumbnail, ActivityType activity) {
-    log.info("get tracks [name={}, activity={}]", name, activity);
+    log.info(
+        "get tracks [name={}, activity={}, startPosition={}, maxResults={}, onlyPublished={}, thumbnail={}]",
+        name, activity, startPosition, maxResults, onlyPublished, thumbnail);
     User user = findUser(true);
     QueryOptions options = buildQueryOptions(startPosition, maxResults, activity);
     List<Track> tracks = findTracks(name, onlyPublished, user, options);
@@ -146,8 +152,9 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
 
   @Override
   @Transactional(Transactional.TxType.SUPPORTS)
+  @Timed(name = "search-tracks", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getTracks(Search search) {
-    log.info("get tracks {}", search);
+    log.info("get tracks [search={}]", search);
 
     QueryOptions options = buildQueryOptions(search);
     List<Track> tracks = trackService.findTracks(search.getName(), search.getBounds(), options);
@@ -201,6 +208,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.SUPPORTS)
+  @Timed(name = "get-track", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getTrack(String name, boolean includePublished) {
     try {
       log.info("get track [name={}, includePublished={}]", name, includePublished);
@@ -283,6 +291,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "delete-track", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response deleteTrack(String name) {
     try {
       User user = findUser(false);
@@ -310,6 +319,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "insert-track", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response insertTrack(TrackInfo trackInfo) {
     try {
       User user = findUser(false);
@@ -323,7 +333,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
       track.setUser(user);
       track.getTrackData().forEach(td -> td.setTrack(track));
       track.getImages().forEach(img -> img.setTrack(track));
-      log.info("insert track  [{}]", track);
+      log.info("insert track [{}]", track);
       trackService.insert(track);
       URI location = UriBuilder.fromPath(track.getName()).build();
       List<Model> models = addLinks(track, null, user);
@@ -350,6 +360,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "update-track", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response updateTrack(String name, TrackInfo track) {
     try {
       User user = findUser(false);
@@ -489,6 +500,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    * @see x1.hiking.rest.HikingTracksService#getUser()
    */
   @Override
+  @Timed(name = "get-user", absolute = true, unit = MetricUnits.MILLISECONDS)
   public UserInfo getUser() {
     User user = findUser(false);
     return new UserInfo(user);
@@ -501,6 +513,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "update-user", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response updateUser(UserInfo user) {
     validate(user);
     User oldUser = findUser(false);
@@ -537,6 +550,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "get-image", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getImage(final String name, final Integer id, ThumbnailType type) {
     User user = findUser(true);
     try {
@@ -602,13 +616,14 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "insert-image", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response insertImage(final String name, final String filename, final byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw notFound(MSG_TRACK_MISSING, name);
     }
-    log.info("insert image for track [{}]", track);
+    log.info("insert image {} for track [{}]", filename, track);
     int number = track.getImages().size();
     Image img = new Image();
     img.setName(filename);
@@ -627,13 +642,14 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "update-image", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response updateImage(final String name, final String filename, final Integer id, final byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw notFound(MSG_TRACK_MISSING, name);
     }
-    log.info("update image for track [{}]", track);
+    log.info("update image {} for track [{}]", filename, track);
     Image img = findImage(track, id).orElseThrow(() -> notFound(MSG_IMAGE_MISSING, id));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(img);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
@@ -654,13 +670,14 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "delete-image", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response deleteImage(final String name, final Integer id) {
     User user = findUser(false);
     Image image = imageService.findImage(user, name, id);
     if (image == null) {
       throw notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id);
     }
-    log.info("Delete image [{}]", id);
+    log.info("Delete image {} in track [{}]", id, name);
     imageService.delete(image);
     return Response.status(NO_CONTENT).build();
   }
@@ -673,6 +690,7 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "get-trackdata", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getTrackData(final String name, final Integer id) {
     User user = findUser(true);
     Optional<TrackData> result = trackService.findTrackData(user, name, id);
@@ -709,13 +727,14 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "insert-trackdata", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response insertTrackData(final String name, final String filename, final byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, false);
     if (track == null) {
       throw notFound(MSG_TRACK_MISSING, name);
     }
-    log.info("insert track data for track [{}]", track);
+    log.info("insert track data {} for track [{}]", filename, track);
     TrackData td = new TrackData();
     KmlSampler.updateTrackDataFields(td, filename, data);
     td.setTrack(track);
@@ -732,13 +751,14 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "update-trackdata", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response updateTrackData(final String name, final String filename, final Integer id, byte[] data) {
     User user = findUser(false);
     Track track = trackService.findTrack(user, name, true);
     if (track == null) {
       throw notFound(MSG_TRACK_MISSING, name);
     }
-    log.info("update track data for track [{}]", track);
+    log.info("update track data {} for track [{}]", filename, track);
     TrackData td = findTrackData(track, id).orElseThrow(() -> notFound(MSG_TRACK_DATA_MISSING, id));
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(td);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
@@ -775,12 +795,13 @@ public class HikingTracksResource implements HikingTracksService, AuthorizationC
    */
   @Override
   @Transactional(Transactional.TxType.REQUIRES_NEW)
+  @Timed(name = "delete-trackdata", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response deleteTrackData(final String name, final Integer id) {
     User user = findUser(false);
 
     TrackData td = trackService.findTrackData(user, name, id)
         .orElseThrow(() -> notFound(MSG_TRACK_DATA_IN_TRACK_MISSING, name, id));
-    log.info("Delete track data [{}]", id);
+    log.info("Delete track data {} in track [{}]", id, name);
     trackService.delete(td);
     Track track = trackService.findTrack(user, name);
     resetGeolocationAvailable(track);

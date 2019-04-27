@@ -1,8 +1,9 @@
-package x1.hiking.boundary;
+package x1.hiking.oauth;
 
 import static x1.hiking.representation.ErrorMessageBuilder.*;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -18,7 +19,6 @@ import x1.hiking.control.UserManagement;
 import x1.hiking.model.TokenExpiredException;
 import x1.hiking.model.User;
 import x1.hiking.model.UserNotFoundException;
-import x1.hiking.utils.AuthorizationConstants;
 import x1.hiking.utils.ServletHelper;
 
 /**
@@ -28,7 +28,7 @@ import x1.hiking.utils.ServletHelper;
  * 
  */
 @Named("sessionValidator")
-public class SessionValidatorImpl implements AuthorizationConstants, SessionValidator {
+public class SessionValidatorImpl implements SessionValidator {
   private static final String MSG_OAUTH_CHALLENGE = "Bearer realm=\"%s\", error=\"%s\", error_description=\"%s\"";
 
   private final Logger log = LoggerFactory.getLogger(SessionValidatorImpl.class);
@@ -45,7 +45,8 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
    */
   @Override
   public void validateToken(HttpServletRequest request, HttpServletResponse response) {
-    String token = checkToken(false, request);
+    String token = checkToken(false, request)
+        .orElseThrow(() -> forbidden(MSG_MISSING_TOKEN, ServletHelper.PARAM_AUTH_TOKEN));
     Date expires = cache.get(token);
     if (expires == null || expires.before(new Date())) {
       User user = validateUser(false, request, response);
@@ -62,11 +63,11 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
    */
   @Override
   public User validateUser(boolean allowPublic, HttpServletRequest request, HttpServletResponse response) {
-    String token = checkToken(allowPublic, request);
-    if (token == null && allowPublic) {
+    Optional<String> token = checkToken(allowPublic, request);
+    if (!token.isPresent() && allowPublic) {
       return null;
     }
-    return checkUser(allowPublic, request, response, token);
+    return checkUser(allowPublic, request, response, token.get());
   }
 
   private User checkUser(boolean allowPublic, HttpServletRequest request, HttpServletResponse response, String token) {
@@ -90,18 +91,18 @@ public class SessionValidatorImpl implements AuthorizationConstants, SessionVali
     }
   }
 
-  private String checkToken(boolean allowPublic, HttpServletRequest request) {
-    String token = ServletHelper.getSessionCookieValue(request, AuthorizationConstants.PARAM_AUTH_TOKEN);
+  private Optional<String> checkToken(boolean allowPublic, HttpServletRequest request) {
+    String token = ServletHelper.getSessionCookieValue(request, ServletHelper.PARAM_AUTH_TOKEN);
     if (token == null) {
-      token = request.getParameter(AuthorizationConstants.PARAM_AUTH_TOKEN);
+      token = request.getParameter(ServletHelper.PARAM_AUTH_TOKEN);
     }
     if (token == null) {
       if (allowPublic) {
-        return null;
+        return Optional.empty();
       }
-      throw forbidden(MSG_MISSING_TOKEN, PARAM_AUTH_TOKEN);
+      throw forbidden(MSG_MISSING_TOKEN, ServletHelper.PARAM_AUTH_TOKEN);
     }
-    return token;
+    return Optional.of(token);
   }
 
   @EJB

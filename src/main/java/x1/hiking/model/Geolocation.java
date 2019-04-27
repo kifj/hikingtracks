@@ -180,12 +180,12 @@ public class Geolocation implements Model {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
-    return "<geolocation id=" + getId() + " " + getSource() + ": " + getLocation() + ">";
+    return "<geolocation id=" + getId() + " source=" + getSource() + ": " + getLocation() + ">";
   }
 
   /**
