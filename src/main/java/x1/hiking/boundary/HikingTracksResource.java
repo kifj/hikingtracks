@@ -102,9 +102,8 @@ public class HikingTracksResource implements HikingTracksService {
   @Timed(name = "get-tracks", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response getTracks(String name, Integer startPosition, Integer maxResults, boolean onlyPublished,
       ThumbnailType thumbnail, ActivityType activity) {
-    log.info(
-        "get tracks [name={}, activity={}, startPosition={}, maxResults={}, onlyPublished={}, thumbnail={}]",
-        name, activity, startPosition, maxResults, onlyPublished, thumbnail);
+    log.info("get tracks [name={}, activity={}, startPosition={}, maxResults={}, onlyPublished={}, thumbnail={}]", name,
+        activity, startPosition, maxResults, onlyPublished, thumbnail);
     User user = findUser(true);
     QueryOptions options = buildQueryOptions(startPosition, maxResults, activity);
     List<Track> tracks = findTracks(name, onlyPublished, user, options);
@@ -190,14 +189,13 @@ public class HikingTracksResource implements HikingTracksService {
 
   private void addImage(ThumbnailType thumbnail, Track track, TrackInfo trackInfo) {
     if (thumbnail != ThumbnailType.NONE) {
-      Image image = imageService.findFirstImage(track);
-      if (image != null) {
+      imageService.findFirstImage(track).ifPresent(image -> {
         URI location = pathTracks().path(track.getName()).path(PATH_IMAGES).path(String.valueOf(image.getId()))
             .queryParam(THUMBNAIL, thumbnail).build();
         ImageInfo imageInfo = new ImageInfo(image, null);
         imageInfo.setUrl(location.toString());
         trackInfo.addImage(imageInfo);
-      }
+      });
     }
   }
 
@@ -565,13 +563,14 @@ public class HikingTracksResource implements HikingTracksService {
   }
 
   private Response getImage(final String name, final Integer id, User user) throws URISyntaxException {
-    Image image = imageService.findImage(user, name, id);
-    if (image == null && user != null) {
-      imageService.findImage(null, name, id);
+    Optional<Image> candidate = imageService.findImage(user, name, id);
+    if (!candidate.isPresent() && user != null) {
+      candidate = imageService.findImage(null, name, id);
     }
-    if (image == null) {
+    if (!candidate.isPresent()) {
       throw notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id);
     }
+    Image image = candidate.get();
     EntityTag eTag = new EntityTagBuilder(httpServletRequest).buildEntityTag(image);
     Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
     if (builder != null) {
@@ -673,10 +672,8 @@ public class HikingTracksResource implements HikingTracksService {
   @Timed(name = "delete-image", absolute = true, unit = MetricUnits.MILLISECONDS)
   public Response deleteImage(final String name, final Integer id) {
     User user = findUser(false);
-    Image image = imageService.findImage(user, name, id);
-    if (image == null) {
-      throw notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id);
-    }
+    Image image = imageService.findImage(user, name, id)
+        .orElseThrow(() -> notFound(MSG_IMAGE_IN_TRACK_MISSING, name, id));
     log.info("Delete image {} in track [{}]", id, name);
     imageService.delete(image);
     return Response.status(NO_CONTENT).build();

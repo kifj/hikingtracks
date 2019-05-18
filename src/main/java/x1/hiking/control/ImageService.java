@@ -43,7 +43,7 @@ public class ImageService {
    * @return the image
    */
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
-  public Image findImage(User user, String name, Integer id) {
+  public Optional<Image> findImage(User user, String name, Integer id) {
     TypedQuery<Image> q;
     if (user != null) {
       q = em.createNamedQuery("Image.findImageByUserAndNameAndId", Image.class);
@@ -56,9 +56,9 @@ public class ImageService {
       q.setParameter(PARAM_ID, id);
     }
     try {
-      return q.getSingleResult();
+      return Optional.of(q.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
 
@@ -187,15 +187,15 @@ public class ImageService {
    * @param track the track
    * @return the image
    */
-  public Image findFirstImage(@NotNull Track track) {
+  public Optional<Image> findFirstImage(@NotNull Track track) {
     TypedQuery<Image> q = em.createNamedQuery("Image.getImages", Image.class);
     q.setParameter(PARAM_TRACK, track);
     q.setMaxResults(1);
     List<Image> images = q.getResultList();
     if (images.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
-    return images.get(0);
+    return Optional.of(images.get(0));
   }
 
   /**

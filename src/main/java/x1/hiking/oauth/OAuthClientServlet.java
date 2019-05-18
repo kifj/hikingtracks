@@ -115,7 +115,7 @@ public class OAuthClientServlet extends HttpServlet implements OAuthConstants {
     }
     if (request.getParameter(PARAM_AUTHENTICATE) == null) {
       String wanted = ServletHelper.getSessionCookieValue(request, ServletHelper.PARAM_AUTH_TOKEN);
-      if (wanted != null && authUser(wanted)) {
+      if (authUser(wanted)) {
         String redirectUrl = URLDecoder.decode(getState(request), StandardCharsets.UTF_8.name());
         log.info("Authenticated {}, redirect to: {}", wanted, redirectUrl);
         ServletHelper.injectSessionCookie(response, wanted);
@@ -276,11 +276,11 @@ public class OAuthClientServlet extends HttpServlet implements OAuthConstants {
     String email = idToken.getClaimsSet().getCustomField(emailField, String.class);
     log.debug("Access Token: {}, Email: {}", oauthParams.getAccessToken(), email);
     if (oauthParams.isIdTokenValid() && StringUtils.isNotEmpty(email)) {
-      Date expires = null;
+      Date expires;
       if (oauthParams.getExpiresIn() != null) {
         expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
       } else {
-        expires = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));        
+        expires = Date.from(Instant.now().plus(2, ChronoUnit.HOURS));
       }
       String name = idToken.getClaimsSet().getCustomField(nameField, String.class);
       checkUser(openIdConnectResponse.getAccessToken(), email, expires, name);
@@ -303,11 +303,11 @@ public class OAuthClientServlet extends HttpServlet implements OAuthConstants {
       String email = userData.getString(emailField);
       log.debug("Access Token: {}, Email: {}", oauthParams.getAccessToken(), email);
       if (StringUtils.isNotEmpty(email)) {
-        Date expires = null;
+        Date expires;
         if (oauthParams.getExpiresIn() != null) {
           expires = Date.from(Instant.now().plus(oauthParams.getExpiresIn().intValue(), ChronoUnit.SECONDS));
         } else {
-          expires = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));        
+          expires = Date.from(Instant.now().plus(2, ChronoUnit.HOURS));
         }
         String name = userData.getString(nameField);
         checkUser(githubTokenResponse.getAccessToken(), email, expires, name);

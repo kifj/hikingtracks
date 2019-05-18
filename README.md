@@ -1,6 +1,7 @@
-# hikingtracks
+# HikingTracks
 
 Sample application how to use Wildfly for REST services. 
+Written for my own holidays and weekend tours.
 
 Visit https://hikingtracks.johannes-beck.name to this code running on Openshift 3
 This is a part of of the whole project, and contains only the application code.
@@ -14,7 +15,7 @@ see [standalone.xml](cfg/standalone.xml)
 
 The DDL scripts are available for MySQL. 
 
-	create-mysql.cli
+	create-mysql.sql
 
 ## Kubernetes resources
 

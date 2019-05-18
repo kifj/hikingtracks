@@ -39,7 +39,6 @@ import x1.hiking.control.ImageService;
 import x1.hiking.control.QueryOptions;
 import x1.hiking.control.TrackService;
 import x1.hiking.model.Coord;
-import x1.hiking.model.Image;
 import x1.hiking.model.Track;
 import x1.hiking.representation.ImageInfo;
 import x1.hiking.representation.TrackDataInfo;
@@ -50,9 +49,8 @@ import x1.hiking.utils.ServletHelper;
 
 /**
  * ATOM Feed service
- * 
+ *
  * @author joe
- * 
  */
 public class FeedResource implements FeedService {
   private static final long serialVersionUID = 8443300431399389281L;
@@ -69,25 +67,25 @@ public class FeedResource implements FeedService {
   @Inject
   @ConfigProperty(name = "feed.author")
   private String author;
-  
+
   @Inject
   @ConfigProperty(name = "feed.title")
   private String title;
-  
+
   @Inject
   @ConfigProperty(name = "feed.id")
   private String id;
-  
+
   @Inject
   @ConfigProperty(name = "feed.url")
   private String baseUrl;
 
   @EJB
   private TrackService service;
-  
+
   @EJB
   private ImageService imageService;
-  
+
   @Context
   private HttpServletRequest httpServletRequest;
 
@@ -99,7 +97,7 @@ public class FeedResource implements FeedService {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see x1.hiking.rest.FeedService#getTracks()
    */
   @Override
@@ -136,14 +134,14 @@ public class FeedResource implements FeedService {
     String value = (String) cache.get(SEP);
     if (value != null) {
       StringReader in = new StringReader(value);
-      return Optional.of((Feed)unmarshaller.unmarshal(in));
+      return Optional.of((Feed) unmarshaller.unmarshal(in));
     }
     return Optional.empty();
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see x1.hiking.rest.FeedService#getTrack(java.lang.Integer)
    */
   @Override
@@ -160,10 +158,8 @@ public class FeedResource implements FeedService {
       }
       String path = UriBuilder.fromPath(baseUrl + PATH_TRACKS).path("{0}").build(track.getName()).toString();
       TrackInfo trackInfo = new TrackInfo(track, false, false, path, null);
-      Image image = imageService.findFirstImage(track);
-      if (image != null) {
-        trackInfo.addImage(new ImageInfo(image, path + SEP + PATH_IMAGES));
-      }
+      imageService.findFirstImage(track)
+          .ifPresent(image -> trackInfo.addImage(new ImageInfo(image, path + SEP + PATH_IMAGES)));
       entry = createEntryFromObject(trackInfo, getRequestURL());
       cache.put(SEP + id, entry);
       return entry;
@@ -180,10 +176,8 @@ public class FeedResource implements FeedService {
     for (Track track : tracks) {
       String path = UriBuilder.fromPath(baseUrl + PATH_TRACKS).path("{0}").build(track.getName()).toString();
       TrackInfo trackInfo = new TrackInfo(track, false, false, path, null);
-      Image image = imageService.findFirstImage(track);
-      if (image != null) {
-        trackInfo.addImage(new ImageInfo(image, path + SEP + PATH_IMAGES));
-      }
+      imageService.findFirstImage(track)
+          .ifPresent(image -> trackInfo.addImage(new ImageInfo(image, path + SEP + PATH_IMAGES)));
       trackInfos.add(trackInfo);
     }
     return new TrackInfoList(trackInfos);
@@ -288,12 +282,8 @@ public class FeedResource implements FeedService {
     feed.getAuthors().add(new Person(author));
     feed.setTitle(title);
     feed.setId(new URI(id));
-    Date updated = getUpdated(list);
-    if (updated != null) {
-      feed.setUpdated(updated);
-    } else {
-      feed.setUpdated(new Date());
-    }
+    Date lastChangeDate = lastChangeDate(list).orElse(new Date());
+    feed.setUpdated(lastChangeDate);
 
     if (StringUtils.isNotEmpty(baseUrl)) {
       feed.getLinks().add(new Link(null, baseUrl));
@@ -301,16 +291,17 @@ public class FeedResource implements FeedService {
     feed.getLinks().add(new Link("self", self));
   }
 
-  private Date getUpdated(TrackInfoList list) {
-    Date result = null;
+  private Optional<Date> lastChangeDate(TrackInfoList list) {
+    Optional<Date> lastChangeDate = Optional.empty();
     for (TrackInfo trackInfo : list.getTrackInfos()) {
-      if (result == null) {
-        result = trackInfo.getLastChange();
+      if (lastChangeDate.isEmpty()) {
+        lastChangeDate = Optional.of(trackInfo.getLastChange());
       } else {
-        result = (result.compareTo(trackInfo.getLastChange()) > 0) ? result : trackInfo.getLastChange();
+        lastChangeDate = (lastChangeDate.get().compareTo(trackInfo.getLastChange()) > 0)
+            ? lastChangeDate : Optional.ofNullable(trackInfo.getLastChange());
       }
     }
-    return result;
+    return lastChangeDate;
   }
 
   private String getRequestURL() {

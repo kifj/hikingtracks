@@ -24,8 +24,8 @@ public interface SessionValidator {
    *          the request
    * @param response
    *          the response
-   * @throws javax.ws.rs.NotAuthorizedException
-   * @throws javax.ws.rs.ForbiddenException
+   * @throws javax.ws.rs.NotAuthorizedException when not authorized
+   * @throws javax.ws.rs.ForbiddenException when not allowed
    */
   User validateUser(boolean allowPublic, HttpServletRequest request, HttpServletResponse response);
   
@@ -36,8 +36,8 @@ public interface SessionValidator {
    *          the request
    * @param response
    *          the response
-   * @throws javax.ws.rs.NotAuthorizedException
-   * @throws javax.ws.rs.ForbiddenException
+   * @throws javax.ws.rs.NotAuthorizedException when not authorized
+   * @throws javax.ws.rs.ForbiddenException when not allowed
    */
   void validateToken(HttpServletRequest request, HttpServletResponse response);
 }
