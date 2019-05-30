@@ -212,7 +212,7 @@ public interface HikingTracksService extends Representation {
    * @return the track data
    */
   @GET
-  @Produces({ TEXT_XML, APPLICATION_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Produces({ TEXT_XML, APPLICATION_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ, MEDIA_TYPE_VND_GPX })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
   Response getTrackData(@PathParam("name") String name, @PathParam("id") Integer id);
 
@@ -225,7 +225,7 @@ public interface HikingTracksService extends Representation {
    * @return the response
    */
   @POST
-  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ, MEDIA_TYPE_VND_GPX })
   @Produces({ APPLICATION_XML })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML)
   Response insertTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename,
@@ -241,7 +241,7 @@ public interface HikingTracksService extends Representation {
    * @return the response
    */
   @PUT
-  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ })
+  @Consumes({ APPLICATION_XML, TEXT_XML, TEXT_PLAIN, MEDIA_TYPE_VND_KML, MEDIA_TYPE_VND_KMZ, MEDIA_TYPE_VND_GPX })
   @Produces({ APPLICATION_XML })
   @Path(PATH_TRACKS + SEP + PARAM_NAME + SEP + PATH_KML + PARAM_ID)
   Response updateTrackData(@PathParam("name") String name, @HeaderParam(HEADER_FILE_NAME) @NotEmpty String filename,

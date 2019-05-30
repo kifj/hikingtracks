@@ -147,7 +147,7 @@ public class GeolocationTagUpdater {
   }
 
   private List<Geolocation> createGeolocations(TrackData trackData, double minDistance) {
-    Coord[] coords = KmlSampler.parse(trackData).getSamples();
+    Coord[] coords = WaypointSampler.parse(trackData).getSamples();
     return createGeolocation(trackData.getTrack(), coords, minDistance);
   }
 
@@ -169,7 +169,7 @@ public class GeolocationTagUpdater {
   private void updateTrackdataLocationInternal(TrackData trackdata) {
     log.trace("Updating location for trackdata {}", trackdata);
 
-    KmlSampler.Result result = KmlSampler.parse(trackdata);
+    WaypointSampler.Result result = WaypointSampler.parse(trackdata);
     Coord[] coordinates = result.getSamples();
     if (coordinates.length > 0) {
       trackdata.setLocation(coordinates);

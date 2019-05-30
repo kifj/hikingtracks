@@ -63,6 +63,8 @@ public class TrackDataInfo implements Representation, FilenameInfo {
       return MEDIA_TYPE_VND_KML;
     } else if (StringUtils.endsWith(filename, FILE_EXTENSION_KMZ)) {
       return MEDIA_TYPE_VND_KMZ;
+    } else if (StringUtils.endsWith(filename, FILE_EXTENSION_GPX)) {
+        return MEDIA_TYPE_VND_GPX;
     } else {
       // META-INF/mime.types
       return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);

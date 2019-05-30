@@ -45,7 +45,7 @@ import x1.hiking.control.QueryOptions;
 import x1.hiking.control.ThumbnailService;
 import x1.hiking.control.TrackService;
 import x1.hiking.control.UserManagement;
-import x1.hiking.geocoding.KmlSampler;
+import x1.hiking.geocoding.WaypointSampler;
 import x1.hiking.model.*;
 import x1.hiking.oauth.SessionValidator;
 import x1.hiking.representation.*;
@@ -733,7 +733,7 @@ public class HikingTracksResource implements HikingTracksService {
     }
     log.info("insert track data {} for track [{}]", filename, track);
     TrackData td = new TrackData();
-    KmlSampler.updateTrackDataFields(td, filename, data);
+    WaypointSampler.updateTrackDataFields(td, filename, data);
     td.setTrack(track);
     trackService.insert(td);
     URI location = UriBuilder.fromPath(track.getName() + SEP + PATH_KML + td.getId()).build();
@@ -762,7 +762,7 @@ public class HikingTracksResource implements HikingTracksService {
     if (builder != null) {
       return createResponse(builder);
     }
-    KmlSampler.updateTrackDataFields(td, filename, data);
+    WaypointSampler.updateTrackDataFields(td, filename, data);
     td.setTrack(track);
     td = trackService.update(td);
 

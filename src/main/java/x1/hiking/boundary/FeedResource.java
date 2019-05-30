@@ -294,7 +294,7 @@ public class FeedResource implements FeedService {
   private Optional<Date> lastChangeDate(TrackInfoList list) {
     Optional<Date> lastChangeDate = Optional.empty();
     for (TrackInfo trackInfo : list.getTrackInfos()) {
-      if (lastChangeDate.isEmpty()) {
+      if (!lastChangeDate.isPresent()) {
         lastChangeDate = Optional.of(trackInfo.getLastChange());
       } else {
         lastChangeDate = (lastChangeDate.get().compareTo(trackInfo.getLastChange()) > 0)

@@ -19,7 +19,7 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import x1.hiking.geocoding.KmlSampler;
+import x1.hiking.geocoding.WaypointSampler;
 import x1.hiking.model.Image;
 import x1.hiking.model.Track;
 import x1.hiking.model.TrackData;
@@ -97,7 +97,7 @@ public class TrackInfo implements Representation {
       for (TrackData td : track.getTrackData()) {
         TrackDataInfo tdi = new TrackDataInfo(td, path + SEP + PATH_KML);
         addTrackData(tdi);
-        KmlSampler.Result result = KmlSampler.parse(td, d);
+        WaypointSampler.Result result = WaypointSampler.parse(td, d);
         tdi.setSamples(result.getSamples());
         d += result.getDistance();
       }

@@ -1177,14 +1177,18 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
         if (this.token) {
           url = url + "?x-auth-token=" + encodeURIComponent(caller.token);
         }
-        var kmlLayer = new google.maps.KmlLayer(url, {
-          suppressInfoWindows : true
-        });
-
-        google.maps.event.addListener(kmlLayer, 'click', clickListener);
-        google.maps.event.addListener(kmlLayer, 'metadata_changed', metadataChangeListener);
-        kmlLayer.setMap(this.map);
-        this.kmlArray.push(kmlLayer);
+        if (td.name.endsWith(".gpx")) {
+          this.loadGPXFileIntoGoogleMap(this.map, url);
+        } else {
+          var kmlLayer = new google.maps.KmlLayer(url, {
+            suppressInfoWindows : true
+          });
+  
+          google.maps.event.addListener(kmlLayer, 'click', clickListener);
+          google.maps.event.addListener(kmlLayer, 'metadata_changed', metadataChangeListener);
+          kmlLayer.setMap(this.map);
+          this.kmlArray.push(kmlLayer);
+        }
         if (td.highestPoint) {
           var p1 = new google.maps.LatLng(td.highestPoint.lat, td.highestPoint.lng)
           if (!center) {
@@ -1226,6 +1230,22 @@ Client.prototype.showGoogleMaps = function(elem, trackData) {
       $(elem).css("visibility", "visible");
     }
   }
+}
+
+Client.prototype.loadGPXFileIntoGoogleMap = function(map, url) {
+  $.ajax({url: url,
+    dataType: "xml",
+    success: function(data) {
+      var parser = new GPXParser(data, map);
+      parser.setTrackColour("#0000ff");
+      parser.setTrackWidth(5);
+      parser.setMinTrackPointDelta(0.001);
+      parser.centerAndZoom(data);
+      parser.addTrackpointsToMap();
+      parser.addRoutepointsToMap();
+      parser.addWaypointsToMap();
+    }
+  });
 }
 
 Client.prototype.toggleFullscreenGoogleMaps = function() {
